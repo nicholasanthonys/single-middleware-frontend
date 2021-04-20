@@ -8,10 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.35",
-    "@fortawesome/vue-fontawesome": "^2.0.2",
     "axios": "^0.21.1",
-    "buefy": "^0.9.6",
     "camelcase-keys": "^6.2.2",
     "core-js": "^3.6.5",
     "qs": "^6.10.1",
