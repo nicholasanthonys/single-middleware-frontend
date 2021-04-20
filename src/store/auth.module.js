@@ -44,8 +44,9 @@ const auth = {
                 )
             })
         },
-        logout(context) {
+        logout(context, redirect) {
             context.commit('purgeAuth')
+            router.push({name : redirect})
         },
         register(context, credentials) {
             const{name, email, password, redirect} = credentials
