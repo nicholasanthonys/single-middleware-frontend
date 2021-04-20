@@ -1,66 +1,45 @@
 <template>
-  <div>
-    <ValidationObserver v-slot="{handleSubmit}" ref="observer">
-      <form @submit.prevent="handleSubmit(onSubmit)">
-        <ValidationProvider v-slot="{ errors }"
-                            name="Name"
-                            rules="required|min:5"
-                            v-if="mode==='register'"
-        >
-          <b-field label="Username"
-                   :type="{ 'is-danger': errors.length > 0 }"
-                   :message="  errors.length > 0 ? errors[0] : '' "
-          >
-            <b-input maxlength="30" v-model="name" key="name-input"></b-input>
-          </b-field>
+  <div class="q-pa-md" style="max-width: 400px">
+    <q-form
+        @submit="onSubmit"
+        @reset="resetForm"
+        class="q-gutter-md"
+    >
+      <q-input
+          filled
+          v-model="name"
+          label="Name *"
+          hint="Name and surname"
+          v-if="mode!=='login' "
+      />
+
+      <q-input
+          filled
+          type="email"
+          v-model="email"
+          label="Email *"
+          hint="Your Email"
+          :rules="[ val => val && val.length > 0 || 'Please type something']"
+      />
+
+      <q-input
+          type="password"
+          filled
+          v-model="password"
+          label="Your Password "
+
+      />
 
 
-        </ValidationProvider>
-        <ValidationProvider v-slot="{ errors }"
-                            name="Email"
-                            rules="required|email"
-        >
-          <b-field label="Email"
-                   :type="{ 'is-danger': errors.length > 0 }"
-                   :message="  errors.length > 0 ? errors[0] : '' ">
-            <b-input v-model="email" maxlength="50" type="text" key="email-input"></b-input>
-          </b-field>
-        </ValidationProvider>
-
-        <ValidationProvider name="Password" v-slot="{ errors }" rules="required|min:8">
-          <b-field label="Password"
-                   :type="{ 'is-danger': errors.length > 0 }"
-                   :message="  errors.length > 0 ? errors[0] : '' ">
-            <b-input v-model="password" type="password" maxlength="30" key="password-input" password-reveal></b-input>
-          </b-field>
-        </ValidationProvider>
-
-        <ValidationProvider name="confirm" v-slot="{ errors }" rules="required|password:@Password"
-                            v-if="mode==='register'">
-          <b-field label="Confirm Password"
-                   :type="{ 'is-danger': errors.length > 0 }"
-                   :message="  errors.length > 0 ? errors[0] : '' ">
-            <b-input v-model="confirmPassword" type="password" maxlength="30" key="confirm-password-input"
-                     password-reveal></b-input>
-          </b-field>
-        </ValidationProvider>
-
-
-        <div class="buttons">
-          <b-button type="is-primary" native-type="submit" expanded>{{
-              mode === 'login' ? 'Login' : 'Register'
-            }}
-          </b-button>
-        </div>
-      </form>
-    </ValidationObserver>
+      <div>
+        <q-btn label="Submit" type="submit" color="primary"/>
+        <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" />
+      </div>
+    </q-form>
   </div>
-
-
 </template>
 
 <script>
-import {showToast} from "../toast";
 
 export default {
   props: {
@@ -93,6 +72,7 @@ export default {
       });
     },
     async onSubmit() {
+      console.log("onSubmit triggered")
       // Login
       if (this.mode === "login") {
         await this.login();
@@ -102,6 +82,7 @@ export default {
       }
     },
     async login() {
+      console.log("Do login triggered")
       this.isLoading = true
 
       let credential = {
@@ -117,7 +98,6 @@ export default {
 
       } catch (err) {
         this.message = 'Login Failed'
-        showToast('Login Failed', 'is-danger', 'is-bottom')
       }
       this.isLoading = false
     },
@@ -133,7 +113,6 @@ export default {
       } catch (err) {
         this.message = 'Register Failed'
         console.log(err)
-        showToast(err.response,'is-danger','is-bottom')
       }
     }
   }

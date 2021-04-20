@@ -1,28 +1,16 @@
 import Vue from 'vue'
 import App from './App.vue'
 import Vuex from 'vuex'
-import router from './router'
+import router from './router/routes'
 
-/* buefy css framework */
-import Buefy from 'buefy'
-import 'buefy/dist/buefy.css'
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 /* for form validation */
 import {extend, ValidationObserver, ValidationProvider} from 'vee-validate';
 
 import store from './store'
 import {email, required} from "vee-validate/dist/rules";
+import './quasar'
 
-
-
-
-Vue.component('vue-fontawesome', FontAwesomeIcon);
-
-Vue.use(Buefy, {
-  defaultIconComponent:FontAwesomeIcon ,
-  defaultIconPack: 'fas',
-})
 
 Vue.component('ValidationObserver', ValidationObserver)
 Vue.component('ValidationProvider', ValidationProvider)
@@ -53,6 +41,5 @@ extend('min', {
 new Vue({
   router,
   store,
-  Buefy,
   render: h => h(App)
 }).$mount('#app')
