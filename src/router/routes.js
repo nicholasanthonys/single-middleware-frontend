@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from "../views/Login";
 import store from '../store';
+import Container from "../views/Containers";
 
 Vue.use(VueRouter)
 
@@ -13,7 +14,18 @@ const routes = [
         component: Home,
         meta: {
             requireAuth: true
-        }
+        },
+        children : [
+            {
+                path: '',
+                name: 'Home.Containers',
+                component: Container,
+                meta: {
+                    requireAuth: true
+                },
+            }
+        ]
+
     },
     {
         path: '/login',
