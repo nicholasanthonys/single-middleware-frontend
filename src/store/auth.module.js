@@ -1,13 +1,14 @@
 import ApiService from '@/services/common/api.service'
 import JwtService from '@/services/common/jwt.service'
-import router from '@/router'
+import router from '@/router/routes'
+import {decodeToken, getToken} from "../services/common/jwt.service";
 
 const auth = {
     namespaced: true,
     state: () => ({
         errors: null,
         message: null,
-        user: {},
+        user: decodeToken(getToken()) ? decodeToken(getToken()) : null,
         loggedIn: !!JwtService.getToken(),
     }),
     getters: {
@@ -33,7 +34,7 @@ const auth = {
                             context.commit('setAuth', {
                                 user: response.data.user,
                             })
-                            router.push({ path: redirect })
+                            router.push({path: redirect})
 
                             resolve(response)
                         }
@@ -46,10 +47,10 @@ const auth = {
         },
         logout(context, redirect) {
             context.commit('purgeAuth')
-            router.push({name : redirect})
+            router.push({name: redirect})
         },
         register(context, credentials) {
-            const{name, email, password, redirect} = credentials
+            const {name, email, password, redirect} = credentials
             return new Promise((resolve, reject) => {
                 ApiService.init()
                 ApiService.post('/api/v1/auth/register', {
@@ -58,7 +59,7 @@ const auth = {
                     password
                 }).then(
                     response => {
-                        router.push({ path: redirect })
+                        router.push({path: redirect})
                         resolve(response)
                     },
                     error => {
