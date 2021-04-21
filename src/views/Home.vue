@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated class="glossy">
+    <q-header >
       <q-toolbar>
         <q-btn
             flat
@@ -11,91 +11,101 @@
             icon="menu"
         />
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
+      <div class="q-px-lg q-pt-xl q-mb-md">
+       <div class="text-h3">Welcome</div>
+        <div class="text-subtitle1"> {{todaysDate}}</div>
+      </div>
+      <img :src="require('../assets/images/bridge.jpg')" class="header-image absolute-top">
     </q-header>
 
     <q-drawer
         v-model="leftDrawerOpen"
         show-if-above
-        bordered
-        content-class="bg-grey-2"
+        :width="250"
+        :breakpoint="600"
     >
-      <q-list>
-        <q-item-label header>Essential Links</q-item-label>
-        <q-item clickable tag="a" target="_blank" href="https://quasar.dev">
-          <q-item-section avatar>
-            <q-icon name="school" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Docs</q-item-label>
-            <q-item-label caption>quasar.dev</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item clickable tag="a" target="_blank" href="https://github.com/quasarframework/">
-          <q-item-section avatar>
-            <q-icon name="code" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Github</q-item-label>
-            <q-item-label caption>github.com/quasarframework</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item clickable tag="a" target="_blank" href="https://chat.quasar.dev">
-          <q-item-section avatar>
-            <q-icon name="chat" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Discord Chat Channel</q-item-label>
-            <q-item-label caption>chat.quasar.dev</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item clickable tag="a" target="_blank" href="https://forum.quasar.dev">
-          <q-item-section avatar>
-            <q-icon name="forum" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Forum</q-item-label>
-            <q-item-label caption>forum.quasar.dev</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item clickable tag="a" target="_blank" href="https://twitter.com/quasarframework">
-          <q-item-section avatar>
-            <q-icon name="rss_feed" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Twitter</q-item-label>
-            <q-item-label caption>@quasarframework</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
+      <q-scroll-area style="height: calc(100% - 192px); margin-top: 192px; border-right: 1px solid #ddd">
+        <q-list padding>
+          <q-item clickable v-ripple :active="$route.name === 'Home.Containers' ">
+            <q-item-section avatar>
+              <q-icon name="inbox" />
+            </q-item-section>
+
+            <q-item-section>
+              Container
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple :active="$route.name==='Home.Projects'">
+            <q-item-section avatar>
+              <q-icon name="star" />
+            </q-item-section>
+
+            <q-item-section>
+              Projects
+            </q-item-section>
+          </q-item>
+
+
+        </q-list>
+      </q-scroll-area>
+
+      <q-img class="absolute-top" src="https://cdn.quasar.dev/img/material.png" style="height: 192px">
+        <div class="absolute-bottom bg-transparent">
+          <q-avatar size="56px" class="q-mb-sm">
+            <img src="https://cdn.quasar.dev/img/boy-avatar.png">
+          </q-avatar>
+          <div class="text-weight-bold">{{user.name}}</div>
+        </div>
+      </q-img>
     </q-drawer>
 
     <q-page-container>
-      <p>tes</p>
+        <router-view/>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
-
+import {date} from 'quasar'
+import {decodeToken, getToken} from "../services/common/jwt.service";
+import {mapGetters} from "vuex";
 export default {
   name: 'LayoutDefault',
-
+  computed : {
+    ...mapGetters({
+     user : 'auth/currentUser'
+    }),
+   todaysDate() {
+     let timeStamp = Date.now()
+     return  date.formatDate(timeStamp, 'dddd D MMMM')
+   }
+  },
   components: {
   },
 
   data () {
     return {
-      leftDrawerOpen: false
+      leftDrawerOpen:true
     }
+  },
+  mounted() {
+    console.log("mounted triggered")
+    let token = getToken()
+    let decode = decodeToken(token)
+    console.log("decode token is ")
+    console.log(decode)
   }
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
+.header-image {
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.4;
+  filter: grayscale(20%);
+}
 </style>
