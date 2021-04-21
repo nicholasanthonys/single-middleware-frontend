@@ -40,19 +40,14 @@
                 </q-tooltip>
               </p>
             </div>
-              <q-icon
-                  v-if="col.name==='action'"
-                  size="xs"
-                  name="preview"
-              />
+            <q-icon
+                v-if="col.name==='action'"
+                size="xs"
+                name="preview"
+            />
 
           </q-td>
-
-          <!--              <q-td>-->
-
-
         </q-tr>
-
       </template>
     </q-table>
   </div>
