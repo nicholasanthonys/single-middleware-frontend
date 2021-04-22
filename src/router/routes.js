@@ -5,6 +5,8 @@ import Login from "../views/Login";
 import store from '../store';
 import Container from "../views/Containers/Containers";
 import Projects from "../views/Projects/Projects";
+import ProjectDetail from "../views/Projects/ProjectDetail";
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -15,25 +17,29 @@ const routes = [
         meta: {
             requireAuth: true
         },
-        children : [
+        children: [
             {
                 path: '',
                 name: 'Home.Containers',
                 component: Container,
-                meta: {
-                    requireAuth: true
-                },
+
             },
             {
                 path: 'projects',
                 name: 'Home.Projects',
                 component: Projects,
-                meta: {
-                    requireAuth: true
-                },
+
             }
         ]
 
+    },
+    {
+        path: '/projects/:id',
+        name: 'Projects.Detail',
+        component: ProjectDetail,
+        meta: {
+            requireAuth: true
+        },
     },
     {
         path: '/login',
@@ -54,11 +60,11 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
     let isAuthenticated = store.getters['auth/isLoggedIn']
-    if (to.name !== 'Login' && !isAuthenticated) next({ name: 'Login' })
+    if (to.name !== 'Login' && !isAuthenticated) next({name: 'Login'})
     else next()
 
-    if(to.name === "Login" && isAuthenticated){
-        next({name : "Home"})
+    if (to.name === "Login" && isAuthenticated) {
+        next({name: "Home"})
     }
 })
 
