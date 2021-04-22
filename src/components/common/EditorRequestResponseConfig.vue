@@ -69,7 +69,6 @@
 
         <q-tab-panel name="Adds.Header">
           <div class="text-h4 q-mb-md">Add Header</div>
-          code add header : {{codeAddHeader}}
           <Editor :propCode="codeAddHeader" :event-name="'on-change-add-header'"
                   @on-change-add-header="onChangeAddHeader"/>
         </q-tab-panel>
