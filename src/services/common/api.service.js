@@ -1,6 +1,5 @@
 import axios from 'axios'
 import JwtService from './jwt.service'
-import camelcaseKeys from 'camelcase-keys'
 import snakecaseKeys from 'snakecase-keys'
 import * as qs from 'qs'
 
@@ -29,11 +28,7 @@ const ApiService = {
             paramsSerializer: params => {
                 return qs.stringify(params, { arrayFormat: 'brackets' })
             },
-            transformResponse: [
-                data => {
-                    return camelcaseKeys(JSON.parse(data), { deep: true })
-                },
-            ],
+
         })
     },
 
@@ -42,13 +37,7 @@ post(resource, body, noSnakeCase) {
             `${resource}`,
             !noSnakeCase ? snakecaseKeys(body, { deep: true }) : body,
             {
-                transformResponse: [
-                    data => {
-                        if (data) {
-                            return camelcaseKeys(JSON.parse(data), { deep: true })
-                        }
-                    },
-                ],
+
             }
         )
     },
@@ -62,13 +51,7 @@ post(resource, body, noSnakeCase) {
             `${resource}`,
             !noSnakeCase ? snakecaseKeys(body, { deep: true }) : body,
             {
-                transformResponse: [
-                    data => {
-                        if (data) {
-                            return camelcaseKeys(JSON.parse(data), { deep: true })
-                        }
-                    },
-                ],
+
             }
         )
     },
@@ -76,13 +59,7 @@ post(resource, body, noSnakeCase) {
     delete(resource, body) {
         return axios.delete(resource, {
             params: body ? snakecaseKeys(body, { deep: true }) : null,
-            transformResponse: [
-                data => {
-                    if (data) {
-                        return camelcaseKeys(JSON.parse(data), { deep: true })
-                    }
-                },
-            ],
+
         })
     },
 }

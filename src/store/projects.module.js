@@ -28,16 +28,50 @@ const projects = {
                 )
             })
         },
+        fetchSpecificProject(context, projectId){
+            return new Promise((resolve, reject) => {
+                ApiService.init()
+                ApiService.get(`/api/v1/project/${projectId}`).then(
+                    response => {
+                        if (response.status === 200) {
+                            resolve(response)
+                        }
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
 
         storeProject(context, data) {
             return new Promise((resolve, reject) => {
-                const {name, description, projectIds, routers} = data
+                const {name, description, base} = data
                 ApiService.init()
                 ApiService.post('/api/v1/project', {
                     name,
                     description,
-                    projectIds,
-                    routers
+                    base
+                }).then(
+                    response => {
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
+        updateProject(context, data) {
+            return new Promise((resolve, reject) => {
+                const {id,name, description, base} = data
+                ApiService.init()
+                ApiService.put('/api/v1/project', {
+                    id ,
+                    name,
+                    description,
+                    base
                 }).then(
                     response => {
                         resolve(response)

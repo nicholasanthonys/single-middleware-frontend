@@ -41,8 +41,9 @@
               />
 
             </div>
+            <br/>
             <div class="col col-md-5">
-              <q-select outlined :data="transform" :options="transformOptions" label="Transform"
+              <q-select outlined :value="transform" :options="transformOptions" label="Transform"
                         :hint="configType === 'request' ? 'Request Transform' : 'Response Transform'  "
                         @input="onChangeTransform"
                         style="max-width: 200px"/>
@@ -68,6 +69,7 @@
 
         <q-tab-panel name="Adds.Header">
           <div class="text-h4 q-mb-md">Add Header</div>
+          code add header : {{codeAddHeader}}
           <Editor :propCode="codeAddHeader" :event-name="'on-change-add-header'"
                   @on-change-add-header="onChangeAddHeader"/>
         </q-tab-panel>
@@ -131,24 +133,24 @@ import TreeConfigCircularResponse from "../../models/TreeConfigResponse";
 import TreeConfigRequest from "../../models/TreeConfigRequest";
 
 export default {
-  props: {
-    configType: String,
-    propCodeAddHeader: Object,
-    propCodeAddBody: Object,
-    propCodeAddQuery: Object,
-    propCodeModifyHeader: Object,
-    propCodeModifyBody: Object,
-    propCodeModifyQuery: Object,
-    propCodeDeleteHeader: Array,
-    propCodeDeleteBody: Array,
-    propCodeDeleteQuery: Array,
+  props: [
+    'configType',
+    'propCodeAddHeader',
+    'propCodeAddBody',
+    'propCodeAddQuery',
+    'propCodeModifyHeader',
+    'propCodeModifyBody',
+    'propCodeModifyQuery',
+    'propCodeDeleteHeader',
+    'propCodeDeleteBody',
+    'propCodeDeleteQuery',
 
-    propStatusCode: Number,
-    propTransform: String,
-    propLogBeforeModify: Object,
-    propLogAfterModify: Object,
+    'propStatusCode',
+    'propTransform',
+    'propLogBeforeModify',
+    'propLogAfterModify',
 
-  },
+    ],
   components: {Editor},
   watch: {
     // propCodeAddHeader(val) {
@@ -157,7 +159,7 @@ export default {
   },
   data() {
     return {
-
+      splitterModel : 20,
       selected: "General",
       statusCode: this.propStatusCode,
       transform: this.propTransform,

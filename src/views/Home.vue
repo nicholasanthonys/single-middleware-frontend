@@ -27,7 +27,7 @@
     >
       <q-scroll-area style="height: calc(100% - 192px); margin-top: 192px; border-right: 1px solid #ddd">
         <q-list padding>
-          <q-item clickable v-ripple :active="$route.name === 'Home.Containers' ">
+          <q-item clickable v-ripple :active="false " :to="{name :'Home.Containers'}" exact>
             <q-item-section avatar>
               <q-icon name="inbox" />
             </q-item-section>
@@ -37,7 +37,7 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple :active="$route.name==='Home.Projects'">
+          <q-item clickable v-ripple :active="$route.name==='Home.Projects'" :to="{name : 'Home.Projects'}"  exact>
             <q-item-section avatar>
               <q-icon name="star" />
             </q-item-section>

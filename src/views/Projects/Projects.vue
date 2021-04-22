@@ -43,7 +43,8 @@
             <q-icon
                 v-if="col.name==='action'"
                 size="xs"
-                name="preview"
+                name="edit"
+                @click="$router.push({name : 'Projects.Detail', params :{id : props.row.id}})"
             />
 
           </q-td>

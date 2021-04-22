@@ -18,10 +18,10 @@
 <script>
 
 export default {
-  props : {
-    eventName : String,
-    propCode : Object
-  },
+  props :[
+    'eventName',
+    'propCode'
+  ],
   data(){
     return {
       code : this.propCode,

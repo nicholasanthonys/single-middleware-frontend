@@ -34,6 +34,14 @@ const routes = [
 
     },
     {
+        path: '/projects/new',
+        name: 'Projects.New',
+        component: ProjectDetail,
+        meta: {
+            requireAuth: true
+        },
+    },
+    {
         path: '/projects/:id',
         name: 'Projects.Detail',
         component: ProjectDetail,

@@ -82,7 +82,7 @@ export default {
           required: true,
           label: 'Is Docker Container Created',
           align: 'left',
-          field: row => row.containerId,
+          field: row => row.container_id,
           format: val => `${val ? 'Yes' : 'No'}`,
         },
         {
