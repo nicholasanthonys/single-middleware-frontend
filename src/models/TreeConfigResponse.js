@@ -1,5 +1,5 @@
 export default        {
-    label: 'Circular Response',
+    label: 'Response',
     children: [
         {
             label: 'General',
