@@ -11,11 +11,15 @@ import store from './store'
 import {email, required} from "vee-validate/dist/rules";
 import './quasar'
 
-
+import VJsoneditor from 'v-jsoneditor'
 Vue.component('ValidationObserver', ValidationObserver)
+
 Vue.component('ValidationProvider', ValidationProvider)
 
 Vue.use(Vuex);
+
+
+Vue.use(VJsoneditor)
 
 Vue.config.productionTip = false
 
