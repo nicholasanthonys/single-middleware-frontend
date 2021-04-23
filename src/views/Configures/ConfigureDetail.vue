@@ -86,7 +86,6 @@
 
 <script>
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
-import TreeConfig from "../../models/TreeConfig";
 
 export default {
   components: {
@@ -97,7 +96,6 @@ export default {
     return {
       tab: 'request',
       splitterModel: 10,
-      treeConfig: TreeConfig,
       request: {
         codeAddHeader: {},
         codeAddBody: {},
