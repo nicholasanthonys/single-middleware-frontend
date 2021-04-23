@@ -183,47 +183,47 @@ export default {
   },
   methods: {
     onChangeStatusCode(val) {
-      this.$emit('on-change-status-code', val)
+      this.$emit('on-change-status-code-' + this.configType, val)
       this.statusCode = val;
     },
     onChangeTransform(val) {
-      this.$emit('on-change-transform', val)
+      this.$emit('on-change-transform-' + this.configType, val)
       this.transform = val;
     },
     onChangeLogBeforeModify(val) {
-      this.$emit('on-change-log-before-modify', val)
+      this.$emit('on-change-log-before-modify-' + this.configType, val)
       this.logBeforeModify = val;
     },
     onChangeLogAfterModify(val) {
-      this.$emit('on-change-log-after-modify', val)
+      this.$emit('on-change-log-after-modify-' + this.configType, val)
       this.logAfterModify = val;
     },
     onChangeAddHeader(val) {
-      this.$emit('on-change-add-header', val)
+      this.$emit('on-change-add-header-' + this.configType, val)
       this.codeAddHeader = val;
     },
     onChangeAddBody(val) {
-      this.$emit('on-change-add-body', val)
+      this.$emit('on-change-add-body-' + this.configType, val)
       this.codeAddBody = val
     },
     onChangeAddQuery(val) {
-      this.$emit('on-change-add-query', val)
+      this.$emit('on-change-add-query-' + this.configType, val)
       this.codeAddQuery = val
     },
     onChangeModifyHeader(val) {
-      this.$emit('on-change-modify-header', val)
+      this.$emit('on-change-modify-header-' + this.configType, val)
       this.codeModifyHeader = val
     },
     onChangeModifyBody(val) {
-      this.$emit('on-change-modify-body', val)
+      this.$emit('on-change-modify-body-' + this.configType, val)
       this.codeModifyBody = val
     },
     onChangeModifyQuery(val) {
-      this.$emit('on-change-modify-query', val)
+      this.$emit('on-change-modify-query-' + this.configType, val)
       this.codeModifyQuery = val
     },
     onChangeDeleteHeader(val) {
-      this.$emit('on-change-delete-header', val)
+      this.$emit('on-change-delete-header-' + this.configType, val)
       this.codeDeleteHeader = val
     },
     onChangeDeleteBody(val) {
@@ -231,7 +231,7 @@ export default {
       this.codeDeleteBody = val
     },
     onChangeDeleteQuery(val) {
-      this.$emit('on-change-delete-query', val)
+      this.$emit('on-change-delete-query-' + this.configType, val)
       this.codeDeleteQuery = val
     }
 
