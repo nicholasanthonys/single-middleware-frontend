@@ -6,6 +6,7 @@ import store from '../store';
 import Container from "../views/Containers/Containers";
 import Projects from "../views/Projects/Projects";
 import ProjectDetail from "../views/Projects/ProjectDetail";
+import ConfigureDetail from "../views/Configures/ConfigureDetail";
 
 Vue.use(VueRouter)
 
@@ -48,6 +49,14 @@ const routes = [
         meta: {
             requireAuth: true
         },
+        children:  [
+
+        ]
+    },
+    {
+        path: '/projects/:projectId/configures/:id',
+        name: 'Configures.Detail',
+        component: ConfigureDetail,
     },
     {
         path: '/login',
