@@ -36,7 +36,6 @@
                 <q-select v-model="selectedConfigId" :options="configureOptions" label="Select Configuration Id"
                           style="max-width: 300px"/>
                 <br/>
-                {{ propSerialConfig }}
                 <q-input
                     filled
                     v-model="alias"
@@ -75,7 +74,6 @@
 
               <q-tab-panel name="c_logics">
                 <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
-                <p>Clogics i s {{ cLogics }}</p>
                 <q-table
                     style="height: 400px"
                     title="Your Projects"
