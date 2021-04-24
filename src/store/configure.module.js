@@ -4,8 +4,8 @@ const configures = {
     namespaced: true,
     state: () => ({
         configs: [],
-        selectedConfig : null,
-        description : ''
+        selectedConfig: null,
+        description: ''
     }),
     getters: {
         getConfigures(state) {
@@ -20,10 +20,8 @@ const configures = {
                 ApiService.get(`/api/v1/configure/project/${projectId}`).then(
                     response => {
                         if (response.status === 200) {
-                            context.commit('setDescription',response.data.description)
-                            console.log("configs")
-                            console.log(response.data.configs)
-                            context.commit('setConfigs',response.data.configs)
+                            context.commit('setDescription', response.data.description)
+                            context.commit('setConfigs', response.data.configs)
                             resolve(response)
                         }
                     },
@@ -33,7 +31,7 @@ const configures = {
                 )
             })
         },
-        fetchSpecificConfigure(context, data){
+        fetchSpecificConfigure(context, data) {
             const {configureId, projectId} = data
             return new Promise((resolve, reject) => {
                 ApiService.init()
@@ -52,12 +50,16 @@ const configures = {
 
         storeConfigure(context, data) {
             return new Promise((resolve, reject) => {
-                const {name, description, base} = data
+                const {projectId, config} = data
+                const { request, response, description} = config
                 ApiService.init()
                 ApiService.post('/api/v1/configure', {
-                    name,
-                    description,
-                    base
+                    projectId,
+                    config: {
+                        description,
+                        request,
+                        response
+                    },
                 }).then(
                     response => {
                         resolve(response)
@@ -71,13 +73,17 @@ const configures = {
 
         updateConfigure(context, data) {
             return new Promise((resolve, reject) => {
-                const {id,name, description, base} = data
+                const {projectId, config} = data
+                const {id, request, response, description} = config
                 ApiService.init()
                 ApiService.put('/api/v1/configure', {
-                    id ,
-                    name,
-                    description,
-                    base
+                    projectId,
+                    config: {
+                        id,
+                        description,
+                        request,
+                        response
+                    },
                 }).then(
                     response => {
                         resolve(response)
@@ -89,11 +95,15 @@ const configures = {
             })
         },
 
-        deleteConfigure(context, id){
+        deleteConfigure(context, params) {
+            const {projectId, configureId} = params
             return new Promise((resolve, reject) => {
-                ApiService.delete(`/api/v1/configure/${id}` ).then(
+                ApiService.delete(`/api/v1/configure/`, {
+                    projectId,
+                    configureId
+                }).then(
                     response => {
-                        context.commit('deleteConfigure', id)
+                        context.commit('deleteConfigure', configureId)
                         resolve(response)
                     },
                     error => {
@@ -106,16 +116,18 @@ const configures = {
 
     mutations: {
         setConfigs(state, data) {
-            state.configs= data
+            state.configs = data
         },
-        setSelectedConfig(state,data){
-            state.selectedConfig= data
+        setSelectedConfig(state, data) {
+            state.selectedConfig = data
         },
-        setDescription(state,data){
-         state.description = data
+        setDescription(state, data) {
+            state.description = data
         },
-        deleteConfigure(state, id){
-            state.configures = state.configures.filter(e => e.id !== id)
+        deleteConfigure(state, id) {
+            if(state.configs){
+                state.configs = state.configs.filter(e => e.id !== id)
+            }
         }
     },
 }
