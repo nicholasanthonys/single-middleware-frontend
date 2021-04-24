@@ -37,8 +37,6 @@
               </q-tab-panel>
               <q-tab-panel name="request">
                 <div class="text-h4 q-mb-md">Request</div>
-                {{request}}
-                route name : {{$route.name}}
                 <EditorRequestResponseConfig config-type="request"
                                              :prop-request-method="request.method"
                                              :prop-destination-url="request.destinationUrl"
