@@ -276,13 +276,9 @@ export default {
     },
 
     onCLogicSave(val) {
-      console.log("on c logic save triggered, data is ")
-      console.log(val)
       const {mode, data, index} = val
 
       if (mode === 'edit') {
-        console.log("index is")
-        console.log(index)
         let temp = [...this.cLogics];
         temp[index] = data
         this.cLogics = temp;
@@ -292,22 +288,10 @@ export default {
       this.dialog = false
     },
     selectCLogic(cLogicItem, index) {
-      console.log("index is ")
-      console.log(index)
       this.selectedCLogic = cLogicItem
       this.selectedIndex = index
       this.mode = 'edit';
       this.dialog = true
-    },
-
-    async loadSerial(projectId) {
-      this.isLoading = true;
-      try {
-        await this.actionFetchSerial(projectId)
-      } catch (e) {
-        console.log(e)
-      }
-      this.isLoading = false;
     },
     async loadConfigures(projectId) {
       this.isLoadConfigures = true;
@@ -411,21 +395,13 @@ export default {
             })
 
           })
-      console.log("from filld ata props c logics is ")
-      console.log(this.cLogics)
     }
   },
   mounted() {
 
     if (this.propMode === 'edit') {
-      console.log("serial config is ")
-      console.log(this.propSerialConfig)
       this.fillDataFromProps(this.propSerialConfig)
     }
-    // if (this.$route.name === 'Serial.Detail') {
-    //   await this.loadSerial(this.$route.params.projectId)
-    // }
-    // await this.loadConfigures(this.$route.params.projectId)
   }
 }
 </script>

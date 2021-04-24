@@ -174,8 +174,6 @@ export default {
 
     },
     onConfirmConfigSerial(val) {
-      console.log("from config serialis ")
-      console.log(val)
       const {index, data} = val
       const {id, configure_id, alias, c_logics, next_failure, mode} = data
       if (mode === 'edit') {
@@ -188,11 +186,7 @@ export default {
           next_failure
 
         }
-        console.log("configures before assign is ")
-        console.log(this.configures)
-        console.log("configures after assign")
         this.configures = [...temp];
-        console.log(this.configures)
         // this.configures  =temp
         this.$emit('on-confirm-serial-config', this.configures)
       }else {
@@ -208,11 +202,7 @@ export default {
 
     },
     selectConfigureSerial(conf, index) {
-      console.log("conf i s")
-      console.log(conf)
       this.selectedConfigureSerial = conf
-      console.log("select configure serial i s")
-      console.log(this.selectedConfigureSerial)
       this.index = index
       this.mode = 'edit',
           this.dialog = true;
