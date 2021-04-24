@@ -18,8 +18,10 @@
             >
               <q-tab name="general" icon="description" label="General"/>
               <q-tab name="base" icon="settings_application" label="Base Settings"/>
-              <q-tab name="configures" icon="settings_application" label="Configures" v-if="$route.name ==='Projects.Detail' "/>
-              <q-tab name="serial/parallel" icon="settings_application" label="Serial/Parallel" v-if="$route.name === 'Projects.Detail' "/>
+              <q-tab name="configures" icon="settings_application" label="Configures"
+                     v-if="$route.name ==='Projects.Detail' "/>
+              <q-tab name="serial/parallel" icon="settings_application" label="Serial/Parallel"
+                     v-if="$route.name === 'Projects.Detail' "/>
             </q-tabs>
           </template>
 
@@ -78,7 +80,7 @@
                                              :prop-code-modify-body="codeModifyBody"
                                              :prop-code-delete-header="codeDeleteHeader"
                                              :prop-code-delete-body="codeDeleteBody"
-                                             @on-change-status-code="onChangeStatusCode"
+                                             @on-change-status-code-response="onChangeStatusCode"
                                              @on-change-transform-response="onChangeTransform"
                                              @on-change-log-before-modify-response="onChangeLogBeforeModify"
                                              @on-change-log-after-modify-response="onChangeLogAfterModify"
@@ -104,7 +106,21 @@
               </q-tab-panel>
 
               <q-tab-panel name="serial/parallel">
-                <p>Tes 2</p>
+                  <ConfigSerialList :prop-serial="serial" :prop-project-id="$route.params.id"
+                                    @on-confirm-serial-config="onConfirmSerialConfig"/>
+
+
+                <!--                <div class="column" style="height: 200px" v-else>-->
+                <!--                  <div class="col-3">-->
+                <!--                    <q-btn>Add Serial</q-btn>-->
+                <!--                    <br/>-->
+                <!--                  </div>-->
+                <!--                  <div class="col">-->
+                <!--                    <div class="flex justify-center items-center" style="height: 200px;background: #f3f3f3">-->
+                <!--                      <p>No Serial Config Found</p>-->
+                <!--                    </div>-->
+                <!--                  </div>-->
+                <!--                </div>-->
               </q-tab-panel>
 
 
@@ -148,12 +164,15 @@
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 import {mapActions, mapGetters} from "vuex";
 import Configures from '../Configures/Configures'
+import ConfigSerialList from "../SerialParallelConfig/ConfigSerialList";
+
 export default {
-  components: {EditorRequestResponseConfig, Configures},
-  computed : {
-   ...mapGetters({
-     configs : 'configures/getConfigures'
-   })
+  components: {ConfigSerialList, EditorRequestResponseConfig, Configures},
+  computed: {
+    ...mapGetters({
+      configs: 'configures/getConfigures',
+      selectedProject: 'projects/selectedProject'
+    })
   },
   data() {
     return {
@@ -175,8 +194,39 @@ export default {
       logBeforeModify: {},
       logAfterModify: {},
       isLoading: false,
-      isLoadConfigures : false,
+      isLoadConfigures: false,
       confirmDelete: false,
+
+      serial: null,
+      parallel: null,
+
+      paginationSerial: {
+        rowsPerPage: 1000
+      },
+
+      columnsSerial: [
+        {
+          name: 'id',
+          label: 'Id',
+          field: row => row.id,
+          align: 'left',
+        },
+        {
+          name: 'alias',
+          required: false,
+          label: 'Alias',
+          align: 'left',
+          field: row => row.alias,
+          format: val => `${val ? val.substring(0, 30) + '...' : '-'}`,
+        },
+        {
+          name: 'action',
+          required: true,
+          label: 'Action',
+        }
+      ],
+      /* serial saved data */
+      serialConfigSaved: null
     }
   },
   methods: {
@@ -185,8 +235,76 @@ export default {
       updateProject: 'projects/updateProject',
       storeProject: 'projects/storeProject',
       deleteProject: "projects/deleteProject",
-      actionFetchConfigures: 'configures/fetchConfigures'
+      actionFetchConfigures: 'configures/fetchConfigures',
+      storeSerial: 'serial/storeSerial'
     }),
+    async onConfirmSerialConfig(val) {
+      console.log("from project detail, value i s")
+      console.log(val)
+      this.serialConfigSaved = val
+      let data = this.constructDataConfigSerial(this.serialConfigSaved);
+      await this.onSaveSerialConfig(data)
+    },
+    constructDataConfigSerial(configSerialData) {
+      let configures = [];
+      configSerialData.forEach(conf => {
+        let cLogics = [];
+        let configureId = conf.configure_id;
+        let alias = conf.alias;
+        let nextFailure = conf.next_failure
+        conf.c_logics.forEach(cLogic => {
+          let rule = cLogic.rule
+          let data = cLogic.data
+          let nextSuccess = cLogic.next_success;
+         let response = null;
+         if(cLogic.response){
+           response = {
+             statusCode: cLogic.response.status_code,
+             transform: cLogic.response.transform,
+             adds: {
+               header: cLogic.response.adds.header,
+               body: cLogic.response.adds.body
+             },
+             modifies: {
+               header: cLogic.response.modifies.header,
+               body: cLogic.response.modifies.body
+             },
+             deletes: {
+               header: cLogic.response.deletes.header,
+               body: cLogic.response.deletes.body
+             }
+           }
+         }
+
+          cLogics.push({
+            rule, data, nextSuccess, response
+          })
+        })
+        configures.push({
+          configureId, alias, cLogics, nextFailure
+        })
+      })
+      console.log("from construct data configures is ")
+      console.log(configures)
+      return configures
+    },
+    async onSaveSerialConfig(val) {
+      let data = {
+        projectId: this.$route.params.id,
+        configures: val
+      }
+      try {
+        let response = await this.storeSerial(data)
+        console.log("response data is ")
+        console.log(response.data)
+        this.$q.notify({
+          message: 'Store Serial Success.',
+          color: 'secondary'
+        })
+      } catch (err) {
+        console.log(err)
+      }
+    },
     onChangeStatusCode(val) {
       this.statusCode = val;
     },
@@ -251,10 +369,8 @@ export default {
     async getProjectDetail() {
       this.isLoading = true;
       try {
-        let response = await this.fetchSpecificProject(this.$route.params.id)
-        console.log("response is ")
-        console.log(response.data)
-        this.fillData(response.data)
+        await this.fetchSpecificProject(this.$route.params.id)
+        this.fillData(this.selectedProject)
       } catch (err) {
         console.log(err)
       }
@@ -275,8 +391,6 @@ export default {
       this.logBeforeModify = log_before_modify
       this.logAfterModify = log_after_modify
 
-      console.log("adds is ")
-      console.log(adds)
 
       this.codeAddHeader = adds.header ? adds.header : {}
 
@@ -287,6 +401,9 @@ export default {
 
       this.codeDeleteHeader = deletes.header ? deletes.header : []
       this.codeDeleteBody = deletes.body ? deletes.body : []
+
+      this.serial = data.serial
+      this.parallel = data.parallel
 
     },
     async onSaveClicked() {

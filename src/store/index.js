@@ -5,6 +5,7 @@ import auth from './auth.module'
 import containers from "./containers.module";
 import projects from "./projects.module";
 import configures from "./configure.module";
+import serial from "./serial.module";
 
 Vue.use(Vuex)
 
@@ -13,7 +14,8 @@ export default new Vuex.Store({
         auth,
         containers,
         projects,
-        configures
+        configures,
+        serial
 
     }
 });

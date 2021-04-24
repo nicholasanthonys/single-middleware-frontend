@@ -1,0 +1,295 @@
+<template>
+  <div>
+    <div id="serial">
+      <div v-if="propSerial != null">
+        {{ propSerial }}
+        <q-table
+            style="height: 400px"
+            title="Serial Projects Config File"
+            :data="configures"
+            :columns="columns"
+            row-key="index"
+            virtual-scroll
+            :pagination.sync="pagination"
+            :rows-per-page-options="[0]"
+        >
+
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th
+                  v-for="col in props.cols"
+                  :key="col.name"
+                  :props="props"
+              >
+                {{ col.label }}
+              </q-th>
+            </q-tr>
+          </template>
+          <template v-slot:body="props">
+            <q-tr :props="props">
+
+              <q-td
+                  v-for="col in props.cols"
+                  :key="col.name"
+                  :props="props"
+              >
+
+                <p v-if="col.name !=='action'">{{ col.value }}</p>
+
+                <q-icon
+                    v-else
+                    size="xs"
+                    name="edit"
+                    @click="selectConfigureSerial(props.row, props.rowIndex)"
+                />
+                <!--                    @click="$router.push(`/projects/${propProjectId}/serial/${props.row.id}`)"-->
+
+              </q-td>
+            </q-tr>
+          </template>
+        </q-table>
+
+        <!--        <q-card class="my-card bg-secondary text-white">-->
+        <!--          <q-card-section>-->
+        <!--            <div class="text-h6">Serial Request</div>-->
+        <!--            <div class="text-subtitle2">Request will be executed sequentially</div>-->
+        <!--          </q-card-section>-->
+
+        <!--          <q-card-section>-->
+
+        <!--          </q-card-section>-->
+
+        <!--          <q-separator dark />-->
+
+        <!--          <q-card-actions>-->
+        <!--            <q-btn flat @click="$router.push(`/projects/${$route.params.id}/serial`)">Edit</q-btn>-->
+        <!--          </q-card-actions>-->
+        <!--        </q-card>-->
+      </div>
+      <div v-else>
+        <div class="column" style="height: 200px">
+          <div class="col-3">
+            <q-btn @click="openDialogAddSerial">Add Serial</q-btn>
+            <br/>
+          </div>
+          <div class="col">
+            <div class="flex justify-center items-center" style="height: 200px;background: #f3f3f3">
+              <p>No Serial Config Found</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="parallel">
+
+    </div>
+    <q-dialog
+        v-model="dialog"
+        persistent
+        :maximized="true"
+        transition-show="slide-up"
+        transition-hide="slide-down"
+    >
+      <q-card class="text-black">
+        <q-bar>
+          <q-space/>
+
+          <q-btn dense flat icon="minimize" @click="maximizedToggle = false" :disable="!maximizedToggle">
+            <q-tooltip v-if="maximizedToggle" content-class="bg-white text-primary">Minimize</q-tooltip>
+          </q-btn>
+          <q-btn dense flat icon="crop_square" @click="maximizedToggle = true" :disable="maximizedToggle">
+            <q-tooltip v-if="!maximizedToggle" content-class="bg-white text-primary">Maximize</q-tooltip>
+          </q-btn>
+          <q-btn dense flat icon="close" v-close-popup>
+            <q-tooltip content-class="bg-white text-primary">Close</q-tooltip>
+          </q-btn>
+        </q-bar>
+
+        <q-card-section class="q-pt-none full-height">
+          <div class="text-h6">Serial Config</div>
+          <ConfigSerialDetail
+              :prop-serial-config="selectedConfigureSerial"
+              :configure-options="options"
+              :prop-index="index"
+              :prop-mode="mode"
+              @on-confirm-clicked="onConfirmConfigSerial"
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+  </div>
+</template>
+
+<script>
+import {mapActions} from "vuex";
+import ConfigSerialDetail from "./ConfigSerialDetail";
+
+export default {
+  components: {ConfigSerialDetail},
+  props: {
+    propSerial: Object,
+    propProjectId: String,
+  },
+  data() {
+    return {
+      dialog: false,
+      maximizedToggle: true,
+      codeAddHeader: {},
+      codeAddBody: {},
+      codeModifyHeader: {},
+      codeModifyBody: {},
+      codeDeleteHeader: [],
+      codeDeleteBody: [],
+      statusCode: null,
+      transform: "ToJson",
+      logBeforeModify: {},
+      logAfterModify: {},
+      isLoading: false,
+      isLoadConfigures: false,
+
+      configures: this.propSerial ? this.propSerial.configures : [],
+      pagination: {
+        rowsPerPage: 1000
+      },
+      columns: [
+        {
+          name: 'id',
+          label: 'Id',
+          field: row => row.id,
+          align: 'left',
+        },
+        {
+          name: 'alias',
+          required: false,
+          label: 'Alias',
+          align: 'left',
+          field: row => row.alias,
+          format: val => `${val ? val.substring(0, 30) + '...' : '-'}`,
+        },
+        {
+          name: 'action',
+          required: true,
+          label: 'Action',
+        }
+      ],
+
+      selectedConfigureSerial: null,
+      mode: 'add',
+      index: -1,
+      options: [],
+    }
+  },
+  methods: {
+    ...mapActions({
+      actionFetchConfigures: 'configures/fetchConfigures'
+    }),
+    openDialogAddSerial() {
+      this.mode = 'add'
+      this.dialog = true
+
+    },
+    onConfirmConfigSerial(val) {
+      console.log("from config serialis ")
+      console.log(val)
+      const {index, data} = val
+      const {id, configure_id, alias, c_logics, next_failure, mode} = data
+      if (mode === 'edit') {
+        let temp = [...this.configures]
+        temp[index] = {
+          id,
+          configure_id,
+          alias,
+          c_logics,
+          next_failure
+
+        }
+        console.log("configures before assign is ")
+        console.log(this.configures)
+        console.log("configures after assign")
+        this.configures = [...temp];
+        console.log(this.configures)
+        // this.configures  =temp
+        this.$emit('on-confirm-serial-config', this.configures)
+      }else {
+        this.configures.push({
+          configure_id,
+          alias,
+          c_logics,
+          next_failure
+        })
+        this.$emit('on-confirm-serial-config', this.configures)
+      }
+      this.dialog = false;
+
+    },
+    selectConfigureSerial(conf, index) {
+      console.log("conf i s")
+      console.log(conf)
+      this.selectedConfigureSerial = conf
+      console.log("select configure serial i s")
+      console.log(this.selectedConfigureSerial)
+      this.index = index
+      this.mode = 'edit',
+          this.dialog = true;
+    },
+    async loadConfigures(projectId) {
+      this.isLoadConfigures = true;
+      try {
+        let response = await this.actionFetchConfigures(projectId)
+        this.options = this.constructOptionsConfigId(response.data.configs)
+      } catch (e) {
+        console.log(e)
+      }
+      this.isLoadConfigures = false;
+    },
+    constructOptionsConfigId(configures) {
+      let options = []
+      configures.forEach(e => {
+        options.push(
+            e.id,
+        )
+      });
+      return options
+    },
+    onChangeStatusCode(val) {
+      this.statusCode = val;
+    },
+    onChangeTransform(val) {
+      this.transform = val;
+    },
+    onChangeLogBeforeModify(val) {
+      this.logBeforeModify = val;
+    },
+    onChangeLogAfterModify(val) {
+      this.logAfterModify = val;
+    },
+    onChangeAddHeader(val) {
+      this.codeAddHeader = val;
+    },
+    onChangeAddBody(val) {
+      this.codeAddBody = val;
+    },
+    onChangeModifyHeader(val) {
+      this.codeModifyHeader = val
+    },
+    onChangeModifyBody(val) {
+      this.codeModifyBody = val
+    },
+    onChangeDeleteHeader(val) {
+      this.codeDeleteHeader = val
+    },
+    onChangeDeleteBody(val) {
+      this.codeDeleteBody = val
+    },
+  },
+  async mounted() {
+    await this.loadConfigures(this.$route.params.id)
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

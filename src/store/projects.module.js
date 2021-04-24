@@ -4,11 +4,15 @@ const projects = {
     namespaced: true,
     state: () => ({
         projects : [],
+        selectedProject : null
     }),
     getters: {
         getProjects(state) {
             return state.projects
         },
+        selectedProject(state){
+            return state.selectedProject
+        }
 
     },
     actions: {
@@ -34,6 +38,7 @@ const projects = {
                 ApiService.get(`/api/v1/project/${projectId}`).then(
                     response => {
                         if (response.status === 200) {
+                            context.commit('setSelectedProject', response.data)
                             resolve(response)
                         }
                     },
@@ -104,6 +109,9 @@ const projects = {
         },
         deleteProject(state, id){
             state.projects = state.projects.filter(e => e.id !== id)
+        },
+        setSelectedProject(state,data){
+            state.selectedProject = data
         }
     },
 }
