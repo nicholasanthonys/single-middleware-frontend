@@ -164,7 +164,7 @@
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 import {mapActions, mapGetters} from "vuex";
 import Configures from '../Configures/Configures'
-import ConfigSerialList from "../SerialParallelConfig/ConfigSerialList";
+import ConfigSerialList from "../SerialParallelConfig/SerialConfiglList";
 
 export default {
   components: {ConfigSerialList, EditorRequestResponseConfig, Configures},

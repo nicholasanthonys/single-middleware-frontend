@@ -2,7 +2,6 @@
   <div>
     <div id="serial">
       <div v-if="propSerial != null">
-        {{ propSerial }}
         <q-table
             style="height: 400px"
             title="Serial Projects Config File"
@@ -49,22 +48,6 @@
           </template>
         </q-table>
 
-        <!--        <q-card class="my-card bg-secondary text-white">-->
-        <!--          <q-card-section>-->
-        <!--            <div class="text-h6">Serial Request</div>-->
-        <!--            <div class="text-subtitle2">Request will be executed sequentially</div>-->
-        <!--          </q-card-section>-->
-
-        <!--          <q-card-section>-->
-
-        <!--          </q-card-section>-->
-
-        <!--          <q-separator dark />-->
-
-        <!--          <q-card-actions>-->
-        <!--            <q-btn flat @click="$router.push(`/projects/${$route.params.id}/serial`)">Edit</q-btn>-->
-        <!--          </q-card-actions>-->
-        <!--        </q-card>-->
       </div>
       <div v-else>
         <div class="column" style="height: 200px">
