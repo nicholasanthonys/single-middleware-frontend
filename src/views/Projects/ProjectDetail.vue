@@ -31,6 +31,7 @@
                 vertical
                 transition-prev="jump-up"
                 transition-next="jump-up"
+                style="height: 100%"
 
             >
               <q-tab-panel name="general">
@@ -91,8 +92,15 @@
 
               </q-tab-panel>
 
-              <q-tab-panel name="configures">
-                <Configures :project-id="$route.params.id"/>
+              <q-tab-panel name="configures" style="height: 100%;">
+                <Configures :project-id="$route.params.id" :prop-configs="configs" v-if="!isLoadConfigures"/>
+                <div style="height: 100%;" v-else class="flex justify-center items-center">
+                  <q-spinner
+                      color="primary"
+                      size="3em"
+                  />
+                </div>
+
               </q-tab-panel>
 
               <q-tab-panel name="serial/parallel">
@@ -138,10 +146,15 @@
 
 <script>
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
-import {mapActions} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 import Configures from '../Configures/Configures'
 export default {
   components: {EditorRequestResponseConfig, Configures},
+  computed : {
+   ...mapGetters({
+     configs : 'configures/getConfigures'
+   })
+  },
   data() {
     return {
       splitterModel: 10,
@@ -162,6 +175,7 @@ export default {
       logBeforeModify: {},
       logAfterModify: {},
       isLoading: false,
+      isLoadConfigures : false,
       confirmDelete: false,
     }
   },
@@ -170,7 +184,8 @@ export default {
       fetchSpecificProject: 'projects/fetchSpecificProject',
       updateProject: 'projects/updateProject',
       storeProject: 'projects/storeProject',
-      deleteProject: "projects/deleteProject"
+      deleteProject: "projects/deleteProject",
+      actionFetchConfigures: 'configures/fetchConfigures'
     }),
     onChangeStatusCode(val) {
       this.statusCode = val;
@@ -201,6 +216,19 @@ export default {
     },
     onChangeDeleteBody(val) {
       this.codeDeleteBody = val
+    },
+    async fetchConfigures(projectId) {
+      this.isLoadConfigures = true;
+      try {
+        await this.actionFetchConfigures(projectId);
+        /*this.data.forEach((row, index) => {
+          row.index = index
+        })*/
+      } catch (err) {
+        console.log(err)
+      }
+      this.isLoadConfigures = false;
+
     },
 
     async onDeleteClicked() {
@@ -334,6 +362,7 @@ export default {
     console.log(this.$route.name)
     if (this.$route.name === 'Projects.Detail') {
       await this.getProjectDetail()
+      await this.fetchConfigures(this.$route.params.id);
     }
   }
 }

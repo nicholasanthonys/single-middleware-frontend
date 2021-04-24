@@ -67,22 +67,19 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from "vuex";
 export default {
   props : {
-   projectId : String
+   projectId : String,
+    propConfigs : Array
   },
   components : {
 
   },
   computed : {
-   ...mapGetters({
-    configs:'configures/getConfigures'
-   })
   },
   data() {
     return {
-      data: [],
+      configs : this.propConfigs,
       selectedConfig : null,
       pagination: {
         rowsPerPage: 1000
@@ -103,28 +100,8 @@ export default {
 
     }
   },
-  methods: {
-    ...mapActions({
-      actionFetchConfigures: 'configures/fetchConfigures'
-    }),
 
 
-    async fetchProjects(projectId) {
-      try {
-        await this.actionFetchConfigures(projectId);
-        /*this.data.forEach((row, index) => {
-          row.index = index
-        })*/
-      } catch (err) {
-        console.log(err)
-      }
-
-    },
-
-  },
-  async mounted() {
-    await this.fetchProjects(this.projectId);
-  }
 }
 </script>
 
