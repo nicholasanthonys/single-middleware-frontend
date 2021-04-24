@@ -56,9 +56,9 @@ post(resource, body, noSnakeCase) {
         )
     },
 
-    delete(resource, body) {
+    delete(resource, params) {
         return axios.delete(resource, {
-            params: body ? snakecaseKeys(body, { deep: true }) : null,
+            params: params ? snakecaseKeys(params, { deep: true }) : null,
 
         })
     },
