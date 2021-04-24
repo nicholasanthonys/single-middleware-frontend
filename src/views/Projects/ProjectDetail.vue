@@ -70,6 +70,7 @@
 
                 <br/>
                 <EditorRequestResponseConfig config-type="response"
+                                             :have-log="false"
                                              :prop-status-code="statusCode"
                                              :prop-transform="transform"
                                              :prop-log-after-modify="logAfterModify"
@@ -108,19 +109,9 @@
               <q-tab-panel name="serial/parallel">
                   <ConfigSerialList :prop-serial="serial" :prop-project-id="$route.params.id"
                                     @on-confirm-serial-config="onConfirmSerialConfig"/>
+               <br/>
 
-
-                <!--                <div class="column" style="height: 200px" v-else>-->
-                <!--                  <div class="col-3">-->
-                <!--                    <q-btn>Add Serial</q-btn>-->
-                <!--                    <br/>-->
-                <!--                  </div>-->
-                <!--                  <div class="col">-->
-                <!--                    <div class="flex justify-center items-center" style="height: 200px;background: #f3f3f3">-->
-                <!--                      <p>No Serial Config Found</p>-->
-                <!--                    </div>-->
-                <!--                  </div>-->
-                <!--                </div>-->
+                <ParallelConfigList :prop-parallel="parallel"/>
               </q-tab-panel>
 
 
@@ -165,9 +156,10 @@ import EditorRequestResponseConfig from "../../components/common/EditorRequestRe
 import {mapActions, mapGetters} from "vuex";
 import Configures from '../Configures/Configures'
 import ConfigSerialList from "../SerialParallelConfig/SerialConfiglList";
+import ParallelConfigList from "../SerialParallelConfig/ParallelConfigList";
 
 export default {
-  components: {ConfigSerialList, EditorRequestResponseConfig, Configures},
+  components: {ConfigSerialList, EditorRequestResponseConfig, Configures, ParallelConfigList},
   computed: {
     ...mapGetters({
       configs: 'configures/getConfigures',
@@ -239,8 +231,6 @@ export default {
       storeSerial: 'serial/storeSerial'
     }),
     async onConfirmSerialConfig(val) {
-      console.log("from project detail, value i s")
-      console.log(val)
       this.serialConfigSaved = val
       let data = this.constructDataConfigSerial(this.serialConfigSaved);
       await this.onSaveSerialConfig(data)
@@ -284,8 +274,6 @@ export default {
           configureId, alias, cLogics, nextFailure
         })
       })
-      console.log("from construct data configures is ")
-      console.log(configures)
       return configures
     },
     async onSaveSerialConfig(val) {
@@ -339,9 +327,7 @@ export default {
       this.isLoadConfigures = true;
       try {
         await this.actionFetchConfigures(projectId);
-        /*this.data.forEach((row, index) => {
-          row.index = index
-        })*/
+
       } catch (err) {
         console.log(err)
       }

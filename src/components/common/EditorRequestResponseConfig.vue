@@ -89,7 +89,7 @@
                   style="max-width: 200px"/>
             </div>
             <br/>
-            <div class="col-2">
+            <div class="col-2" v-if="haveLog">
               <div class="row">
                 <div class="col-12 col-lg-6">
                   <p class="text-h5">Log Before Modify</p>
@@ -193,6 +193,7 @@ import TreeConfigRequest from "../../models/TreeConfigRequest";
 
 export default {
   props: [
+      'haveLog',
     'configType',
     'propCodeAddHeader',
     'propCodeAddBody',

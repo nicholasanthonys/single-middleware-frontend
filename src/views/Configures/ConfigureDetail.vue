@@ -38,6 +38,7 @@
               <q-tab-panel name="request">
                 <div class="text-h4 q-mb-md">Request</div>
                 <EditorRequestResponseConfig config-type="request"
+                                             :have-log="true"
                                              :prop-request-method="request.method"
                                              :prop-destination-url="request.destinationUrl"
                                              :prop-destination-path="request.destinationPath"
@@ -78,6 +79,7 @@
               <q-tab-panel name="response">
                 <div class="text-h4 q-mb-md">Response</div>
                 <EditorRequestResponseConfig config-type="response"
+                                             :have-log="true"
                                              :prop-status-code="response.statusCode"
                                              :prop-transform="response.transform"
                                              :prop-log-after-modify="response.logAfterModify"
@@ -335,8 +337,6 @@ export default {
       this.description = description
       this.request = this.fillRequest(request)
       this.response = this.fillResponse(response)
-      console.log("request is")
-      console.log(this.request)
 
     },
     fillRequest(request) {
@@ -454,7 +454,6 @@ export default {
       this.response.statusCode = val
     },
     onChangeTransformResponse(val) {
-      console.log("on change transform response triggered")
       this.response.transform = val;
     },
     onChangeLogBeforeModifyResponse(val) {
@@ -484,7 +483,6 @@ export default {
   },
   async mounted() {
     if (this.$route.name === 'Configures.Detail') {
-      console.log("load configure triggered")
       await this.loadConfigure(this.$route.params.projectId, this.$route.params.id)
     }
   }
