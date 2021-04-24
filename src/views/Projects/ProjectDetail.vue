@@ -18,6 +18,8 @@
             >
               <q-tab name="general" icon="description" label="General"/>
               <q-tab name="base" icon="settings_application" label="Base Settings"/>
+              <q-tab name="configures" icon="settings_application" label="Configures" v-if="$route.name ==='Projects.Detail' "/>
+              <q-tab name="serial/parallel" icon="settings_application" label="Serial/Parallel" v-if="$route.name === 'Projects.Detail' "/>
             </q-tabs>
           </template>
 
@@ -64,7 +66,6 @@
                 />
 
                 <br/>
-
                 <EditorRequestResponseConfig config-type="response"
                                              :prop-status-code="statusCode"
                                              :prop-transform="transform"
@@ -77,17 +78,25 @@
                                              :prop-code-delete-header="codeDeleteHeader"
                                              :prop-code-delete-body="codeDeleteBody"
                                              @on-change-status-code="onChangeStatusCode"
-                                             @on-change-transform="onChangeTransform"
-                                             @on-change-log-before-modify="onChangeLogBeforeModify"
-                                             @on-change-log-after-modify="onChangeLogAfterModify"
-                                             @on-change-add-header="onChangeAddHeader"
-                                             @on-change-add-body="onChangeAddBody"
-                                             @on-change-modify-header="onChangeModifyHeader"
-                                             @on-change-modify-body="onChangeModifyBody"
-                                             @on-change-delete-header="onChangeDeleteHeader"
-                                             @on-change-delete-body="onChangeDeleteBody"
+                                             @on-change-transform-response="onChangeTransform"
+                                             @on-change-log-before-modify-response="onChangeLogBeforeModify"
+                                             @on-change-log-after-modify-response="onChangeLogAfterModify"
+                                             @on-change-add-header-response="onChangeAddHeader"
+                                             @on-change-add-body-response="onChangeAddBody"
+                                             @on-change-modify-header-response="onChangeModifyHeader"
+                                             @on-change-modify-body-response="onChangeModifyBody"
+                                             @on-change-delete-header-response="onChangeDeleteHeader"
+                                             @on-change-delete-body-response="onChangeDeleteBody"
                 />
 
+              </q-tab-panel>
+
+              <q-tab-panel name="configures">
+                <Configures :project-id="$route.params.id"/>
+              </q-tab-panel>
+
+              <q-tab-panel name="serial/parallel">
+                <p>Tes 2</p>
               </q-tab-panel>
 
 
@@ -100,7 +109,7 @@
       <div class="col-1">
         <div class="row">
           <div class="col-1 text-center">
-            <q-btn @click="onSaveClicked" type="primary" >Save</q-btn>
+            <q-btn @click="onSaveClicked" type="primary">Save</q-btn>
           </div>
           <div class="col-1" v-if="$route.name === 'Projects.Detail' ">
             <q-btn @click="confirmDelete = true" type="negative">Delete</q-btn>
@@ -114,13 +123,13 @@
     <q-dialog v-model="confirmDelete" persistent>
       <q-card>
         <q-card-section class="row items-center">
-          <q-avatar icon="signal_wifi_off" color="primary" text-color="white" />
-          <span class="q-ml-sm">You are currently not connected to any network.</span>
+          <q-avatar icon="delete" color="primary" text-color="white"/>
+          <span class="q-ml-sm">Are you sure want to delete this project ? </span>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="primary" v-close-popup />
-          <q-btn flat label="Turn Delete" color="primary" v-close-popup  @click="onDeleteClicked"/>
+          <q-btn flat label="Cancel" color="primary" v-close-popup/>
+          <q-btn flat label="Delete" color="primary" v-close-popup @click="onDeleteClicked"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -130,9 +139,9 @@
 <script>
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 import {mapActions} from "vuex";
-
+import Configures from '../Configures/Configures'
 export default {
-  components: {EditorRequestResponseConfig},
+  components: {EditorRequestResponseConfig, Configures},
   data() {
     return {
       splitterModel: 10,
@@ -153,7 +162,7 @@ export default {
       logBeforeModify: {},
       logAfterModify: {},
       isLoading: false,
-      confirmDelete : false,
+      confirmDelete: false,
     }
   },
   methods: {
@@ -161,7 +170,7 @@ export default {
       fetchSpecificProject: 'projects/fetchSpecificProject',
       updateProject: 'projects/updateProject',
       storeProject: 'projects/storeProject',
-      deleteProject : "projects/deleteProject"
+      deleteProject: "projects/deleteProject"
     }),
     onChangeStatusCode(val) {
       this.statusCode = val;
@@ -194,15 +203,15 @@ export default {
       this.codeDeleteBody = val
     },
 
-    async onDeleteClicked(){
-      try{
-       await this.deleteProject(this.$route.params.id)
+    async onDeleteClicked() {
+      try {
+        await this.deleteProject(this.$route.params.id)
         this.$q.notify({
           message: 'Delete Success.',
           color: 'secondary'
         })
         await this.$router.replace({name: 'Home.Projects'})
-      }catch(err){
+      } catch (err) {
         console.log(err)
         this.$q.notify({
           message: err.response.data,
@@ -217,13 +226,13 @@ export default {
         let response = await this.fetchSpecificProject(this.$route.params.id)
         console.log("response is ")
         console.log(response.data)
-        this.filLData(response.data)
+        this.fillData(response.data)
       } catch (err) {
         console.log(err)
       }
       this.isLoading = false;
     },
-    filLData(data) {
+    fillData(data) {
       const {name, description, base, id} = data
       this.id = id
       this.name = name
@@ -248,14 +257,12 @@ export default {
       this.codeModifyHeader = modifies.head ? modifies.head : {}
       this.codeModifyBody = modifies.body ? modifies.body : {}
 
-      this.codeDeleteHeader = deletes.header ? deletes.header : {}
-      this.codeDeleteBody = deletes.body ? deletes.body : {}
+      this.codeDeleteHeader = deletes.header ? deletes.header : []
+      this.codeDeleteBody = deletes.body ? deletes.body : []
 
     },
     async onSaveClicked() {
       let data = this.constructData();
-      console.log("construct data is")
-      console.log(data)
       if (this.$route.name === 'Projects.Detail') {
         await this.onUpdateProject(data)
 
@@ -266,11 +273,14 @@ export default {
     },
     async onStoreProject(data) {
       try {
-        await this.storeProject(data)
+        let response = await this.storeProject(data)
         this.$q.notify({
-          message: 'Update Success.',
+          message: 'Add Project Success.',
           color: 'secondary'
         })
+        this.id = response.data.id
+        // push to project detail
+        await this.$router.replace({name: 'Projects.Detail', params: {id: this.id}})
       } catch (err) {
         console.log(err)
         // inside of a Vue file
@@ -281,7 +291,10 @@ export default {
     async onUpdateProject(data) {
       try {
         await this.updateProject(data)
-
+        this.$q.notify({
+          message: 'Update Project Success.',
+          color: 'secondary'
+        })
       } catch (err) {
         console.log(err)
       }
@@ -297,8 +310,8 @@ export default {
           circularResponse: {
             statusCode: this.statusCode,
             transform: this.transform,
-            logBeforeModify: this.logBeforeModify,
-            logAfterModify: this.logAfterModify,
+            logBeforeModify: this.logBeforeModify ? this.logBeforeModify : {},
+            logAfterModify: this.logAfterModify ? this.logAfterModify : {},
             adds: {
               header: this.codeAddHeader,
               body: this.codeAddBody

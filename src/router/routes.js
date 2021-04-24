@@ -43,6 +43,16 @@ const routes = [
         },
     },
     {
+        path: '/projects/:projectId/configures/new',
+        name: 'Configures.New',
+        component: ConfigureDetail,
+    },
+    {
+        path: '/projects/:projectId/configures/:id',
+        name: 'Configures.Detail',
+        component: ConfigureDetail,
+    },
+    {
         path: '/projects/:id',
         name: 'Projects.Detail',
         component: ProjectDetail,
@@ -53,11 +63,8 @@ const routes = [
 
         ]
     },
-    {
-        path: '/projects/:projectId/configures/:id',
-        name: 'Configures.Detail',
-        component: ConfigureDetail,
-    },
+
+
     {
         path: '/login',
         name: 'Login',

@@ -3,7 +3,7 @@
     <div class="column">
       <div class="col-4">
 
-        <q-btn @click="dialog = true"> Add New Project</q-btn>
+        <q-btn @click="$router.push({name : 'Configures.New', params : {projectId : $route.params.id}})"> Add New Configure</q-btn>
 
       </div>
       <br/>
