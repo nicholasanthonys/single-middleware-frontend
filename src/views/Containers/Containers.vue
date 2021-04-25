@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md">
-
+  <q-btn @click="$router.push({name : 'Containers.New'})">Add Container</q-btn>
     <q-table
         style="height: 400px"
         title="Your Containers"
@@ -44,6 +44,7 @@
                 v-if="col.name==='action'"
                 size="xs"
                 name="preview"
+                @click="$router.push({name : 'Containers.Detail', params : {id : props.row.id}})"
             />
 
           </q-td>

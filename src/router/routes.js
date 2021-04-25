@@ -8,6 +8,7 @@ import Projects from "../views/Projects/Projects";
 import ProjectDetail from "../views/Projects/ProjectDetail";
 import ConfigureDetail from "../views/Configures/ConfigureDetail";
 import ConfigureSerialDetail from "../views/SerialParallelConfig/ConfigSerialDetail";
+import ContainerDetail from "../views/Containers/ContainerDetail";
 
 Vue.use(VueRouter)
 
@@ -66,7 +67,25 @@ const routes = [
         meta: {
             requireAuth: true
         },
-        children: []
+    },
+
+    {
+        path: '/containers/new',
+        name: 'Containers.New',
+        component: ContainerDetail,
+        meta: {
+            requireAuth: true
+        },
+    },
+
+
+    {
+        path: '/containers/:id',
+        name: 'Containers.Detail',
+        component: ContainerDetail,
+        meta: {
+            requireAuth: true
+        },
     },
 
     {

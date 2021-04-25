@@ -3,7 +3,7 @@ import ApiService from "../services/common/api.service";
 const containers = {
     namespaced: true,
     state: () => ({
-        containers : [],
+        containers: [],
     }),
     getters: {
         getContainers(state) {
@@ -12,13 +12,13 @@ const containers = {
 
     },
     actions: {
-       fetchContainers(context) {
+        fetchContainers(context) {
             return new Promise((resolve, reject) => {
                 ApiService.init()
                 ApiService.get('/api/v1/container').then(
                     response => {
                         if (response.status === 200) {
-                            context.commit('setContainers',response.data)
+                            context.commit('setContainers', response.data)
                             resolve(response)
                         }
                     },
@@ -28,11 +28,10 @@ const containers = {
                 )
             })
         },
-
-        getContainerById(context, dbContainerId){
+        fetchSpecificContainer(context, containerId) {
             return new Promise((resolve, reject) => {
                 ApiService.init()
-                ApiService.get(`/api/v1/container/${dbContainerId}`).then(
+                ApiService.get(`/api/v1/container/${containerId}`).then(
                     response => {
                         if (response.status === 200) {
                             resolve(response)
@@ -51,7 +50,6 @@ const containers = {
                 ApiService.init()
                 ApiService.post('/api/v1/container', {
                     name,
-                    description,
                     projectIds,
                     routers
                 }).then(
@@ -64,7 +62,6 @@ const containers = {
                 )
             })
         },
-
 
         updateContainer(context, data) {
             return new Promise((resolve, reject) => {
@@ -86,9 +83,10 @@ const containers = {
                 )
             })
         },
-        deleteContainer(context, id){
+
+        deleteContainer(context, id) {
             return new Promise((resolve, reject) => {
-                ApiService.delete(`/api/v1/container/${id}` ).then(
+                ApiService.delete(`/api/v1/container/${id}`).then(
                     response => {
                         context.commit('deleteContainer', id)
                         resolve(response)
@@ -105,8 +103,13 @@ const containers = {
         setContainers(state, data) {
             state.containers = data
         },
-        deleteContainer(state, id){
-            state.containers = state.containers.filter(e => e.id !== id)
+        deleteContainer(state, id) {
+            if(state.containers){
+                state.containers = state.containers.filter(e => e.id !== id)
+            }
+        },
+        setSelectedContainer(state, data) {
+            state.selectedContainer = data
         }
     },
 }
