@@ -98,7 +98,41 @@ const containers = {
                     }
                 )
             })
-        }
+        },
+        toggleStartStopContainer(context, data){
+            return new Promise((resolve, reject) => {
+                const {dbContainerId} = data
+                ApiService.init()
+                ApiService.put('/api/v1/container/docker-container', {
+                    id : dbContainerId
+                }).then(
+                    response => {
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
+        createDockerContainer(context, data){
+            return new Promise((resolve, reject) => {
+                const {dbContainerId} = data
+                ApiService.init()
+                ApiService.post('/api/v1/container/docker-container', {
+                    id : dbContainerId
+                }).then(
+                    response => {
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
     },
 
     mutations: {

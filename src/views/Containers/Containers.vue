@@ -1,56 +1,65 @@
 <template>
   <div class="q-pa-md">
-  <q-btn @click="$router.push({name : 'Containers.New'})">Add Container</q-btn>
-    <q-table
-        style="height: 400px"
-        title="Your Containers"
-        :data="data"
-        :columns="columns"
-        row-key="index"
-        virtual-scroll
-        :pagination.sync="pagination"
-        :rows-per-page-options="[0]"
-    >
+    <div class="column" style="height: 150px">
+      <div class="col-4">
+        <q-btn @click="$router.push({name : 'Containers.New'})">Add Container</q-btn>
+      </div>
 
-      <template v-slot:header="props">
-        <q-tr :props="props">
-          <q-th
-              v-for="col in props.cols"
-              :key="col.name"
-              :props="props"
-          >
-            {{ col.label }}
-          </q-th>
-        </q-tr>
-      </template>
-      <template v-slot:body="props">
-        <q-tr :props="props">
+      <div class="col-4">
+        <q-table
+            style="height: 400px"
+            title="Your Containers"
+            :data="data"
+            :columns="columns"
+            row-key="index"
+            virtual-scroll
+            :pagination.sync="pagination"
+            :rows-per-page-options="[0]"
+        >
 
-          <q-td
-              v-for="col in props.cols"
-              :key="col.name"
-              :props="props"
-          >
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th
+                  v-for="col in props.cols"
+                  :key="col.name"
+                  :props="props"
+              >
+                {{ col.label }}
+              </q-th>
+            </q-tr>
+          </template>
+          <template v-slot:body="props">
+            <q-tr :props="props">
 
-            <p v-if="col.name !=='description' && col.name !== 'action' ">{{ col.value }}</p>
-            <div v-if="col.name === 'description'">
-              <p>{{ col.value }}
-                <q-tooltip anchor="bottom middle" self="top middle" :offset="[10, 10]">
-                  {{ props.row.description }}
-                </q-tooltip>
-              </p>
-            </div>
-            <q-icon
-                v-if="col.name==='action'"
-                size="xs"
-                name="preview"
-                @click="$router.push({name : 'Containers.Detail', params : {id : props.row.id}})"
-            />
+              <q-td
+                  v-for="col in props.cols"
+                  :key="col.name"
+                  :props="props"
+              >
 
-          </q-td>
-        </q-tr>
-      </template>
-    </q-table>
+                <p v-if="col.name !=='description' && col.name !== 'action' ">{{ col.value }}</p>
+                <div v-if="col.name === 'description'">
+                  <p>{{ col.value }}
+                    <q-tooltip anchor="bottom middle" self="top middle" :offset="[10, 10]">
+                      {{ props.row.description }}
+                    </q-tooltip>
+                  </p>
+                </div>
+                <q-icon
+                    v-if="col.name==='action'"
+                    size="xs"
+                    name="preview"
+                    @click="$router.push({name : 'Containers.Detail', params : {id : props.row.id}})"
+                />
+
+              </q-td>
+            </q-tr>
+          </template>
+        </q-table>
+      </div>
+    </div>
+
+
   </div>
 </template>
 
@@ -69,7 +78,14 @@ export default {
         {
           name: 'index',
           label: '#',
-          field: 'index'
+          field: 'index',
+          align: 'left',
+        },
+        {
+          name: 'id',
+          label: 'Id',
+          field: 'id',
+          align: 'left',
         },
         {
           name: 'name',

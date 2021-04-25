@@ -1,8 +1,6 @@
 <template>
   <div class="full-height">
     <div class="column" style="height: 100%">
-      {{container}}
-      {{projects}}
       <div class="col">
         <q-splitter
             v-model="splitterModel"
@@ -32,6 +30,47 @@
             >
               <q-tab-panel name="general">
                 <div class="text-h4 q-mb-md">General</div>
+                <p class="text-h7 q-mb-md"> Container Created : {{ container.containerId ? 'Yes' : 'No' }}</p>
+
+                <div v-if="container.containerId">
+                  <div v-if="!isToggling">
+                    <q-icon
+                        class="icon-toggle"
+                        v-if="!container.running"
+                        size="md"
+                        name="play_arrow"
+                        style="color:#2F612F "
+                        @click="toggleContainer"
+                    >
+                      <q-tooltip>
+                        Start Docker Container
+                      </q-tooltip>
+                    </q-icon>
+
+                    <q-icon
+                        class="icon-toggle"
+                        v-if="container.running"
+                        size="md"
+                        name="pause"
+                        style="color :#E84B1E"
+                        @click="toggleContainer"
+                    >
+                      <q-tooltip>
+                        Stop Docker Container
+                      </q-tooltip>
+                    </q-icon>
+                  </div>
+
+                  <div v-else>
+                    <q-spinner
+                        color="primary"
+                        size="3em"
+                        :thickness="2"
+                    />
+                  </div>
+
+                </div>
+                <br/>
                 <q-input
 
                     filled
@@ -48,6 +87,9 @@
                     type="textarea"
                     filled hint="Container Description"
                     label="Description"/>
+
+                <br/>
+
 
               </q-tab-panel>
 
@@ -287,9 +329,9 @@
           <div class="col-1 text-center">
             <q-btn @click="onSaveClicked" type="primary">Save</q-btn>
           </div>
-                  <div class="col-1" v-if="$route.name === 'Containers.Detail' ">
-                    <q-btn @click="dialogDelete= true" type="negative">Delete</q-btn>
-                  </div>
+          <div class="col-1" v-if="$route.name === 'Containers.Detail' ">
+            <q-btn @click="dialogDelete= true" type="negative">Delete</q-btn>
+          </div>
         </div>
 
       </div>
@@ -333,6 +375,7 @@ export default {
       description: '',
 
       container: {
+        containerId: null,
         name: '',
         description: '',
         projectIds: [],
@@ -443,7 +486,10 @@ export default {
         }
       ],
 
-      dialogDelete : false,
+      dialogDelete: false,
+
+      /* for toggling start stop */
+      isToggling : false,
     }
   },
   methods: {
@@ -452,19 +498,34 @@ export default {
       actionFetchProjects: 'projects/fetchProjects',
       storeContainer: 'containers/storeContainer',
       updateContainer: 'containers/updateContainer',
-      deleteContainer : 'containers/deleteContainer',
+      deleteContainer: 'containers/deleteContainer',
+      actionToggleContainer: 'containers/toggleStartStopContainer'
     }),
-    async onDeleteClicked(){
-    try {
-     await this.deleteContainer(this.$route.params.id) ;
-      this.$q.notify({
-        message: 'Delete Container Success',
-        color: 'secondary'
-      })
-      await this.$router.replace({name: 'Home.Containers'})
-    }catch (e) {
-     console.log(e)
-    }
+    async toggleContainer() {
+      this.isToggling = true;
+      try {
+        let response = await this.actionToggleContainer({
+          dbContainerId: this.$route.params.id,
+        })
+        console.log("response is ")
+        console.log(response.data);
+        this.container.running = response.data.running
+      } catch (e) {
+        console.log(e)
+      }
+      this.isToggling = false;
+    },
+    async onDeleteClicked() {
+      try {
+        await this.deleteContainer(this.$route.params.id);
+        this.$q.notify({
+          message: 'Delete Container Success',
+          color: 'secondary'
+        })
+        await this.$router.replace({name: 'Home.Containers'})
+      } catch (e) {
+        console.log(e)
+      }
     },
     async onSaveClicked() {
       if (this.$route.name === 'Containers.Detail') {
@@ -483,19 +544,19 @@ export default {
           routers: this.container.routers
 
         });
-        const{id} =response.data
+        const {id} = response.data
         this.$q.notify({
           message: 'StoreContainer Success',
           color: 'secondary'
         })
-        await this.$router.replace({name : 'Containers.Detail', params : {id}  })
+        await this.$router.replace({name: 'Containers.Detail', params: {id}})
       } catch (e) {
         console.log(e)
       }
     },
     async onUpdateContainer() {
       try {
-         await this.updateContainer({
+        await this.updateContainer({
           id: this.$route.params.id,
           name: this.container.name,
           description: this.container.description,
@@ -577,6 +638,7 @@ export default {
     fillContainerData(data) {
       this.container = {
         name: data.name,
+        containerId: data.container_id,
         description: data.description,
         projectIds: data.project_ids,
         routers: data.routers,
@@ -585,7 +647,7 @@ export default {
     }
   },
   async mounted() {
-    if(this.$route.name === 'Containers.Detail'){
+    if (this.$route.name === 'Containers.Detail') {
       await this.loadContainerById(this.$route.params.id)
     }
     await this.fetchProjects();
@@ -593,6 +655,10 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+.icon-toggle {
+  &:hover {
+    cursor: pointer;
+  }
+}
 </style>
