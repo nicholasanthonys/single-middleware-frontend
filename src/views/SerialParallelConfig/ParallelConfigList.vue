@@ -1,7 +1,6 @@
 <template>
   <div>
     <div v-if="propParallel">
-      {{ propParallel }}
 
       <p>Parallel Config File</p>
       <q-btn @click="onAddSelectedConfig">Add New Parallel Config</q-btn>
@@ -53,7 +52,6 @@
 
       <br/>
       <p>Parallel Next Failure Response</p>
-      status code {{ nextFailure.statusCode }}
       <q-btn @click="onSaveNextFailure">Save Next Failure</q-btn>
       <EditorRequestResponseConfig config-type="response"
                                    :have-log="false"
@@ -186,7 +184,7 @@
           <q-card-section class="q-pt-none">
             <div class="text-h6">CLogic</div>
             <CLogicItemDetail :prop-c-logic="selectedCLogic" @on-clogic-save="onCLogicSave" :prop-mode="cLogicMode"
-                              :prop-index="selectedCLogicIndex"/>
+                              :prop-index="selectedCLogicIndex" prop-request-type="parallel"/>
           </q-card-section>
         </q-card>
       </q-dialog>

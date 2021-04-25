@@ -16,7 +16,7 @@
             >
               <q-tab name="general" icon="description" label="General"/>
               <q-tab name="next_failure" icon="settings_application" label="Next Failure"/>
-              <q-tab name="c_logics" icon="settings_application" label="CLogics"/>
+              <q-tab name="c_logics" icon="settings_application" label="CLogics" v-if="selectedSerialConfig!= null"/>
             </q-tabs>
           </template>
 
@@ -72,7 +72,7 @@
 
               </q-tab-panel>
 
-              <q-tab-panel name="c_logics">
+              <q-tab-panel name="c_logics" v-if="selectedSerialConfig!= null">
                 <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
                 <q-table
                     style="height: 400px"
@@ -152,7 +152,7 @@
         <q-card-section class="q-pt-none">
           <div class="text-h6">CLogic</div>
           <CLogicItemDetail :prop-c-logic="selectedCLogic" @on-clogic-save="onCLogicSave" :prop-mode="mode"
-                            :prop-index="selectedIndex"/>
+                            :prop-index="selectedIndex" :prop-config-id="selectedSerialConfig.id" prop-request-type="serial"/>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -180,8 +180,14 @@ export default {
     EditorRequestResponseConfig
   },
   computed: {},
+  watch : {
+   propSerialConfig(val){
+     this.selectedSerialConfig = val;
+   }
+  },
   data() {
     return {
+      selectedSerialConfig : this.propSerialConfig,
       splitterModel: 10,
       tab: 'general',
       isLoading: false,
@@ -240,6 +246,8 @@ export default {
       actionFetchSerial: 'serial/fetchSerial',
       actionFetchConfigures: 'configures/fetchConfigures',
       actionStoreSerial: 'serial/storeSerial',
+      storeSingleConfig: 'serial/storeSingleConfig',
+      updateSpecificConfig: 'serial/updateSingleConfig',
     }),
     openDialogAddCLogic() {
       this.mode = 'add',
@@ -247,12 +255,11 @@ export default {
     },
     async onSaveClick() {
       let data = {
-        id: this.id,
-        configure_id: this.selectedConfigId,
+        projectId: this.$route.params.id,
+        configureId: this.selectedConfigId,
         alias: this.alias,
-        c_logics: this.cLogics,
-        next_failure: {
-          status_code: this.statusCode,
+        nextFailure: {
+          statusCode: this.statusCode,
           transform: this.transform,
           adds: {
             header: this.codeAddHeader,
@@ -269,22 +276,52 @@ export default {
         },
         mode: this.propMode,
       }
-      this.$emit('on-confirm-clicked', {
-        index: this.propIndex,
-        data
-      })
+      if (this.propMode === 'edit') {
+        /* add id */
+        try{
+          data.id = this.id;
+          await this.updateSpecificConfig(data);
+          this.$q.notify({
+            message: 'Update Config Serial Success.',
+            color: 'secondary'
+          })
+          this.$emit('on-confirm-clicked')
+        }catch (e) {
+         console.log(e)
+        }
+      } else {
+        try {
+          await this.storeSingleConfig(data)
+          this.$q.notify({
+            message: 'Store Config Serial Success.',
+            color: 'secondary'
+          })
+          this.$emit('on-confirm-clicked')
+        } catch (e) {
+          console.log(e)
+        }
+      }
+
+
     },
 
     onCLogicSave(val) {
-      const {mode, data, index} = val
-
-      if (mode === 'edit') {
-        let temp = [...this.cLogics];
-        temp[index] = data
-        this.cLogics = temp;
-      } else {
-        this.cLogics.push(data)
-      }
+      console.log(val)
+      // const {mode, data, index} = val
+      //
+      // if (mode === 'edit') {
+      //   let temp = [...this.cLogics];
+      //   temp[index] = data
+      //   this.cLogics = temp;
+      // } else {
+      //   try {
+      //
+      //
+      //     this.cLogics.push(data)
+      //   }catch (e) {
+      //    console.log(e) ;
+      //   }
+      // }
       this.dialog = false
     },
     selectCLogic(cLogicItem, index) {
@@ -344,8 +381,8 @@ export default {
       this.codeDeleteBody = val
     },
 
-    fillDataFromProps(propSerial) {
-      const {alias, configure_id, c_logics, next_failure, id} = propSerial
+    fillDataFromProps(config) {
+      const {alias, configure_id, c_logics, next_failure, id} = config
       this.id = id
       this.alias = alias
       this.selectedConfigId = configure_id
@@ -400,7 +437,7 @@ export default {
   mounted() {
 
     if (this.propMode === 'edit') {
-      this.fillDataFromProps(this.propSerialConfig)
+      this.fillDataFromProps(this.selectedSerialConfig)
     }
   }
 }

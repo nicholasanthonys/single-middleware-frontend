@@ -38,7 +38,6 @@
 
       <q-tab-panel name="response">
         <div class="text-h6">Response</div>
-        <p>   status code is  {{statusCode}}</p>
         <EditorRequestResponseConfig config-type="response"
                                      :prop-status-code="statusCode"
                                      :prop-transform="transform"
@@ -71,12 +70,15 @@
 <script>
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 import Editor from "../../components/common/Editor";
+import {mapActions} from "vuex";
 
 export default {
   props: {
     propCLogic: Object,
-    propIndex : Number,
-    propMode : String,
+    propIndex: Number,
+    propMode: String,
+    propConfigId : Number,
+    propRequestType : String,
   },
   components: {
     Editor,
@@ -85,7 +87,7 @@ export default {
   data() {
     return {
       tab: 'data',
-      id : null,
+      id: null,
       nextSuccess: null,
       /* json logic cdata and rule */
       data: {},
@@ -105,12 +107,19 @@ export default {
     }
   },
   methods: {
-    onSaveClicked() {
+    ...mapActions({
+      addCLogicSerial: 'serial/storeSingleCLogic',
+      updateCLogicSerial: 'serial/updateSingleCLogic',
+      addCLogicParallel : 'parallel/storeSingleCLogicParallel',
+      updateCLogicParallel : 'parallel/updateSingleCLogicParallel',
+    }),
+    async onSaveClicked() {
       let data = {
-        id :this.id ? this.id : '(new clogic)',
-        data: this.data,
-        rule : this.rule,
-        next_success: this.nextSuccess,
+        projectId: this.$route.params.id,
+        configId : this.propConfigId,
+        data: this.data ? this.data : {},
+        rule: this.rule ? this.rule : {},
+        nextSuccess: this.nextSuccess,
         response: {
           transform: this.transform,
           status_code: this.statusCode,
@@ -128,9 +137,39 @@ export default {
           }
         }
       }
-      console.log("data is before emit")
-      console.log(data)
-      this.$emit('on-clogic-save', {mode : this.propMode, data : data, index : this.propIndex})
+      if (this.propMode === 'edit') {
+        data.id = this.id
+        if(this.propRequestType === 'serial'){
+          await this.updateCLogicSerial(data)
+        }else{
+          await this.updateCLogicParallel(data)
+        }
+        this.$q.notify({
+        message: 'Update CLogic Success',
+          color: 'secondary'
+        })
+      } else {
+        try {
+          if(this.propRequestType == 'serial'){
+            await this.addCLogicSerial(data)
+          }else{
+            await this.addCLogicParallel(data)
+          }
+          this.$q.notify({
+            message: 'Add CLogic Success',
+            color: 'secondary'
+          })
+          this.$emit('on-clogic-save', {mode: this.propMode, data: data, index: this.propIndex})
+
+        } catch (err) {
+          console.log(err)
+        }
+      }
+
+
+      // console.log("data is before emit")
+      // console.log(data)
+      // this.$emit('on-clogic-save', {mode : this.propMode, data : data, index : this.propIndex})
     },
     onChangeCodeData(val) {
       this.data = val
@@ -139,7 +178,7 @@ export default {
       this.rule = val
     },
     onChangeStatusCode(val) {
-      console.log("on change status code triggered  " +  val)
+      console.log("on change status code triggered  " + val)
       this.statusCode = val;
     },
     onChangeTransform(val) {
@@ -177,26 +216,26 @@ export default {
       this.data = data
       this.nextSuccess = next_success
       this.rule = rule
-      if(response){
+      if (response) {
 
         const {adds, modifies, deletes, transform, status_code} = response
         this.statusCode = status_code
         this.transform = transform
         this.codeAddBody = adds.body ? adds.body : {},
-        this.codeAddHeader = adds.header ? adds.header : {},
-        this.codeModifyHeader = modifies.header ? modifies.header : {}
+            this.codeAddHeader = adds.header ? adds.header : {},
+            this.codeModifyHeader = modifies.header ? modifies.header : {}
         this.codeModifyBody = modifies.body ? modifies.body : {},
-        this.codeDeleteHeader = deletes.header ? deletes.header : [],
-        this.codeDeleteBody = deletes.body ? deletes.body : [],
+            this.codeDeleteHeader = deletes.header ? deletes.header : [],
+            this.codeDeleteBody = deletes.body ? deletes.body : [],
 
-        this.logBeforeModify = log_before_modify
+            this.logBeforeModify = log_before_modify
         this.logAfterModify = log_after_modify
       }
 
     },
   },
   mounted() {
-    if(this.propMode === 'edit'){
+    if (this.propMode === 'edit') {
 
       this.filLData(this.propCLogic)
     }

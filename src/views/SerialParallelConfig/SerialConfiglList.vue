@@ -1,7 +1,8 @@
 <template>
   <div>
     <div id="serial">
-      <div v-if="propSerial != null">
+
+      <div v-if="serial!= null">
         <q-btn @click="openDialogAddSerial">Add More Serial Config</q-btn>
         <q-table
             style="height: 400px"
@@ -34,7 +35,7 @@
                   :props="props"
               >
 
-                <p v-if="col.name !=='action'">{{ col.value }}</p>
+                <p v-if="col.name !=='action'">{{ col.value }} - {{props.rowIndex}}</p>
 
                 <q-icon
                     v-else
@@ -72,7 +73,7 @@
     <q-dialog
         v-model="dialog"
         persistent
-        :maximized="true"
+        :maximized="maximizedToggle"
         transition-show="slide-up"
         transition-hide="slide-down"
     >
@@ -107,14 +108,19 @@
 </template>
 
 <script>
-import {mapActions} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 import ConfigSerialDetail from "./ConfigSerialDetail";
 
 export default {
   components: {ConfigSerialDetail},
   props: {
-    propSerial: Object,
     propProjectId: String,
+  },
+  computed : {
+   ...mapGetters({
+     serial : 'serial/getSerial',
+     configures : 'serial/getConfigures'
+   })
   },
   data() {
     return {
@@ -132,8 +138,6 @@ export default {
       logAfterModify: {},
       isLoading: false,
       isLoadConfigures: false,
-
-      configures: this.propSerial ? this.propSerial.configures : [],
       pagination: {
         rowsPerPage: 1000
       },
@@ -167,38 +171,39 @@ export default {
   },
   methods: {
     ...mapActions({
-      actionFetchConfigures: 'configures/fetchConfigures'
+      actionFetchConfigures: 'configures/fetchConfigures',
+      fetchSerial : 'serial/fetchSerial',
     }),
     openDialogAddSerial() {
       this.mode = 'add'
       this.dialog = true
 
     },
-    onConfirmConfigSerial(val) {
-      const {index, data} = val
-      const {id, configure_id, alias, c_logics, next_failure, mode} = data
-      if (mode === 'edit') {
-        let temp = [...this.configures]
-        temp[index] = {
-          id,
-          configure_id,
-          alias,
-          c_logics,
-          next_failure
-
-        }
-        this.configures = [...temp];
-        // this.configures  =temp
-        this.$emit('on-confirm-serial-config', this.configures)
-      }else {
-        this.configures.push({
-          configure_id,
-          alias,
-          c_logics,
-          next_failure
-        })
-        this.$emit('on-confirm-serial-config', this.configures)
-      }
+    onConfirmConfigSerial() {
+      // const {index, data} = val
+      // const {id, configure_id, alias, c_logics, next_failure, mode} = data
+      // if (mode === 'edit') {
+      //   let temp = [...this.configures]
+      //   temp[index] = {
+      //     id,
+      //     configure_id,
+      //     alias,
+      //     c_logics,
+      //     next_failure
+      //
+      //   }
+      //   this.configures = [...temp];
+      //   // this.configures  =temp
+      //   this.$emit('on-confirm-serial-config', this.configures)
+      // }else {
+      //   this.configures.push({
+      //     configure_id,
+      //     alias,
+      //     c_logics,
+      //     next_failure
+      //   })
+      //   this.$emit('on-confirm-serial-config', this.configures)
+      // }
       this.dialog = false;
 
     },
@@ -217,6 +222,15 @@ export default {
         console.log(e)
       }
       this.isLoadConfigures = false;
+    },
+    async loadSerial(projectId){
+      this.isLoading = false;
+      try {
+         await this.fetchSerial(projectId)
+      } catch (e) {
+        console.log(e)
+      }
+      this.isLoading = true
     },
     constructOptionsConfigId(configures) {
       let options = []
@@ -259,6 +273,7 @@ export default {
     },
   },
   async mounted() {
+    await this.loadSerial(this.$route.params.id)
     await this.loadConfigures(this.$route.params.id)
   }
 }
