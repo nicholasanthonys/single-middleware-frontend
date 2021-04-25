@@ -68,7 +68,11 @@
                         :thickness="2"
                     />
                   </div>
-
+                </div>
+                <div v-else>
+                  <q-btn @click="createDockerContainer" v-if="!isCreatingDockerContainer">Create Docker Container</q-btn>
+                  <q-spinner-hourglass color="light-green" v-else size="3em"
+                                       :thickness="2" />
                 </div>
                 <br/>
                 <q-input
@@ -490,6 +494,9 @@ export default {
 
       /* for toggling start stop */
       isToggling : false,
+
+      /* for creating docker container */
+      isCreatingDockerContainer :false,
     }
   },
   methods: {
@@ -499,16 +506,33 @@ export default {
       storeContainer: 'containers/storeContainer',
       updateContainer: 'containers/updateContainer',
       deleteContainer: 'containers/deleteContainer',
-      actionToggleContainer: 'containers/toggleStartStopContainer'
+      actionToggleContainer: 'containers/toggleStartStopContainer',
+      actionCreateDockerContainer : 'containers/createDockerContainer',
     }),
+    async createDockerContainer(){
+      this.isCreatingDockerContainer = true;
+      try {
+       let response = await this.actionCreateDockerContainer({
+         dbContainerId : this.$route.params.id
+       })
+        console.log("create docker repsonse")
+        console.log(response.data)
+        this.container.containerId = response.data.container_id;
+        this.$q.notify({
+          message: 'Create Docker Container Success.',
+          color: 'secondary'
+        })
+      }catch (err) {
+       console.log(err)
+      }
+      this.isCreatingDockerContainer = false;
+    },
     async toggleContainer() {
       this.isToggling = true;
       try {
         let response = await this.actionToggleContainer({
           dbContainerId: this.$route.params.id,
         })
-        console.log("response is ")
-        console.log(response.data);
         this.container.running = response.data.running
       } catch (e) {
         console.log(e)
