@@ -470,10 +470,8 @@ export default {
       if (this.$route.name === 'Containers.Detail') {
         await this.onUpdateContainer()
 
-
       } else {
         await this.onStoreContainer()
-
       }
     },
     async onStoreContainer() {
@@ -497,7 +495,7 @@ export default {
     },
     async onUpdateContainer() {
       try {
-        let response = await this.updateContainer({
+         await this.updateContainer({
           id: this.$route.params.id,
           name: this.container.name,
           description: this.container.description,
