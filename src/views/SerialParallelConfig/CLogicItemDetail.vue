@@ -152,7 +152,9 @@ export default {
       this.logAfterModify = val;
     },
     onChangeAddHeader(val) {
+      console.log("code add header is ")
       this.codeAddHeader = val;
+      console.log(this.codeAddHeader)
     },
     onChangeAddBody(val) {
       this.codeAddBody = val;

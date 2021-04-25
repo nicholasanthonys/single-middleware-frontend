@@ -2,6 +2,7 @@
   <div>
     <div id="serial">
       <div v-if="propSerial != null">
+        <q-btn @click="openDialogAddSerial">Add More Serial Config</q-btn>
         <q-table
             style="height: 400px"
             title="Serial Projects Config File"
