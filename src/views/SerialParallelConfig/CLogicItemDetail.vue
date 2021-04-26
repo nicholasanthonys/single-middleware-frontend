@@ -77,12 +77,19 @@ export default {
     propCLogic: Object,
     propIndex: Number,
     propMode: String,
-    propConfigId : Number,
+    propConfigId : String,
     propRequestType : String,
   },
   components: {
     Editor,
     EditorRequestResponseConfig
+  },
+  watch : {
+   propCLogic(val){
+     console.log("prop c logic change val is ")
+     console.log(val)
+    this.filLData(val)
+   } ,
   },
   data() {
     return {
@@ -150,7 +157,7 @@ export default {
         })
       } else {
         try {
-          if(this.propRequestType == 'serial'){
+          if(this.propRequestType === 'serial'){
             await this.addCLogicSerial(data)
           }else{
             await this.addCLogicParallel(data)
@@ -159,7 +166,6 @@ export default {
             message: 'Add CLogic Success',
             color: 'secondary'
           })
-          this.$emit('on-clogic-save', {mode: this.propMode, data: data, index: this.propIndex})
 
         } catch (err) {
           console.log(err)

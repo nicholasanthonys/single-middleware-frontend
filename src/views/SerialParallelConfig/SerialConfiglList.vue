@@ -7,7 +7,7 @@
         <q-table
             style="height: 400px"
             title="Serial Projects Config File"
-            :data="configures"
+            :data="serial.configures"
             :columns="columns"
             row-key="index"
             virtual-scroll
@@ -41,7 +41,7 @@
                     v-else
                     size="xs"
                     name="edit"
-                    @click="selectConfigureSerial(props.row, props.rowIndex)"
+                    @click="selectConfigureSerial(props.rowIndex)"
                 />
                 <!--                    @click="$router.push(`/projects/${propProjectId}/serial/${props.row.id}`)"-->
 
@@ -95,7 +95,7 @@
         <q-card-section class="q-pt-none full-height">
           <div class="text-h6">Serial Config</div>
           <ConfigSerialDetail
-              :prop-serial-config="selectedConfigureSerial"
+              :prop-serial-config="serial.configures[index]"
               :configure-options="options"
               :prop-index="index"
               :prop-mode="mode"
@@ -119,7 +119,6 @@ export default {
   computed : {
    ...mapGetters({
      serial : 'serial/getSerial',
-     configures : 'serial/getConfigures'
    })
   },
   data() {
@@ -207,8 +206,8 @@ export default {
       this.dialog = false;
 
     },
-    selectConfigureSerial(conf, index) {
-      this.selectedConfigureSerial = conf
+    selectConfigureSerial( index) {
+      // this.selectedConfigureSerial = this.serial.configures[index]
       this.index = index
       this.mode = 'edit',
           this.dialog = true;
