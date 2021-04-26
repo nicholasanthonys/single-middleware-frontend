@@ -69,7 +69,6 @@
 
 <script>
 import {date} from 'quasar'
-import {decodeToken, getToken} from "../services/common/jwt.service";
 import {mapGetters} from "vuex";
 export default {
   name: 'LayoutDefault',
@@ -82,18 +81,11 @@ export default {
      return  date.formatDate(timeStamp, 'dddd D MMMM')
    }
   },
-  components: {
-  },
-
   data () {
     return {
       leftDrawerOpen:true
     }
   },
-  mounted() {
-    let token = getToken()
-    let decode = decodeToken(token)
-  }
 }
 </script>
 

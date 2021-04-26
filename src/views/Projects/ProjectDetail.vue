@@ -282,7 +282,7 @@ export default {
         configures: val
       }
       try {
-        let response = await this.storeSerial(data)
+        await this.storeSerial(data)
         this.$q.notify({
           message: 'Store Serial Success.',
           color: 'secondary'
