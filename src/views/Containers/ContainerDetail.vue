@@ -515,8 +515,6 @@ export default {
        let response = await this.actionCreateDockerContainer({
          dbContainerId : this.$route.params.id
        })
-        console.log("create docker repsonse")
-        console.log(response.data)
         this.container.containerId = response.data.container_id;
         this.$q.notify({
           message: 'Create Docker Container Success.',

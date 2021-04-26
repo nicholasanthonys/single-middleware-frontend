@@ -209,7 +209,6 @@ export default {
       deleteConfigure : 'configures/deleteConfigure'
     }),
     async onSaveClicked() {
-      console.log("on save clicked triggered")
       if (this.$route.name === 'Configures.Detail') {
         await this.onUpdateConfig()
       } else {
@@ -248,8 +247,6 @@ export default {
     async onStoreConfig() {
       try {
         let data = this.constructData();
-        console.log("data is ")
-        console.log(data)
         let response = await this.storeConfigure(data)
         const {id} = response.data
         this.$q.notify({

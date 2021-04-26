@@ -72,7 +72,6 @@ export default {
       });
     },
     async onSubmit() {
-      console.log("onSubmit triggered")
       // Login
       if (this.mode === "login") {
         await this.login();
@@ -82,7 +81,6 @@ export default {
       }
     },
     async login() {
-      console.log("Do login triggered")
       this.isLoading = true
 
       let credential = {

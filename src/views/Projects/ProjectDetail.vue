@@ -283,8 +283,6 @@ export default {
       }
       try {
         let response = await this.storeSerial(data)
-        console.log("response data is ")
-        console.log(response.data)
         this.$q.notify({
           message: 'Store Serial Success.',
           color: 'secondary'

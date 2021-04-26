@@ -91,11 +91,8 @@ export default {
     }
   },
   mounted() {
-    console.log("mounted triggered")
     let token = getToken()
     let decode = decodeToken(token)
-    console.log("decode token is ")
-    console.log(decode)
   }
 }
 </script>

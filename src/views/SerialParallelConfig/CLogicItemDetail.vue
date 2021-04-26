@@ -86,8 +86,6 @@ export default {
   },
   watch : {
    propCLogic(val){
-     console.log("prop c logic change val is ")
-     console.log(val)
     this.filLData(val)
    } ,
   },
@@ -184,7 +182,6 @@ export default {
       this.rule = val
     },
     onChangeStatusCode(val) {
-      console.log("on change status code triggered  " + val)
       this.statusCode = val;
     },
     onChangeTransform(val) {
@@ -197,9 +194,7 @@ export default {
       this.logAfterModify = val;
     },
     onChangeAddHeader(val) {
-      console.log("code add header is ")
       this.codeAddHeader = val;
-      console.log(this.codeAddHeader)
     },
     onChangeAddBody(val) {
       this.codeAddBody = val;
