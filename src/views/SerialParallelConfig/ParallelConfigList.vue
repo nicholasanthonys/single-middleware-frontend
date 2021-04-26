@@ -1,13 +1,13 @@
 <template>
   <div>
-    <div v-if="propParallel">
-
+    <div v-if="parallel">
+{{parallel}}
       <p>Parallel Config File</p>
       <q-btn @click="onAddSelectedConfig">Add New Parallel Config</q-btn>
       <q-table
           style="height: 400px"
           title="Your Parallel Config File"
-          :data="configures"
+          :data="parallel.configures"
           :columns="configColumns"
           row-key="index"
           virtual-scroll
@@ -51,9 +51,10 @@
       <br/>
 
       <br/>
+      <div v-if="!isLoading">
       <p>Parallel Next Failure Response</p>
       <q-btn @click="onSaveNextFailure">Save Next Failure</q-btn>
-      <EditorRequestResponseConfig config-type="response"
+      <EditorRequestResponseConfig  config-type="response"
                                    :have-log="false"
                                    :prop-status-code="nextFailure.statusCode"
                                    :prop-transform="nextFailure.transform"
@@ -75,6 +76,13 @@
                                    @on-change-delete-header-response="onChangeDeleteHeaderResponse"
                                    @on-change-delete-body-repsonse="onChangeDeleteBodyResponse"
       />
+      </div>
+      <div v-else>
+        <q-spinner
+            color="primary"
+            size="3em"
+        />
+      </div>
       <br/>
       <p>C Logics Parallel</p>
       <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
@@ -82,7 +90,7 @@
       <q-table
           style="height: 400px"
           title="CLogic Parallel"
-          :data="cLogics"
+          :data="parallel.c_logics"
           :columns="cLogicColumns"
           row-key="index"
           virtual-scroll
@@ -194,12 +202,14 @@
 
 <script>
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
-import {mapActions} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 import CLogicItemDetail from "./CLogicItemDetail";
 
 export default {
-  props: {
-    propParallel: Object
+  computed : {
+   ...mapGetters({
+     parallel : 'parallel/getParallel'
+   })
   },
   components: {
     CLogicItemDetail,
@@ -207,8 +217,6 @@ export default {
   },
   data() {
     return {
-      configures: this.propParallel.configures ? this.propParallel.configures : [],
-      cLogics: this.propParallel.c_logics ? this.propParallel.c_logics : [],
       nextFailure: {
         statusCode: '',
         transform: "ToJson",
@@ -288,6 +296,8 @@ export default {
       selectedCLogicIndex: -1,
       maximizedToggle: true,
 
+      isLoading : false,
+
     }
   },
   methods: {
@@ -297,8 +307,19 @@ export default {
       updateSingleConfigParallel: 'parallel/updateSingleConfigParallel',
       storeSingleCLogicParallel: 'parallel/storeSingleCLogicParallel',
       updateSingleCLogicParallel: 'parallel/updateSingleCLogicParallel',
-      storeNextFailureParallel: 'parallel/storeNextFailure'
+      storeNextFailureParallel: 'parallel/storeNextFailure',
+      actionFetchParallel : 'parallel/fetchParallel',
     }),
+    async loadParallel(){
+      this.isLoading = true;
+      try {
+       await this.actionFetchParallel(this.$route.params.id)
+        this.fillDataNextFailure(this.parallel);
+      }catch (e) {
+       console.log(e)
+      }
+      this.isLoading = false;
+    },
 
     async onSaveNextFailure() {
       try {
@@ -332,11 +353,11 @@ export default {
           this.cLogicDialog = true
     },
     async onCLogicSave(val) {
-      const {mode, data, index} = val
+      const {mode, data } = val
 
       if (mode === 'edit') {
         try {
-          let res = await this.updateSingleCLogicParallel({
+           await this.updateSingleCLogicParallel({
             projectId: this.$route.params.id,
             data: data.data,
             rule: data.rule,
@@ -344,9 +365,9 @@ export default {
             response: data.response,
             id: data.id
           })
-          let temp = [...this.cLogics];
-          temp[index] = res.data
-          this.cLogics = temp;
+          // let temp = [...this.cLogics];
+          // temp[index] = res.data
+          // this.cLogics = temp;
           this.$q.notify({
             message: 'Update Parallel CLogic Success.',
             color: 'secondary'
@@ -356,14 +377,14 @@ export default {
         }
       } else {
         try {
-          let res = await this.storeSingleCLogicParallel({
+          await this.storeSingleCLogicParallel({
             projectId: this.$route.params.id,
             data: data.data,
             rule: data.rule,
             nextSuccess: data.next_success,
             response: data.response
           })
-          this.cLogics.push(res.data)
+          // this.cLogics.push(res.data)
           this.$q.notify({
             message: 'Add Parallel CLogic Success.',
             color: 'secondary'
@@ -375,20 +396,18 @@ export default {
       this.cLogicDialog = false
     },
     async onConfigFileSave() {
-      console.log("mode i s")
-      console.log(this.mode)
       if (this.mode === 'edit') {
         try {
-          let temp = [...this.configures]
+          // let temp = [...this.configures]
           await this.updateSingleConfigParallel({
             projectId: this.$route.params.id,
-            id: temp[this.selectedConfigIndex].id,
+            id: this.parallel.configures  [this.selectedConfigIndex].id,
             configureId: this.selectedConfigId,
             alias: this.alias
           })
-          temp[this.selectedConfigIndex].configure_id = this.selectedConfigId
-          temp[this.selectedConfigIndex].alias = this.alias
-          this.configures = temp
+          // temp[this.selectedConfigIndex].configure_id = this.selectedConfigId
+          // temp[this.selectedConfigIndex].alias = this.alias
+          // this.configures = temp
           this.$q.notify({
             message: 'Update Parallel Config Success.',
             color: 'secondary'
@@ -399,17 +418,17 @@ export default {
 
       } else {
         try {
-          let response = await this.storeSingleConfigParallel({
+          await this.storeSingleConfigParallel({
             projectId: this.$route.params.id,
             configureId: this.selectedConfigId,
             alias: this.alias
           })
-          const {id, configure_id, alias} = response.data
-          this.configures.push({
-            id,
-            configure_id,
-            alias,
-          })
+          // const {id, configure_id, alias} = response.data
+          // this.configures.push({
+          //   id,
+          //   configure_id,
+          //   alias,
+          // })
           this.$q.notify({
             message: 'Add Parallel Config Success.',
             color: 'secondary'
@@ -487,11 +506,7 @@ export default {
       this.response.codeDeleteBody = val
     },
     fillDataNextFailure(parallel) {
-      console.log("parallel i s")
-      console.log(parallel)
       if (parallel && parallel.next_failure) {
-        console.log("parallel next failure is ")
-        console.log(parallel.next_failure)
         const {transform, adds, modifies, deletes, status_code} = parallel.next_failure
         this.nextFailure = {
           statusCode: status_code,
@@ -508,9 +523,10 @@ export default {
     }
   },
   created() {
-    this.fillDataNextFailure(this.propParallel);
+
   },
   async mounted() {
+    await this.loadParallel();
     await this.loadConfigures(this.$route.params.id)
   }
 }

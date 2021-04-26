@@ -141,8 +141,6 @@ const serial = {
 
     mutations: {
         setSerial(state, data) {
-            console.log("set serial triggered")
-            console.log(serial)
             state.serial = data
         },
         addSingleCLogicSerial(state, data){
@@ -155,19 +153,13 @@ const serial = {
         updateSingleCLogicSerial(state,data){
             const { configId, id, cLogic} = data
             let configIndex = state.serial.configures.findIndex(e => e.id === configId) ;
-            console.log("config index : ")
-            console.log(configIndex)
             if(configIndex >= 0){
 
                 let cLogicIndex = state.serial.configures[configIndex].c_logics.findIndex(c => c.id === id);
-                console.log("clogic index")
-                console.log(cLogicIndex)
                 if(cLogicIndex >=0){
                     let temp  = [...state.serial.configures];
                     temp[configIndex].c_logics[cLogicIndex] = cLogic
                     state.serial.configures = temp;
-                    console.log("updated c logics is ")
-                    console.log(state.serial.configures[configIndex].c_logics[cLogicIndex])
                 }
             }
         },
