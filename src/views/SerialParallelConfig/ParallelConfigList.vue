@@ -398,16 +398,12 @@ export default {
     async onConfigFileSave() {
       if (this.mode === 'edit') {
         try {
-          // let temp = [...this.configures]
           await this.updateSingleConfigParallel({
             projectId: this.$route.params.id,
             id: this.parallel.configures  [this.selectedConfigIndex].id,
             configureId: this.selectedConfigId,
             alias: this.alias
           })
-          // temp[this.selectedConfigIndex].configure_id = this.selectedConfigId
-          // temp[this.selectedConfigIndex].alias = this.alias
-          // this.configures = temp
           this.$q.notify({
             message: 'Update Parallel Config Success.',
             color: 'secondary'
@@ -423,12 +419,7 @@ export default {
             configureId: this.selectedConfigId,
             alias: this.alias
           })
-          // const {id, configure_id, alias} = response.data
-          // this.configures.push({
-          //   id,
-          //   configure_id,
-          //   alias,
-          // })
+
           this.$q.notify({
             message: 'Add Parallel Config Success.',
             color: 'secondary'
