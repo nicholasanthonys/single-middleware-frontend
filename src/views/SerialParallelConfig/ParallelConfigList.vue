@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="parallel">
-{{parallel}}
+
       <p>Parallel Config File</p>
       <q-btn @click="onAddSelectedConfig">Add New Parallel Config</q-btn>
       <q-table
