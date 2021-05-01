@@ -69,11 +69,10 @@
                     />
                   </div>
                 </div>
-                <div v-else>
-                  <q-btn @click="createDockerContainer" v-if="!isCreatingDockerContainer">Create Docker Container</q-btn>
+
+                  <q-btn @click="createDockerContainer" v-if="!isCreatingDockerContainer">{{container.containerId ? "Recreate" : "Create"}} Docker Container</q-btn>
                   <q-spinner-hourglass color="light-green" v-else size="3em"
                                        :thickness="2" />
-                </div>
                 <br/>
                 <q-input
 
@@ -308,8 +307,8 @@
                       <q-select v-model="dataInputRoute.method" :options="method" label="Select REST Method"
                                 style="max-width: 300px"/>
 
-                      <q-select v-model="dataInputRoute.projectId" :options="container.projectIds"
-                                label="Select Configuration Id"
+                      <q-select v-model="dataInputRoute.projectId" :options="projects"
+                                label="Select Project Id"
                                 style="max-width: 300px"/>
                       <br/>
 
@@ -516,6 +515,7 @@ export default {
          dbContainerId : this.$route.params.id
        })
         this.container.containerId = response.data.container_id;
+       this.container.running = false
         this.$q.notify({
           message: 'Create Docker Container Success.',
           color: 'secondary'
