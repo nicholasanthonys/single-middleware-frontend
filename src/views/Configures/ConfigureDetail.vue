@@ -66,8 +66,14 @@
                                              @on-change-log-after-modify-request="onChangeLogAfterModifyRequest"
                                              @on-change-add-header-request="onChangeAddHeaderRequest"
                                              @on-change-add-body-request="onChangeAddBodyRequest"
+                                             @on-change-add-query-request="onChangeAddQueryRequest"
+                                             @on-change-add-param-request="onChangeAddParamRequest"
+
                                              @on-change-modify-header-request="onChangeModifyHeaderRequest"
                                              @on-change-modify-body-request="onChangeModifyBodyRequest"
+                                             @on-change-modify-query-request="onChangeModifyQueryRequest"
+                                             @on-change-modify-param-request="onChangeModifyParamRequest "
+
                                              @on-change-delete-header-request="onChangeDeleteHeaderRequest"
                                              @on-change-delete-body-request="onChangeDeleteBodyRequest"
                                              @on-change-method-request="onChangeMethodRequest"
