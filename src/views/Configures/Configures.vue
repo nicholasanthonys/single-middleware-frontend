@@ -41,10 +41,16 @@
                   :props="props"
               >
 
-                <p v-if="col.name !== 'action' " >{{ col.value }}</p>
-
+                <p v-if="col.name !== 'action' && col.name !== 'description' " >{{ col.value }} </p>
+                <div v-if="col.name === 'description'">
+                  <p>{{ col.value }}
+                    <q-tooltip anchor="bottom middle" self="top middle" :offset="[10, 10]">
+                      {{ props.row.description }}
+                    </q-tooltip>
+                  </p>
+                </div>
                 <q-icon
-                    v-else
+                    v-if="col.name === 'action'"
                     size="xs"
                     name="edit"
                     @click="$router.push({name : 'Configures.Detail', params : {
@@ -90,6 +96,14 @@ export default {
           label: 'id',
           field: row => row.id,
           align: 'left',
+        },
+        {
+          name: 'description',
+          required: false,
+          label: 'Description',
+          align: 'left',
+          field: row => row.description,
+          format: val => `${val ? val.substring(0, 30) + '...' : '-'}`,
         },
         {
           name: 'action',
