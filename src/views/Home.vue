@@ -47,6 +47,29 @@
             </q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple @click="dialogLogOut = true" >
+            <q-item-section avatar>
+              <q-icon name="logout" />
+            </q-item-section>
+
+            <q-item-section>
+             Logout
+              <q-dialog v-model="dialogLogOut" persistent>
+                <q-card>
+                  <q-card-section class="row items-center">
+                    <q-avatar icon="logout" color="primary" text-color="white" />
+                    <span class="q-ml-sm">Are you sure want to logout ? </span>
+                  </q-card-section>
+
+                  <q-card-actions align="right">
+                    <q-btn flat label="Cancel" color="primary" v-close-popup />
+                    <q-btn flat label="LogOut" color="primary" v-close-popup @click="logOut"/>
+                  </q-card-actions>
+                </q-card>
+              </q-dialog>
+            </q-item-section>
+          </q-item>
+
 
         </q-list>
       </q-scroll-area>
@@ -69,7 +92,7 @@
 
 <script>
 import {date} from 'quasar'
-import {mapGetters} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 export default {
   name: 'LayoutDefault',
   computed : {
@@ -83,9 +106,18 @@ export default {
   },
   data () {
     return {
-      leftDrawerOpen:true
+      leftDrawerOpen:true,
+      dialogLogOut : false,
     }
   },
+  methods : {
+    ...mapActions({
+      actionLogOut : 'auth/logout'
+    }),
+    logOut (){
+     this.actionLogOut('Login') ;
+    }
+  }
 }
 </script>
 
