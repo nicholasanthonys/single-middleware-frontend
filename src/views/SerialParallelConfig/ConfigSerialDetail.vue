@@ -77,7 +77,7 @@
                 <q-table
                     style="height: 400px"
                     title="CLogic List"
-                    :data="serial.configures[propIndex].c_logics"
+                    :data="serial.configures[propIndex] ? serial.configures[propIndex].c_logics : [] "
                     :columns="cLogicTableColumns"
                     row-key="index"
                     virtual-scroll
@@ -128,6 +128,7 @@
       </div>
     </div>
     <q-dialog
+        v-if="serial.configures[propIndex] "
         v-model="dialog"
         persistent
         :maximized="maximizedToggle"
@@ -150,9 +151,10 @@
         </q-bar>
 
         <q-card-section class="q-pt-none">
+
           <div class="text-h6">CLogic</div>
           <CLogicItemDetail :prop-c-logic=" serial.configures[propIndex].c_logics[selectedIndex]" @on-clogic-save="onCLogicSave" :prop-mode="mode"
-                            :prop-index="selectedIndex" :prop-config-id="propSerialConfig.id" prop-request-type="serial" v-if="selectedIndex >= 0"/>
+                            :prop-index="selectedIndex" :prop-config-id="propSerialConfig.id" prop-request-type="serial"/>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -165,7 +167,7 @@
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 
 import {mapActions, mapGetters} from "vuex";
-import CLogicItemDetail from "./CLogicItemDetail";
+ import CLogicItemDetail from "./CLogicItemDetail";
 
 export default {
   props: {
@@ -176,7 +178,7 @@ export default {
     propConfigureId: String,
   },
   components: {
-    CLogicItemDetail,
+     CLogicItemDetail,
     EditorRequestResponseConfig
   },
   computed: {
