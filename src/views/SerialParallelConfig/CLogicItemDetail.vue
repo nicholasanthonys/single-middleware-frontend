@@ -38,7 +38,12 @@
 
       <q-tab-panel name="response">
         <div class="text-h6">Response</div>
-        <EditorRequestResponseConfig config-type="response"
+        <q-toggle
+            v-model="enableResponse"
+            label="Enable Response"
+        />
+        <EditorRequestResponseConfig v-if="enableResponse"
+                                     config-type="response"
                                      :prop-status-code="statusCode"
                                      :prop-transform="transform"
                                      :prop-log-after-modify="logAfterModify"
@@ -71,26 +76,28 @@
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 import Editor from "../../components/common/Editor";
 import {mapActions} from "vuex";
+import snakecaseKeys from "snakecase-keys";
 
 export default {
   props: {
     propCLogic: Object,
     propIndex: Number,
     propMode: String,
-    propConfigId : String,
-    propRequestType : String,
+    propConfigId: String,
+    propRequestType: String,
   },
   components: {
     Editor,
     EditorRequestResponseConfig
   },
-  watch : {
-   propCLogic(val){
-    this.filLData(val)
-   } ,
+  watch: {
+    propCLogic(val) {
+      this.filLData(val)
+    },
   },
   data() {
     return {
+      enableResponse: false,
       tab: 'data',
       id: null,
       nextSuccess: null,
@@ -115,49 +122,53 @@ export default {
     ...mapActions({
       addCLogicSerial: 'serial/storeSingleCLogic',
       updateCLogicSerial: 'serial/updateSingleCLogic',
-      addCLogicParallel : 'parallel/storeSingleCLogicParallel',
-      updateCLogicParallel : 'parallel/updateSingleCLogicParallel',
+      addCLogicParallel: 'parallel/storeSingleCLogicParallel',
+      updateCLogicParallel: 'parallel/updateSingleCLogicParallel',
     }),
     async onSaveClicked() {
       let data = {
         projectId: this.$route.params.id,
-        configId : this.propConfigId,
+        configId: this.propConfigId,
         data: this.data ? this.data : {},
         rule: this.rule ? this.rule : {},
         nextSuccess: this.nextSuccess,
-        response: {
+      }
+      console.log("rule is")
+      console.log(snakecaseKeys(this.rule, { deep : true, exclude : ["=="]}));
+      if(this.enableResponse){
+        data.response = {
           transform: this.transform,
-          status_code: this.statusCode,
-          adds: {
+              status_code: this.statusCode,
+              adds: {
             header: this.codeAddHeader ? this.codeAddHeader : {},
-            body: this.codeAddBody ? this.codeAddBody : {},
+                body: this.codeAddBody ? this.codeAddBody : {},
           },
           modifies: {
             header: this.codeModifyHeader ? this.codeModifyHeader : {},
-            body: this.codeModifyBody ? this.codeModifyBody : {}
+                body: this.codeModifyBody ? this.codeModifyBody : {}
           },
           deletes: {
             header: this.codeDeleteHeader ? this.codeDeleteHeader : [],
-            body: this.codeDeleteBody ? this.codeDeleteBody : []
+                body: this.codeDeleteBody ? this.codeDeleteBody : []
           }
         }
       }
       if (this.propMode === 'edit') {
         data.id = this.id
-        if(this.propRequestType === 'serial'){
+        if (this.propRequestType === 'serial') {
           await this.updateCLogicSerial(data)
-        }else{
+        } else {
           await this.updateCLogicParallel(data)
         }
         this.$q.notify({
-        message: 'Update CLogic Success',
+          message: 'Update CLogic Success',
           color: 'secondary'
         })
       } else {
         try {
-          if(this.propRequestType === 'serial'){
+          if (this.propRequestType === 'serial') {
             await this.addCLogicSerial(data)
-          }else{
+          } else {
             await this.addCLogicParallel(data)
           }
           this.$q.notify({
@@ -218,7 +229,7 @@ export default {
       this.nextSuccess = next_success
       this.rule = rule
       if (response) {
-
+      this.enableResponse = true
         const {adds, modifies, deletes, transform, status_code} = response
         this.statusCode = status_code
         this.transform = transform
