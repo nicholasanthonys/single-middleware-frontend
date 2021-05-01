@@ -29,8 +29,6 @@
 
           <div class="column">
             <div class="col-1"   v-if="configType ==='response' ">
-              prop statu scod{{propStatusCode}}
-              data statu scode {{statusCode}}
               <q-input
                   :value="statusCode"
                   type="number"
