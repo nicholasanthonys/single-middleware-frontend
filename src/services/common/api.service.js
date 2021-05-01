@@ -1,6 +1,7 @@
 import axios from 'axios'
 import JwtService from './jwt.service'
 import snakecaseKeys from 'snakecase-keys'
+import {operators} from "../../util/excludeSnakeCaseKeyOperator";
 import * as qs from 'qs'
 
 const ApiService = {
@@ -24,7 +25,7 @@ const ApiService = {
     get(resource, params ) {
         return axios.get(`${resource}`, {
             params:
-                params !== undefined ? snakecaseKeys(params, { deep: true }) : params,
+                params !== undefined ? snakecaseKeys(params, { deep: true , exclude : operators}) : params,
             paramsSerializer: params => {
                 return qs.stringify(params, { arrayFormat: 'brackets' })
             },
@@ -35,7 +36,7 @@ const ApiService = {
 post(resource, body, noSnakeCase) {
         return axios.post(
             `${resource}`,
-            !noSnakeCase ? snakecaseKeys(body, { deep: true }) : body,
+            !noSnakeCase ? snakecaseKeys(body, { deep: true , exclude :operators}) : body,
             {
 
             }
@@ -49,7 +50,7 @@ post(resource, body, noSnakeCase) {
     put(resource, body, noSnakeCase) {
         return axios.put(
             `${resource}`,
-            !noSnakeCase ? snakecaseKeys(body, { deep: true }) : body,
+            !noSnakeCase ? snakecaseKeys(body, { deep: true , exclude : operators}) : body,
             {
 
             }
@@ -58,7 +59,7 @@ post(resource, body, noSnakeCase) {
 
     delete(resource, params) {
         return axios.delete(resource, {
-            params: params ? snakecaseKeys(params, { deep: true }) : null,
+            params: params ? snakecaseKeys(params, { deep: true, exclude : operators }) : null,
 
         })
     },
