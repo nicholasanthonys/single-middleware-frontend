@@ -70,9 +70,11 @@
                   </div>
                 </div>
 
-                  <q-btn @click="createDockerContainer" v-if="!isCreatingDockerContainer">{{container.containerId ? "Recreate" : "Create"}} Docker Container</q-btn>
-                  <q-spinner-hourglass color="light-green" v-else size="3em"
-                                       :thickness="2" />
+                <q-btn @click="createDockerContainer" v-if="!isCreatingDockerContainer">
+                  {{ container.containerId ? "Recreate" : "Create" }} Docker Container
+                </q-btn>
+                <q-spinner-hourglass color="light-green" v-else size="3em"
+                                     :thickness="2"/>
                 <br/>
                 <q-input
 
@@ -307,7 +309,7 @@
                       <q-select v-model="dataInputRoute.method" :options="method" label="Select REST Method"
                                 style="max-width: 300px"/>
 
-                      <q-select v-model="dataInputRoute.projectId" :options="projects"
+                      <q-select v-model="dataInputRoute.projectId" :options="container.projectIds"
                                 label="Select Project Id"
                                 style="max-width: 300px"/>
                       <br/>
@@ -315,7 +317,8 @@
                     </q-card-section>
 
                     <q-card-actions align="right" class="bg-white text-teal">
-                      <q-btn flat label="Add" v-close-popup @click="addRoute"/>
+                      <q-btn flat label="Add" v-close-popup @click="addRoute" v-if="formModeRoute  === 'add' "/>
+                      <q-btn flat label="Edit" v-close-popup @click="editRoute" v-else />
                     </q-card-actions>
                   </q-card>
                 </q-dialog>
@@ -450,6 +453,7 @@ export default {
       type: ['serial', 'parallel'],
       routerDialog: false,
       dataInputRoute: {
+        id : null,
         path: '',
         type: '',
         method: '',
@@ -492,10 +496,13 @@ export default {
       dialogDelete: false,
 
       /* for toggling start stop */
-      isToggling : false,
+      isToggling: false,
 
       /* for creating docker container */
-      isCreatingDockerContainer :false,
+      isCreatingDockerContainer: false,
+
+      /* form model for route */
+      formModeRoute: 'add'
     }
   },
   methods: {
@@ -506,22 +513,22 @@ export default {
       updateContainer: 'containers/updateContainer',
       deleteContainer: 'containers/deleteContainer',
       actionToggleContainer: 'containers/toggleStartStopContainer',
-      actionCreateDockerContainer : 'containers/createDockerContainer',
+      actionCreateDockerContainer: 'containers/createDockerContainer',
     }),
-    async createDockerContainer(){
+    async createDockerContainer() {
       this.isCreatingDockerContainer = true;
       try {
-       let response = await this.actionCreateDockerContainer({
-         dbContainerId : this.$route.params.id
-       })
+        let response = await this.actionCreateDockerContainer({
+          dbContainerId: this.$route.params.id
+        })
         this.container.containerId = response.data.container_id;
-       this.container.running = false
+        this.container.running = false
         this.$q.notify({
           message: 'Create Docker Container Success.',
           color: 'secondary'
         })
-      }catch (err) {
-       console.log(err)
+      } catch (err) {
+        console.log(err)
       }
       this.isCreatingDockerContainer = false;
     },
@@ -602,6 +609,20 @@ export default {
       })
       this.clearDataInputRoute()
     },
+    editRoute(){
+      let index = this.container.routers.findIndex(e => e.id === this.dataInputRoute.id );
+      if(index >= 0){
+        let temp = [...this.container.routers]
+        temp[index] = {
+          id : this.dataInputRoute.id,
+          path: this.dataInputRoute.path,
+          method : this.dataInputRoute.method,
+          type : this.dataInputRoute.type,
+          project_id : this.dataInputRoute.projectId
+        }
+        this.container.routers = temp;
+      }
+    },
     clearDataInputRoute() {
       this.dataInputRoute = {
         method: '',
@@ -611,11 +632,14 @@ export default {
       }
     },
     openAddRouteDialog() {
-      this.clearDataInputRoute() ,
-          this.routerDialog = true;
+      this.clearDataInputRoute()
+      this.formModeRoute = 'add'
+      this.routerDialog = true;
     },
     openEditRouteDialog(route) {
+      this.formModeRoute = 'edit';
       this.dataInputRoute = {
+        id : route.id,
         method: route.method,
         projectId: route.project_id,
         type: route.type,
