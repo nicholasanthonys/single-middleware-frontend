@@ -439,12 +439,12 @@ export default {
         name: this.name,
         description: this.description,
         base: {
-          projectMaxCircular: this.maxCircular,
-          circularResponse: {
-            statusCode: this.statusCode,
+          project_max_circular: this.maxCircular,
+          circular_response: {
+            status_code: this.statusCode,
             transform: this.transform,
-            logBeforeModify: this.logBeforeModify ? this.logBeforeModify : {},
-            logAfterModify: this.logAfterModify ? this.logAfterModify : {},
+            log_before_modify: this.logBeforeModify ? this.logBeforeModify : {},
+            log_after_modify: this.logAfterModify ? this.logAfterModify : {},
             adds: {
               header: this.codeAddHeader,
               body: this.codeAddBody
