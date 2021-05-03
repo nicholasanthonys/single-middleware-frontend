@@ -3,52 +3,59 @@
     <div id="serial">
 
       <div v-if="serial!= null">
-        <q-btn @click="openDialogAddSerial">Add More Serial Config</q-btn>
-        <q-table
-            style="height: 400px"
-            title="Serial Projects Config File"
-            :data="serial.configures"
-            :columns="columns"
-            row-key="index"
-            virtual-scroll
-            :pagination.sync="pagination"
-            :rows-per-page-options="[0]"
-        >
+        <div class="column" style="height: 500px">
+          <div class="col-1">
+            <q-btn @click="openDialogAddSerial">Add More Serial Config</q-btn>
+          </div>
+          <div class="col">
+            <q-table
+                style="height: 400px"
+                title="Serial Projects Config File"
+                :data="serial.configures"
+                :columns="columns"
+                row-key="index"
+                virtual-scroll
+                :pagination.sync="pagination"
+                :rows-per-page-options="[0]"
+            >
 
-          <template v-slot:header="props">
-            <q-tr :props="props">
-              <q-th
-                  v-for="col in props.cols"
-                  :key="col.name"
-                  :props="props"
-              >
-                {{ col.label }}
-              </q-th>
-            </q-tr>
-          </template>
-          <template v-slot:body="props">
-            <q-tr :props="props">
+              <template v-slot:header="props">
+                <q-tr :props="props">
+                  <q-th
+                      v-for="col in props.cols"
+                      :key="col.name"
+                      :props="props"
+                  >
+                    {{ col.label }}
+                  </q-th>
+                </q-tr>
+              </template>
+              <template v-slot:body="props">
+                <q-tr :props="props">
 
-              <q-td
-                  v-for="col in props.cols"
-                  :key="col.name"
-                  :props="props"
-              >
+                  <q-td
+                      v-for="col in props.cols"
+                      :key="col.name"
+                      :props="props"
+                  >
 
-                <p v-if="col.name !=='action'">{{ col.value }} - {{props.rowIndex}}</p>
+                    <p v-if="col.name !=='action'">{{ col.value }} - {{props.rowIndex}}</p>
 
-                <q-icon
-                    v-else
-                    size="xs"
-                    name="edit"
-                    @click="selectConfigureSerial(props.rowIndex)"
-                />
-                <!--                    @click="$router.push(`/projects/${propProjectId}/serial/${props.row.id}`)"-->
+                    <q-icon
+                        v-else
+                        size="xs"
+                        name="edit"
+                        @click="selectConfigureSerial(props.rowIndex)"
+                    />
+                    <!--                    @click="$router.push(`/projects/${propProjectId}/serial/${props.row.id}`)"-->
 
-              </q-td>
-            </q-tr>
-          </template>
-        </q-table>
+                  </q-td>
+                </q-tr>
+              </template>
+            </q-table>
+          </div>
+        </div>
+
 
       </div>
       <div v-else>
@@ -125,6 +132,7 @@ export default {
     return {
       dialog: false,
       maximizedToggle: true,
+      loop : null,
       codeAddHeader: {},
       codeAddBody: {},
       codeModifyHeader: {},
@@ -179,32 +187,7 @@ export default {
 
     },
     onConfirmConfigSerial() {
-      // const {index, data} = val
-      // const {id, configure_id, alias, c_logics, next_failure, mode} = data
-      // if (mode === 'edit') {
-      //   let temp = [...this.configures]
-      //   temp[index] = {
-      //     id,
-      //     configure_id,
-      //     alias,
-      //     c_logics,
-      //     next_failure
-      //
-      //   }
-      //   this.configures = [...temp];
-      //   // this.configures  =temp
-      //   this.$emit('on-confirm-serial-config', this.configures)
-      // }else {
-      //   this.configures.push({
-      //     configure_id,
-      //     alias,
-      //     c_logics,
-      //     next_failure
-      //   })
-      //   this.$emit('on-confirm-serial-config', this.configures)
-      // }
       this.dialog = false;
-
     },
     selectConfigureSerial( index) {
       // this.selectedConfigureSerial = this.serial.configures[index]
