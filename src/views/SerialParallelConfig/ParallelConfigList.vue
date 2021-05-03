@@ -2,80 +2,92 @@
   <div>
     <div v-if="parallel">
 
-      <p>Parallel Config File</p>
-      <q-btn @click="onAddSelectedConfig">Add New Parallel Config</q-btn>
-      <q-table
-          style="height: 400px"
-          title="Your Parallel Config File"
-          :data="parallel.configures"
-          :columns="configColumns"
-          row-key="index"
-          virtual-scroll
-          :pagination.sync="configPagination"
-          :rows-per-page-options="[0]"
-      >
+      <p class="text-h5">Parallel Config File</p>
+      <div class="column" style="height: 500px">
+        <div class="col-1">
+          <q-btn @click="onAddSelectedConfig">Add New Parallel Config</q-btn>
+        </div>
+        <div class="col">
+          <q-table
+              style="height: 400px"
+              title="Your Parallel Config File"
+              :data="parallel.configures"
+              :columns="configColumns"
+              row-key="index"
+              virtual-scroll
+              :pagination.sync="configPagination"
+              :rows-per-page-options="[0]"
+          >
 
-        <template v-slot:header="props">
-          <q-tr :props="props">
-            <q-th
-                v-for="col in props.cols"
-                :key="col.name"
-                :props="props"
-            >
-              {{ col.label }}
-            </q-th>
-          </q-tr>
-        </template>
-        <template v-slot:body="props">
-          <q-tr :props="props">
+            <template v-slot:header="props">
+              <q-tr :props="props">
+                <q-th
+                    v-for="col in props.cols"
+                    :key="col.name"
+                    :props="props"
+                >
+                  {{ col.label }}
+                </q-th>
+              </q-tr>
+            </template>
+            <template v-slot:body="props">
+              <q-tr :props="props">
 
-            <q-td
-                v-for="col in props.cols"
-                :key="col.name"
-                :props="props"
-            >
+                <q-td
+                    v-for="col in props.cols"
+                    :key="col.name"
+                    :props="props"
+                >
 
-              <p v-if=" col.name !== 'action' ">{{ col.value }}</p>
+                  <p v-if=" col.name !== 'action' ">{{ col.value }}</p>
 
-              <q-icon
-                  v-else
-                  size="xs"
-                  name="edit"
-                  @click="onSelectedConfig(props.row, props.rowIndex)"
-              />
+                  <q-icon
+                      v-else
+                      size="xs"
+                      name="edit"
+                      @click="onSelectedConfig(props.row, props.rowIndex)"
+                  />
 
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
-      <br/>
+                </q-td>
+              </q-tr>
+            </template>
+          </q-table>
+        </div>
+      </div>
 
-      <br/>
       <div v-if="!isLoading">
-      <p>Parallel Next Failure Response</p>
-      <q-btn @click="onSaveNextFailure">Save Next Failure</q-btn>
-      <EditorRequestResponseConfig  config-type="response"
-                                   :have-log="false"
-                                   :prop-status-code="nextFailure.statusCode"
-                                   :prop-transform="nextFailure.transform"
-                                   :prop-log-after-modify="nextFailure.logAfterModify"
-                                   :prop-log-before-modify="nextFailure.logBeforeModify"
-                                   :prop-code-add-header="nextFailure.codeAddHeader"
-                                   :prop-code-add-body="nextFailure.codeAddBody"
-                                   :prop-code-modify-header="nextFailure.codeModifyHeader"
-                                   :prop-code-modify-body="nextFailure.codeModifyBody"
-                                   :prop-code-delete-header="nextFailure.codeDeleteHeader"
-                                   :prop-code-delete-body="nextFailure.codeDeleteBody"
+        <p class="text-h5">Parallel Next Failure Response</p>
+        <div class="column" style="height: 700px">
+          <div class="col-1">
+            <q-btn @click="onSaveNextFailure">Save Next Failure</q-btn>
+          </div>
+          <div class="col">
+            <EditorRequestResponseConfig config-type="response"
+                                         :have-log="false"
 
-                                   @on-change-status-code-response="onChangeStatusCodeResponse"
-                                   @on-change-transform-response="onChangeTransformResponse"
-                                   @on-change-add-header-response="onChangeAddHeaderResponse"
-                                   @on-change-add-body-response="onChangeAddBodyResponse"
-                                   @on-change-modify-header-response="onChangeModifyHeaderResponse"
-                                   @on-change-modify-body-response="onChangeModifyBodyResponse"
-                                   @on-change-delete-header-response="onChangeDeleteHeaderResponse"
-                                   @on-change-delete-body-repsonse="onChangeDeleteBodyResponse"
-      />
+                                         :prop-status-code="nextFailure.statusCode"
+                                         :prop-transform="nextFailure.transform"
+                                         :prop-log-after-modify="nextFailure.logAfterModify"
+                                         :prop-log-before-modify="nextFailure.logBeforeModify"
+                                         :prop-code-add-header="nextFailure.codeAddHeader"
+                                         :prop-code-add-body="nextFailure.codeAddBody"
+                                         :prop-code-modify-header="nextFailure.codeModifyHeader"
+                                         :prop-code-modify-body="nextFailure.codeModifyBody"
+                                         :prop-code-delete-header="nextFailure.codeDeleteHeader"
+                                         :prop-code-delete-body="nextFailure.codeDeleteBody"
+
+                                         @on-change-status-code-response="onChangeStatusCodeResponse"
+                                         @on-change-transform-response="onChangeTransformResponse"
+                                         @on-change-add-header-response="onChangeAddHeaderResponse"
+                                         @on-change-add-body-response="onChangeAddBodyResponse"
+                                         @on-change-modify-header-response="onChangeModifyHeaderResponse"
+                                         @on-change-modify-body-response="onChangeModifyBodyResponse"
+                                         @on-change-delete-header-response="onChangeDeleteHeaderResponse"
+                                         @on-change-delete-body-repsonse="onChangeDeleteBodyResponse"
+            />
+          </div>
+        </div>
+
       </div>
       <div v-else>
         <q-spinner
@@ -83,61 +95,68 @@
             size="3em"
         />
       </div>
-      <br/>
-      <p>C Logics Parallel</p>
-      <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
 
-      <q-table
-          style="height: 400px"
-          title="CLogic Parallel"
-          :data="parallel.c_logics"
-          :columns="cLogicColumns"
-          row-key="index"
-          virtual-scroll
-          :pagination.sync="cLogicPagination"
-          :rows-per-page-options="[0]"
-      >
+      <p class="text-h5">C Logics Parallel</p>
+      <div class="column" style="height: 500px">
+        <div class="col-1">
+          <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
+        </div>
+        <div class="col">
+          <q-table
+              style="height: 400px"
+              title="CLogic Parallel"
+              :data="parallel.c_logics"
+              :columns="cLogicColumns"
+              row-key="index"
+              virtual-scroll
+              :pagination.sync="cLogicPagination"
+              :rows-per-page-options="[0]"
+          >
 
-        <template v-slot:header="props">
-          <q-tr :props="props">
-            <q-th
-                v-for="col in props.cols"
-                :key="col.name"
-                :props="props"
-            >
-              {{ col.label }}
-            </q-th>
-          </q-tr>
-        </template>
-        <template v-slot:body="props">
-          <q-tr :props="props">
+            <template v-slot:header="props">
+              <q-tr :props="props">
+                <q-th
+                    v-for="col in props.cols"
+                    :key="col.name"
+                    :props="props"
+                >
+                  {{ col.label }}
+                </q-th>
+              </q-tr>
+            </template>
+            <template v-slot:body="props">
+              <q-tr :props="props">
 
-            <q-td
-                v-for="col in props.cols"
-                :key="col.name"
-                :props="props"
-            >
+                <q-td
+                    v-for="col in props.cols"
+                    :key="col.name"
+                    :props="props"
+                >
 
-              <p v-if="col.name !=='description' && col.name !== 'action' ">{{ col.value }}</p>
-              <div v-if="col.name === 'description'">
-                <p>{{ col.value }}
-                  <q-tooltip anchor="bottom middle" self="top middle" :offset="[10, 10]">
-                    {{ props.row.description }}
-                  </q-tooltip>
-                </p>
-              </div>
-              <q-icon
-                  v-if="col.name==='action'"
-                  size="xs"
-                  name="edit"
-                  @click="selectCLogic(props.row, props.rowIndex)"
+                  <p v-if="col.name !=='description' && col.name !== 'action' ">{{ col.value }}</p>
+                  <div v-if="col.name === 'description'">
+                    <p>{{ col.value }}
+                      <q-tooltip anchor="bottom middle" self="top middle" :offset="[10, 10]">
+                        {{ props.row.description }}
+                      </q-tooltip>
+                    </p>
+                  </div>
+                  <q-icon
+                      v-if="col.name==='action'"
+                      size="xs"
+                      name="edit"
+                      @click="selectCLogic(props.row, props.rowIndex)"
 
-              />
+                  />
 
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
+                </q-td>
+              </q-tr>
+            </template>
+          </q-table>
+        </div>
+      </div>
+
+
       <!-- Parallel Config Dialog -->
       <q-dialog v-model="bar" persistent>
         <q-card style="width: 700px; max-width: 80vw;">
@@ -206,10 +225,10 @@ import {mapActions, mapGetters} from "vuex";
 import CLogicItemDetail from "./CLogicItemDetail";
 
 export default {
-  computed : {
-   ...mapGetters({
-     parallel : 'parallel/getParallel'
-   })
+  computed: {
+    ...mapGetters({
+      parallel: 'parallel/getParallel'
+    })
   },
   components: {
     CLogicItemDetail,
@@ -296,7 +315,7 @@ export default {
       selectedCLogicIndex: -1,
       maximizedToggle: true,
 
-      isLoading : false,
+      isLoading: false,
 
     }
   },
@@ -308,15 +327,15 @@ export default {
       storeSingleCLogicParallel: 'parallel/storeSingleCLogicParallel',
       updateSingleCLogicParallel: 'parallel/updateSingleCLogicParallel',
       storeNextFailureParallel: 'parallel/storeNextFailure',
-      actionFetchParallel : 'parallel/fetchParallel',
+      actionFetchParallel: 'parallel/fetchParallel',
     }),
-    async loadParallel(){
+    async loadParallel() {
       this.isLoading = true;
       try {
-       await this.actionFetchParallel(this.$route.params.id)
+        await this.actionFetchParallel(this.$route.params.id)
         this.fillDataNextFailure(this.parallel);
-      }catch (e) {
-       console.log(e)
+      } catch (e) {
+        console.log(e)
       }
       this.isLoading = false;
     },
@@ -353,11 +372,11 @@ export default {
           this.cLogicDialog = true
     },
     async onCLogicSave(val) {
-      const {mode, data } = val
+      const {mode, data} = val
 
       if (mode === 'edit') {
         try {
-           await this.updateSingleCLogicParallel({
+          await this.updateSingleCLogicParallel({
             projectId: this.$route.params.id,
             data: data.data,
             rule: data.rule,
@@ -503,11 +522,11 @@ export default {
           statusCode: status_code,
           transform: transform,
           codeAddHeader: adds.header ? adds.header : {},
-          codeAddBody:  adds.body ? adds.body : {},
-          codeModifyHeader:  modifies.header ? modifies.header : {},
-          codeModifyBody:  modifies.body ? modifies.body : {},
+          codeAddBody: adds.body ? adds.body : {},
+          codeModifyHeader: modifies.header ? modifies.header : {},
+          codeModifyBody: modifies.body ? modifies.body : {},
           codeDeleteHeader: deletes.header ? deletes.header : [],
-          codeDeleteBody:   deletes.body ? deletes.body : [],
+          codeDeleteBody: deletes.body ? deletes.body : [],
 
         }
       }
