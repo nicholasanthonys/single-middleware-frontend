@@ -43,6 +43,8 @@
             label="Enable Response"
         />
         <EditorRequestResponseConfig v-if="enableResponse"
+                                     :have-log="false"
+                                     :prop-enable-loop="false"
                                      config-type="response"
                                      :prop-status-code="statusCode"
                                      :prop-transform="transform"

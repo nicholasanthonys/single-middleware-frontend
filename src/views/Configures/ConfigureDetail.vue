@@ -39,6 +39,8 @@
                 <div class="text-h4 q-mb-md">Request</div>
                 <EditorRequestResponseConfig config-type="request"
                                              :have-log="true"
+                                             :prop-enable-loop="true"
+                                              :prop-loop="request.loop"
                                              :prop-request-method="request.method"
                                              :prop-destination-url="request.destinationUrl"
                                              :prop-destination-path="request.destinationPath"
@@ -79,12 +81,14 @@
                                              @on-change-method-request="onChangeMethodRequest"
                                              @on-change-destination-url-request="onChangeDestinationUrlRequest"
                                              @on-change-destination-path-request="onChangeDestinationPathRequest"
+                                             @on-change-loop-request="onChangeLoopRequest"
                 />
               </q-tab-panel>
 
               <q-tab-panel name="response">
                 <div class="text-h4 q-mb-md">Response</div>
                 <EditorRequestResponseConfig config-type="response"
+                                             :prop-enable-loop="false"
                                              :have-log="true"
                                              :prop-status-code="response.statusCode"
                                              :prop-transform="response.transform"
@@ -169,6 +173,7 @@ export default {
       id: '',
       description: '',
       request: {
+        loop : null,
         destinationUrl: '',
         destinationPath: '',
         method: 'POST',
@@ -276,6 +281,7 @@ export default {
           id : this.$route.params.id,
           description : this.description,
           request : {
+            loop : this.request.loop,
             destinationUrl : this.request.destinationUrl,
             destinationPath : this.request.destinationPath,
             method : this.request.method,
@@ -343,7 +349,10 @@ export default {
 
     },
     fillRequest(request) {
+      console.log("fill request triggered, request is ")
+      console.log(request)
       const {
+        loop,
         transform,
         destination_url,
         destination_path,
@@ -355,6 +364,7 @@ export default {
         log_after_modify,
       } = request
       return {
+        loop,
         destinationUrl: destination_url,
         destinationPath: destination_path,
         method,
@@ -391,6 +401,9 @@ export default {
       }
     },
     /* Request */
+    onChangeLoopRequest(val){
+      this.request.loop = val;
+    },
     onChangeDestinationUrlRequest(val) {
       this.request.destinationUrl = val
     },
