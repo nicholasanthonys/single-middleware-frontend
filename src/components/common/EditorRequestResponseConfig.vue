@@ -28,7 +28,7 @@
           <div class="text-h4 q-mb-md">General</div>
 
           <div class="column">
-            <div class="col-1"   v-if="configType ==='response' ">
+            <div class="col-1" v-if="configType ==='response' ">
               <q-input
                   :value="statusCode"
                   type="number"
@@ -41,7 +41,22 @@
 
               <br/>
             </div>
-            <div class="col-1"   v-if="configType ==='request' ">
+
+            <div class="col-1" v-if="configType ==='request' && propEnableLoop ">
+              <q-input
+
+                  filled
+                  type="text"
+                  v-model="loop"
+                  label="Loop"
+                  hint="Request Loop only available for parallel."
+                  @input="onChangeRequestLoop"
+              />
+
+              <br/>
+            </div>
+
+            <div class="col-1" v-if="configType ==='request' ">
               <q-input
 
                   filled
@@ -56,7 +71,7 @@
               <br/>
             </div>
 
-            <div class="col-1"  v-if="configType ==='request' ">
+            <div class="col-1" v-if="configType ==='request' ">
               <q-input
 
                   filled
@@ -69,7 +84,7 @@
               <br/>
             </div>
 
-            <div class="col-1"     v-if="configType ==='request' ">
+            <div class="col-1" v-if="configType ==='request' ">
               <q-select
 
                   outlined v-model="requestMethod" :options="methodOptions" label="Request Method"
@@ -193,7 +208,7 @@ import TreeConfigRequest from "../../models/TreeConfigRequest";
 
 export default {
   props: [
-      'haveLog',
+    'haveLog',
     'configType',
     'propCodeAddHeader',
     'propCodeAddBody',
@@ -217,7 +232,9 @@ export default {
 
     'propRequestMethod',
     'propDestinationUrl',
-    'propDestinationPath'
+    'propDestinationPath',
+    'propLoop',
+    'propEnableLoop'
 
   ],
   components: {Editor},
@@ -230,6 +247,7 @@ export default {
     return {
       splitterModel: 20,
       selected: "General",
+      loop: this.propLoop,
 
       requestMethod: this.propRequestMethod,
       destinationUrl: this.propDestinationUrl,
@@ -264,9 +282,13 @@ export default {
     }
   },
   methods: {
+    onChangeRequestLoop(val) {
+      this.$emit('on-change-loop-' + this.configType, val)
+      this.loop = val
+    },
     onChangeRequestMethod(val) {
       this.$emit('on-change-method-' + this.configType, val)
-     this.requestMethod =val
+      this.requestMethod = val
     },
     onChangeDestinationUrlRequest(val) {
       this.$emit('on-change-destination-url-' + this.configType, val)
