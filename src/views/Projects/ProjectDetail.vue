@@ -1,153 +1,157 @@
 <template>
   <div class="full-height">
 
-    <div class="column" style="height: 100%">
+    <ValidationObserver v-slot="{ handleSubmit }">
+      <form @submit.prevent="handleSubmit(onSaveClicked)" class="full-height">
+      <div class="column" style="height: 100%">
+        <div class="col">
+          <q-splitter
+              class="full-height"
+              v-model="splitterModel"
+              v-if="!isLoading"
+          >
 
-      <div class="col">
-        <q-splitter
-            class="full-height"
-            v-model="splitterModel"
-            v-if="!isLoading"
-        >
+            <template v-slot:before>
+              <q-tabs
+                  v-model="tab"
+                  vertical
+                  class="text-teal"
+              >
+                <q-tab name="general" icon="description" label="General"/>
+                <q-tab name="base" icon="settings_application" label="Base Settings"/>
+                <q-tab name="configures" icon="settings_application" label="Configures"
+                       v-if="$route.name ==='Projects.Detail' "/>
+                <q-tab name="serial/parallel" icon="settings_application" label="Serial/Parallel"
+                       v-if="$route.name === 'Projects.Detail' "/>
+              </q-tabs>
+            </template>
 
-          <template v-slot:before>
-            <q-tabs
-                v-model="tab"
-                vertical
-                class="text-teal"
-            >
-              <q-tab name="general" icon="description" label="General"/>
-              <q-tab name="base" icon="settings_application" label="Base Settings"/>
-              <q-tab name="configures" icon="settings_application" label="Configures"
-                     v-if="$route.name ==='Projects.Detail' "/>
-              <q-tab name="serial/parallel" icon="settings_application" label="Serial/Parallel"
-                     v-if="$route.name === 'Projects.Detail' "/>
-            </q-tabs>
-          </template>
+            <template v-slot:after>
+              <q-tab-panels
+                  v-model="tab"
+                  animated
+                  swipeable
+                  vertical
+                  transition-prev="jump-up"
+                  transition-next="jump-up"
+                  style="height: 100%"
 
-          <template v-slot:after>
-            <q-tab-panels
-                v-model="tab"
-                animated
-                swipeable
-                vertical
-                transition-prev="jump-up"
-                transition-next="jump-up"
-                style="height: 100%"
-
-            >
-              <q-tab-panel name="general">
-                <div class="text-h4 q-mb-md">General</div>
-
-                <q-input
-                    filled
-                    v-model="name"
-                    label="Name *"
-                    hint="Project Name"
-                    :rules="[ val => val && val.length > 0 || 'Please type something']"
-                />
-                <br/>
-                <q-input
-                    filled
-                    v-model="description"
-                    label="Description *"
-                    hint="Project Description"
-                    type="textarea"
-                    :rules="[ val => val && val.length > 0 || 'Please type something']"
-                />
-
-              </q-tab-panel>
-
-              <q-tab-panel name="base">
-                <div class="text-h4 q-mb-md">Base Settings</div>
-                <q-input
-                    v-model.number="maxCircular"
-                    label="Max Circular Limit*"
-                    hint="Maximum limit of circular request"
-                    type="number"
-                    filled
-                />
-
-                <br/>
-                <EditorRequestResponseConfig config-type="response"
-                                             :have-log="false"
-                                             :prop-status-code="statusCode"
-                                             :prop-transform="transform"
-                                             :prop-log-after-modify="logAfterModify"
-                                             :prop-log-before-modify="logBeforeModify"
-                                             :prop-code-add-header="codeAddHeader"
-                                             :prop-code-add-body="codeAddBody"
-                                             :prop-code-modify-header="codeModifyHeader"
-                                             :prop-code-modify-body="codeModifyBody"
-                                             :prop-code-delete-header="codeDeleteHeader"
-                                             :prop-code-delete-body="codeDeleteBody"
-                                             @on-change-status-code-response="onChangeStatusCode"
-                                             @on-change-transform-response="onChangeTransform"
-                                             @on-change-log-before-modify-response="onChangeLogBeforeModify"
-                                             @on-change-log-after-modify-response="onChangeLogAfterModify"
-                                             @on-change-add-header-response="onChangeAddHeader"
-                                             @on-change-add-body-response="onChangeAddBody"
-                                             @on-change-modify-header-response="onChangeModifyHeader"
-                                             @on-change-modify-body-response="onChangeModifyBody"
-                                             @on-change-delete-header-response="onChangeDeleteHeader"
-                                             @on-change-delete-body-response="onChangeDeleteBody"
-                />
-
-              </q-tab-panel>
-
-              <q-tab-panel name="configures" style="height: 100%;">
-                <Configures :project-id="$route.params.id" :prop-configs="configs" v-if="!isLoadConfigures"/>
-                <div style="height: 100%;" v-else class="flex justify-center items-center">
-                  <q-spinner
-                      color="primary"
-                      size="3em"
+              >
+                <q-tab-panel name="general" >
+                  <div class="text-h4 q-mb-md">General</div>
+                  <ValidationProvider name="Project Name" rules="required" v-slot="{ errors }">
+                    <q-input
+                        filled
+                        v-model="name"
+                        label="Name *"
+                        hint="Project Name"
+                    />
+                    <p class="text-negative">{{errors[0]}}</p>
+                  </ValidationProvider>
+                  <br/>
+                  <q-input
+                      filled
+                      v-model="description"
+                      label="Description *"
+                      hint="Project Description"
+                      type="textarea"
                   />
-                </div>
 
-              </q-tab-panel>
+                </q-tab-panel>
 
-              <q-tab-panel name="serial/parallel">
+                <q-tab-panel name="base">
+                  <div class="text-h4 q-mb-md">Base Settings</div>
+                  <q-input
+                      v-model.number="maxCircular"
+                      label="Max Circular Limit*"
+                      hint="Maximum limit of circular request"
+                      type="number"
+                      filled
+                  />
+
+                  <br/>
+                  <EditorRequestResponseConfig config-type="response"
+                                               :prop-enable-loop="false"
+                                               :have-log="false"
+                                               :prop-status-code="statusCode"
+                                               :prop-transform="transform"
+                                               :prop-log-after-modify="logAfterModify"
+                                               :prop-log-before-modify="logBeforeModify"
+                                               :prop-code-add-header="codeAddHeader"
+                                               :prop-code-add-body="codeAddBody"
+                                               :prop-code-modify-header="codeModifyHeader"
+                                               :prop-code-modify-body="codeModifyBody"
+                                               :prop-code-delete-header="codeDeleteHeader"
+                                               :prop-code-delete-body="codeDeleteBody"
+                                               @on-change-status-code-response="onChangeStatusCode"
+                                               @on-change-transform-response="onChangeTransform"
+                                               @on-change-log-before-modify-response="onChangeLogBeforeModify"
+                                               @on-change-log-after-modify-response="onChangeLogAfterModify"
+                                               @on-change-add-header-response="onChangeAddHeader"
+                                               @on-change-add-body-response="onChangeAddBody"
+                                               @on-change-modify-header-response="onChangeModifyHeader"
+                                               @on-change-modify-body-response="onChangeModifyBody"
+                                               @on-change-delete-header-response="onChangeDeleteHeader"
+                                               @on-change-delete-body-response="onChangeDeleteBody"
+                  />
+
+                </q-tab-panel>
+
+                <q-tab-panel name="configures" style="height: 100%;">
+                  <Configures :project-id="$route.params.id" :prop-configs="configs" v-if="!isLoadConfigures"/>
+                  <div style="height: 100%;" v-else class="flex justify-center items-center">
+                    <q-spinner
+                        color="primary"
+                        size="3em"
+                    />
+                  </div>
+
+                </q-tab-panel>
+
+                <q-tab-panel name="serial/parallel">
                   <ConfigSerialList :prop-serial="serial" :prop-project-id="$route.params.id"
                                     @on-confirm-serial-config="onConfirmSerialConfig"/>
-               <br/>
+                  <br/>
 
-                <ParallelConfigList :prop-parallel="parallel"/>
-              </q-tab-panel>
+                  <ParallelConfigList :prop-parallel="parallel"/>
+                </q-tab-panel>
 
 
-            </q-tab-panels>
-          </template>
+              </q-tab-panels>
+            </template>
 
-        </q-splitter>
-      </div>
+          </q-splitter>
+        </div>
 
-      <div class="col-1">
-        <div class="row">
-          <div class="col-1 text-center">
-            <q-btn @click="onSaveClicked" type="primary">Save</q-btn>
+        <div class="col-1">
+          <div class="row">
+            <div class="col-1 text-center">
+              <q-btn type="submit" >Save</q-btn>
+            </div>
+            <div class="col-1" v-if="$route.name === 'Projects.Detail' ">
+              <q-btn @click="confirmDelete = true" type="negative">Delete</q-btn>
+            </div>
           </div>
-          <div class="col-1" v-if="$route.name === 'Projects.Detail' ">
-            <q-btn @click="confirmDelete = true" type="negative">Delete</q-btn>
-          </div>
+
         </div>
 
       </div>
 
-    </div>
+      <q-dialog v-model="confirmDelete" persistent>
+        <q-card>
+          <q-card-section class="row items-center">
+            <q-avatar icon="delete" color="primary" text-color="white"/>
+            <span class="q-ml-sm">Are you sure want to delete this project ? </span>
+          </q-card-section>
 
-    <q-dialog v-model="confirmDelete" persistent>
-      <q-card>
-        <q-card-section class="row items-center">
-          <q-avatar icon="delete" color="primary" text-color="white"/>
-          <span class="q-ml-sm">Are you sure want to delete this project ? </span>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="primary" v-close-popup/>
-          <q-btn flat label="Delete" color="primary" v-close-popup @click="onDeleteClicked"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+          <q-card-actions align="right">
+            <q-btn flat label="Cancel" color="primary" v-close-popup/>
+            <q-btn flat label="Delete" color="primary" v-close-popup @click="onDeleteClicked"/>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+      </form>
+    </ValidationObserver>
   </div>
 </template>
 
@@ -170,9 +174,9 @@ export default {
     return {
       splitterModel: 10,
       tab: 'general',
-      name: '',
+      name: null,
       description: '',
-      maxCircular: 0,
+      maxCircular: 10,
       id: null,
       selected: 'Adds.Header',
       codeAddHeader: {},
@@ -246,25 +250,25 @@ export default {
           let rule = cLogic.rule
           let data = cLogic.data
           let nextSuccess = cLogic.next_success;
-         let response = null;
-         if(cLogic.response){
-           response = {
-             statusCode: cLogic.response.status_code,
-             transform: cLogic.response.transform,
-             adds: {
-               header: cLogic.response.adds.header,
-               body: cLogic.response.adds.body
-             },
-             modifies: {
-               header: cLogic.response.modifies.header,
-               body: cLogic.response.modifies.body
-             },
-             deletes: {
-               header: cLogic.response.deletes.header,
-               body: cLogic.response.deletes.body
-             }
-           }
-         }
+          let response = null;
+          if (cLogic.response) {
+            response = {
+              statusCode: cLogic.response.status_code,
+              transform: cLogic.response.transform,
+              adds: {
+                header: cLogic.response.adds.header,
+                body: cLogic.response.adds.body
+              },
+              modifies: {
+                header: cLogic.response.modifies.header,
+                body: cLogic.response.modifies.body
+              },
+              deletes: {
+                header: cLogic.response.deletes.header,
+                body: cLogic.response.deletes.body
+              }
+            }
+          }
 
           cLogics.push({
             rule, data, nextSuccess, response

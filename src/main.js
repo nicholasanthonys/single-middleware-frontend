@@ -12,12 +12,11 @@ import {email, required} from "vee-validate/dist/rules";
 import './quasar'
 
 import VJsoneditor from 'v-jsoneditor'
-Vue.component('ValidationObserver', ValidationObserver)
 
+Vue.component('ValidationObserver', ValidationObserver)
 Vue.component('ValidationProvider', ValidationProvider)
 
 Vue.use(Vuex);
-
 
 Vue.use(VJsoneditor)
 
@@ -33,7 +32,7 @@ extend('password', {
 
 extend('required', {
   ...required,
-  message: 'This field is required',
+  message: 'The field {_field_} is required',
 })
 
 extend('min', {
