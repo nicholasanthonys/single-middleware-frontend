@@ -344,7 +344,7 @@ export default {
       try {
         await this.storeNextFailureParallel({
           projectId: this.$route.params.id,
-          statusCode: this.nextFailure.statusCode,
+          status_code: this.nextFailure.statusCode,
           transform: this.nextFailure.transform,
           adds: {
             header: this.nextFailure.codeAddHeader,
@@ -380,7 +380,7 @@ export default {
             projectId: this.$route.params.id,
             data: data.data,
             rule: data.rule,
-            nextSuccess: data.next_success,
+            next_success: data.next_success,
             response: data.response,
             id: data.id
           })
@@ -400,7 +400,7 @@ export default {
             projectId: this.$route.params.id,
             data: data.data,
             rule: data.rule,
-            nextSuccess: data.next_success,
+            next_success: data.next_success,
             response: data.response
           })
           // this.cLogics.push(res.data)
@@ -420,7 +420,7 @@ export default {
           await this.updateSingleConfigParallel({
             projectId: this.$route.params.id,
             id: this.parallel.configures  [this.selectedConfigIndex].id,
-            configureId: this.selectedConfigId,
+            configure_id: this.selectedConfigId,
             alias: this.alias
           })
           this.$q.notify({
@@ -435,7 +435,7 @@ export default {
         try {
           await this.storeSingleConfigParallel({
             projectId: this.$route.params.id,
-            configureId: this.selectedConfigId,
+            configure_id: this.selectedConfigId,
             alias: this.alias
           })
 
@@ -516,10 +516,12 @@ export default {
       this.response.codeDeleteBody = val
     },
     fillDataNextFailure(parallel) {
+      console.log("parallel is ")
+      console.log(parallel)
       if (parallel && parallel.next_failure) {
         const {transform, adds, modifies, deletes, status_code} = parallel.next_failure
         this.nextFailure = {
-          status_code: status_code,
+          statusCode: status_code,
           transform: transform,
           codeAddHeader: adds.header ? adds.header : {},
           codeAddBody: adds.body ? adds.body : {},
