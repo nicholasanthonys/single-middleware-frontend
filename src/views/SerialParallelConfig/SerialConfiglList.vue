@@ -1,7 +1,6 @@
 <template>
   <div>
     <div id="serial">
-{{serial.configures}}
       <div v-if="serial!= null">
         <div class="column" style="height: 500px">
           <div class="col-1">
