@@ -229,8 +229,8 @@ export default {
     async onDeleteClicked() {
       try {
         let params  ={
-          projectId : this.$route.params.projectId,
-          configureId : this.$route.params.id
+          project_id : this.$route.params.projectId,
+          configure_id : this.$route.params.id
         }
        await this.deleteConfigure(params)
         this.$q.notify({
@@ -276,18 +276,18 @@ export default {
     },
     constructData() {
       return {
-        projectId : this.$route.params.projectId,
+        project_id : this.$route.params.projectId,
         config : {
           id : this.$route.params.id,
           description : this.description,
           request : {
             loop : this.request.loop,
-            destinationUrl : this.request.destinationUrl,
-            destinationPath : this.request.destinationPath,
+            destination_url : this.request.destinationUrl,
+            destination_path : this.request.destinationPath,
             method : this.request.method,
             transform : this.request.transform,
-            logBeforeModify : this.request.logBeforeModify ? this.request.logBeforeModify : {},
-            logAfterModify : this.request.logAfterModify ? this.request.logAfterModify : {},
+            log_before_modify : this.request.logBeforeModify ? this.request.logBeforeModify : {},
+            log_after_modify : this.request.logAfterModify ? this.request.logAfterModify : {},
             adds : {
               header : this.request.codeAddHeader,
               body : this.request.codeAddBody,
@@ -308,10 +308,10 @@ export default {
             }
           },
           response : {
-            statusCode : this.response.statusCode,
+            status_code : this.response.statusCode,
             transform : this.response.transform,
-            logBeforeModify : this.response.logBeforeModify ? this.response.logBeforeModify : {},
-            logAfterModify : this.response.logAfterModify ? this.response.logAfterModify : {},
+            log_before_modify : this.response.logBeforeModify ? this.response.logBeforeModify : {},
+            log_after_modify : this.response.logAfterModify ? this.response.logAfterModify : {},
             adds : {
               header : this.response.codeAddHeader,
               body : this.response.codeAddBody,
@@ -332,7 +332,8 @@ export default {
     },
     async loadConfigure(projectId, configureId) {
       this.isLoading = true
-      const param = {configureId, projectId}
+      const param = {
+        configure_id: configureId, project_id : projectId}
       try {
         let response = await this.fetchSpecificConfigure(param)
         this.fillData(response.data)

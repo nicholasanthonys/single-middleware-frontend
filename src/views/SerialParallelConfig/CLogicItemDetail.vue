@@ -78,7 +78,6 @@
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 import Editor from "../../components/common/Editor";
 import {mapActions} from "vuex";
-import snakecaseKeys from "snakecase-keys";
 
 export default {
   props: {
@@ -133,10 +132,10 @@ export default {
         configId: this.propConfigId,
         data: this.data ? this.data : {},
         rule: this.rule ? this.rule : {},
-        nextSuccess: this.nextSuccess,
+        next_success: this.nextSuccess,
       }
-      console.log("rule is")
-      console.log(snakecaseKeys(this.rule, { deep : true, exclude : ["=="]}));
+
+
       if(this.enableResponse){
         data.response = {
           transform: this.transform,

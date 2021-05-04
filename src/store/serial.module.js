@@ -5,16 +5,13 @@ const serial = {
     state: () => ({
         serial:  {
             id : null,
-            configures : []
         },
     }),
     getters: {
         getSerial(state) {
             return state.serial
         },
-        getConfigures(state) {
-            return state.configures
-        }
+
 
     },
     actions: {
@@ -25,7 +22,6 @@ const serial = {
                     response => {
                         if (response.status === 200) {
                             context.commit('setSerial', response.data)
-                            context.commit('setConfigures', response.data.configures)
                             resolve(response)
                         }
                     },
@@ -55,12 +51,12 @@ const serial = {
 
         storeSingleConfig(context, data) {
             return new Promise((resolve, reject) => {
-                const {projectId, configureId, alias, nextFailure} = data
+                const { project_id, configure_id, alias, next_failure} = data
                 ApiService.init()
-                ApiService.post(`/api/v1/project/${projectId}/serial/config/new`, {
-                    configureId,
+                ApiService.post(`/api/v1/project/${project_id}/serial/config/new`, {
+                    configure_id,
                     alias,
-                    nextFailure
+                    next_failure
                 }).then(
                     response => {
                         context.commit("addConfig", response.data)
@@ -76,13 +72,13 @@ const serial = {
 
         updateSingleConfig(context, data) {
             return new Promise((resolve, reject) => {
-                const {projectId, id, configureId, alias, nextFailure} = data
+                const {project_id: project_id, id, configure_id, alias, next_failure} = data
                 ApiService.init()
-                ApiService.put(`/api/v1/project/${projectId}/serial/config`, {
+                ApiService.put(`/api/v1/project/${project_id}/serial/config`, {
                     id,
-                    configureId,
+                    configure_id,
                     alias,
-                    nextFailure
+                    next_failure
                 }).then(
                     response => {
                         context.commit('updateSpecificConfig', response.data)
@@ -97,12 +93,12 @@ const serial = {
 
         storeSingleCLogic(context, body) {
             return new Promise((resolve, reject) => {
-                const {projectId, configId, rule, data, nextSuccess,response} = body
+                const {projectId, configId, rule, data, next_success,response} = body
                 ApiService.init()
                 ApiService.post(`/api/v1/project/${projectId}/serial/config/${configId}/clogic/new`, {
                     rule,
                     data,
-                    nextSuccess,
+                    next_success,
                     response
                 }).then(
                     response => {
@@ -118,13 +114,13 @@ const serial = {
 
         updateSingleCLogic(context, body) {
             return new Promise((resolve, reject) => {
-                const {projectId, configId, id, rule, data, nextSuccess,response} = body
+                const {projectId, configId, id, rule, data, next_success,response} = body
                 ApiService.init()
                 ApiService.put(`/api/v1/project/${projectId}/serial/config/${configId}/clogic`, {
                     id,
                     rule,
                     data,
-                    nextSuccess,
+                    next_success,
                     response
                 }).then(
                     response => {
@@ -164,37 +160,41 @@ const serial = {
             }
         },
         setConfigures(state, data) {
-            state.configures = data
+            state.serial.configures = data
         },
         addConfig(state, data) {
             state.serial.configures.push(data);
         },
         updateSpecificConfig(state, data) {
-            let index = state.configures.findIndex(e => e.id === data.id);
+            let index = state.serial.configures.findIndex(e => e.id === data.id);
+            console.log("index is")
+            console.log(index)
+            console.log("data is")
+            console.log(data)
             if (index >= 0) {
-                let temp = [...state.configures];
+                let temp = [...state.serial.configures];
                 temp[index] = data;
-                state.configures = temp;
+                state.serial.configures = [...temp];
             }
         },
         addSingleCLogic(state, data) {
             const {configId, value} = data
-            let index = state.configures.findIndex(e => e.id === configId);
+            let index = state.serial.configures.findIndex(e => e.id === configId);
             if (index >= 0) {
-                let temp = [...state.configures];
+                let temp = [...state.serial.configures];
                 temp[index].c_logics.push(value)
-                state.configures = temp;
+                state.serial.configures = temp;
             }
         },
         updateSingleCLogic(state, data) {
             const {configId, value} = data
-            let confIndex= state.configures.findIndex(e => e.id === configId);
+            let confIndex= state.serial.configures.findIndex(e => e.id === configId);
             if (confIndex >= 0) {
-                let cLogicIndex = state.configures[confIndex].c_logics.findIndex(e => e.id === value.id)
+                let cLogicIndex = state.serial.configures[confIndex].c_logics.findIndex(e => e.id === value.id)
                 if(cLogicIndex >= 0){
-                    let temp = [...state.configures]
+                    let temp = [...state.serial.configures]
                     temp[confIndex].c_logics[cLogicIndex] = value;
-                    state.configures = temp;
+                    state.serial.configures = temp;
                 }
             }
         },

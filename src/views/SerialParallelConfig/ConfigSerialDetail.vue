@@ -77,7 +77,7 @@
                 <q-table
                     style="height: 400px"
                     title="CLogic List"
-                    :data="serial.configures[propIndex] ? serial.configures[propIndex].c_logics : [] "
+                    :data="propSerialConfig? propSerialConfig.c_logics : [] "
                     :columns="cLogicTableColumns"
                     row-key="index"
                     virtual-scroll
@@ -105,7 +105,7 @@
                           :props="props"
                       >
 
-                        <p>{{ serial.configures[propIndex].c_logics[props.rowIndex][col.name] }}   </p>
+                        <p>{{ propSerialConfig.c_logics[props.rowIndex][col.name] }} </p>
 
                         <q-icon
                             v-if="col.name==='action'"
@@ -128,7 +128,7 @@
       </div>
     </div>
     <q-dialog
-        v-if="serial.configures[propIndex] "
+        v-if="propSerialConfig "
         v-model="dialog"
         persistent
         :maximized="maximizedToggle"
@@ -153,8 +153,10 @@
         <q-card-section class="q-pt-none">
 
           <div class="text-h6">CLogic</div>
-          <CLogicItemDetail :prop-c-logic=" serial.configures[propIndex].c_logics[selectedIndex]" @on-clogic-save="onCLogicSave" :prop-mode="mode"
-                            :prop-index="selectedIndex" :prop-config-id="propSerialConfig.id" prop-request-type="serial"/>
+          <CLogicItemDetail :prop-c-logic=" propSerialConfig.c_logics[selectedIndex]"
+                            @on-clogic-save="onCLogicSave" :prop-mode="mode"
+                            :prop-index="selectedIndex" :prop-config-id="propSerialConfig.id"
+                            prop-request-type="serial"/>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -167,7 +169,7 @@
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 
 import {mapActions, mapGetters} from "vuex";
- import CLogicItemDetail from "./CLogicItemDetail";
+import CLogicItemDetail from "./CLogicItemDetail";
 
 export default {
   props: {
@@ -178,12 +180,12 @@ export default {
     propConfigureId: String,
   },
   components: {
-     CLogicItemDetail,
+    CLogicItemDetail,
     EditorRequestResponseConfig
   },
   computed: {
     ...mapGetters({
-      serial : 'serial/getSerial'
+      serial: 'serial/getSerial'
     })
   },
 
@@ -250,16 +252,16 @@ export default {
       updateSpecificConfig: 'serial/updateSingleConfig',
     }),
     openDialogAddCLogic() {
-      this.mode = 'add',
-          this.dialog = true
+      this.mode = 'add'
+      this.dialog = true
     },
     async onSaveClick() {
       let data = {
-        projectId: this.$route.params.id,
-        configureId: this.selectedConfigId,
+        project_id: this.$route.params.id,
+        configure_id: this.selectedConfigId,
         alias: this.alias,
-        nextFailure: {
-          statusCode: this.statusCode,
+        next_failure: {
+          status_code: this.statusCode,
           transform: this.transform,
           adds: {
             header: this.codeAddHeader,
@@ -276,18 +278,21 @@ export default {
         },
         mode: this.propMode,
       }
+      console.log("data is ")
+      console.log(data)
       if (this.propMode === 'edit') {
         /* add id */
-        try{
+        try {
           data.id = this.id;
           await this.updateSpecificConfig(data);
           this.$q.notify({
             message: 'Update Config Serial Success.',
             color: 'secondary'
           })
+
           this.$emit('on-confirm-clicked')
-        }catch (e) {
-         console.log(e)
+        } catch (e) {
+          console.log(e)
         }
       } else {
         try {
@@ -308,7 +313,7 @@ export default {
     onCLogicSave() {
       this.dialog = false
     },
-    selectCLogic( index) {
+    selectCLogic(index) {
       this.selectedIndex = index
       this.mode = 'edit';
       this.dialog = true
@@ -365,7 +370,7 @@ export default {
     },
 
     fillDataFromProps(config) {
-      const {alias, configure_id,  next_failure, id} = config
+      const {alias, configure_id, next_failure, id} = config
       this.id = id
       this.alias = alias
       this.selectedConfigId = configure_id
@@ -384,37 +389,37 @@ export default {
           this.logBeforeModify = log_before_modify,
           this.logAfterModify = log_after_modify
 
-          // /* C Logics */
-          // c_logics.forEach(clogic => {
-          //   let id = clogic.id;
-          //   let rule = clogic.rule;
-          //   let alias = clogic.alias;
-          //   let next_success = clogic.next_success;
-          //   let response = null;
-          //   if (clogic.response) {
-          //     response = {
-          //       status_code: clogic.response.status_code,
-          //       transform: clogic.response.transform,
-          //       adds: {
-          //         header: clogic.response.adds.header,
-          //         body: clogic.response.adds.body
-          //       },
-          //       modifies: {
-          //         header: clogic.response.modifies.header,
-          //         body: clogic.response.modifies.body
-          //       },
-          //       deletes: {
-          //         header: clogic.response.deletes.header,
-          //         body: clogic.response.deletes.body
-          //       }
-          //     }
-          //   }
-          //   this.cLogics.push({
-          //     id,
-          //     rule, alias, next_success, response
-          //   })
-          //
-          // })
+      // /* C Logics */
+      // c_logics.forEach(clogic => {
+      //   let id = clogic.id;
+      //   let rule = clogic.rule;
+      //   let alias = clogic.alias;
+      //   let next_success = clogic.next_success;
+      //   let response = null;
+      //   if (clogic.response) {
+      //     response = {
+      //       status_code: clogic.response.status_code,
+      //       transform: clogic.response.transform,
+      //       adds: {
+      //         header: clogic.response.adds.header,
+      //         body: clogic.response.adds.body
+      //       },
+      //       modifies: {
+      //         header: clogic.response.modifies.header,
+      //         body: clogic.response.modifies.body
+      //       },
+      //       deletes: {
+      //         header: clogic.response.deletes.header,
+      //         body: clogic.response.deletes.body
+      //       }
+      //     }
+      //   }
+      //   this.cLogics.push({
+      //     id,
+      //     rule, alias, next_success, response
+      //   })
+      //
+      // })
     }
   },
   mounted() {

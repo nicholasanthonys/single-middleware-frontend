@@ -519,7 +519,7 @@ export default {
       if (parallel && parallel.next_failure) {
         const {transform, adds, modifies, deletes, status_code} = parallel.next_failure
         this.nextFailure = {
-          statusCode: status_code,
+          status_code: status_code,
           transform: transform,
           codeAddHeader: adds.header ? adds.header : {},
           codeAddBody: adds.body ? adds.body : {},
