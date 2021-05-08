@@ -74,38 +74,17 @@
                   />
 
                   <br/>
-                  <keep-alive>
+                    code add header is {{editorData}}
                     <EditorRequestResponseConfig ref="editor"
                                                  config-type="response"
                                                  :prop-enable-loop="false"
                                                  :have-log="false"
-                                                 :prop-status-code="statusCode"
-                                                 :prop-transform="transform"
-                                                 :prop-log-after-modify="logAfterModify"
-                                                 :prop-log-before-modify="logBeforeModify"
-                                                 :prop-code-add-header="codeAddHeader"
-                                                 :prop-code-add-body="codeAddBody"
-                                                 :prop-code-modify-header="codeModifyHeader"
-                                                 :prop-code-modify-body="codeModifyBody"
-                                                 :prop-code-delete-header="codeDeleteHeader"
-                                                 :prop-code-delete-body="codeDeleteBody"
-                                                 @on-change-status-code-response="onChangeStatusCode"
-                                                 @on-change-transform-response="onChangeTransform"
-                                                 @on-change-log-before-modify-response="onChangeLogBeforeModify"
-                                                 @on-change-log-after-modify-response="onChangeLogAfterModify"
-                                                 @on-change-add-header-response="onChangeAddHeader"
-                                                 @on-change-add-body-response="onChangeAddBody"
-                                                 @on-change-modify-header-response="onChangeModifyHeader"
-                                                 @on-change-modify-body-response="onChangeModifyBody"
-                                                 @on-change-delete-header-response="onChangeDeleteHeader"
-                                                 @on-change-delete-body-response="onChangeDeleteBody"
-                                                 @on-validation-error="setErrorTab2"
+                                                v-model="editorData"
                     />
-                  </keep-alive>
 
                 </q-tab-panel>
 
-                <q-tab-panel name="configures" style="height: 100%;">
+                <q-tab-panel name="configures" style="height: 100%;"  v-if="$route.name === 'Projects.Detail'">
                   <Configures :project-id="$route.params.id" :prop-configs="configs" v-if="!isLoadConfigures"/>
                   <div style="height: 100%;" v-else class="flex justify-center items-center">
                     <q-spinner
@@ -116,7 +95,7 @@
 
                 </q-tab-panel>
 
-                <q-tab-panel name="serial/parallel">
+                <q-tab-panel name="serial/parallel"  v-if="$route.name === 'Projects.Detail'">
                   <ConfigSerialList :prop-serial="serial" :prop-project-id="$route.params.id"
                                     @on-confirm-serial-config="onConfirmSerialConfig"/>
                   <br/>
@@ -211,18 +190,23 @@ export default {
       description: '',
       maxCircular: 10,
       id: null,
+
       selected: 'Adds.Header',
-      codeAddHeader: {},
-      codeAddBody: {},
-      codeModifyHeader: {},
-      codeModifyBody: {},
-      codeDeleteHeader: [],
-      codeDeleteBody: [],
-      statusCode: null,
-      transform: "ToJson",
-      logBeforeModify: {},
-      logAfterModify: {},
-      isLoading: false,
+      editorData : {
+        codeAddHeader: {},
+        codeAddBody: {},
+        codeModifyHeader: {},
+        codeModifyBody: {},
+        codeDeleteHeader: [],
+        codeDeleteBody: [],
+        statusCode: null,
+        transform: "ToJson",
+        logBeforeModify: {},
+        logAfterModify: {},
+
+      },
+
+     isLoading: false,
       isLoadConfigures: false,
       confirmDelete: false,
 
@@ -275,13 +259,11 @@ export default {
       actionFetchConfigures: 'configures/fetchConfigures',
       storeSerial: 'serial/storeSerial'
     }),
+
     okClicked() {
       this.alertDialog = false;
       this.globalErrors = [];
 
-    },
-    setErrorTab2(error) {
-      this.errorTab2 = error
     },
 
     async onConfirmSerialConfig(val) {
@@ -345,36 +327,6 @@ export default {
         console.log(err)
       }
     },
-    onChangeStatusCode(val) {
-      this.statusCode = val;
-    },
-    onChangeTransform(val) {
-      this.transform = val;
-    },
-    onChangeLogBeforeModify(val) {
-      this.logBeforeModify = val;
-    },
-    onChangeLogAfterModify(val) {
-      this.logAfterModify = val;
-    },
-    onChangeAddHeader(val) {
-      this.codeAddHeader = val;
-    },
-    onChangeAddBody(val) {
-      this.codeAddBody = val;
-    },
-    onChangeModifyHeader(val) {
-      this.codeModifyHeader = val
-    },
-    onChangeModifyBody(val) {
-      this.codeModifyBody = val
-    },
-    onChangeDeleteHeader(val) {
-      this.codeDeleteHeader = val
-    },
-    onChangeDeleteBody(val) {
-      this.codeDeleteBody = val
-    },
     async fetchConfigures(projectId) {
       this.isLoadConfigures = true;
       try {
@@ -424,21 +376,21 @@ export default {
       this.maxCircular = project_max_circular
 
       const {adds, modifies, deletes, log_before_modify, log_after_modify, status_code, transform} = circular_response
-      this.statusCode = status_code
-      this.transform = transform
-      this.logBeforeModify = log_before_modify
-      this.logAfterModify = log_after_modify
+      this.editorData.statusCode = status_code
+      this.editorData.transform = transform
+      this.editorData.logBeforeModify = log_before_modify
+      this.editorData.logAfterModify = log_after_modify
 
 
-      this.codeAddHeader = adds.header ? adds.header : {}
+      this.editorData.codeAddHeader = adds.header ? adds.header : {}
 
-      this.codeAddBody = adds.body ? adds.body : {}
+      this.editorData.codeAddBody = adds.body ? adds.body : {}
 
-      this.codeModifyHeader = modifies.head ? modifies.head : {}
-      this.codeModifyBody = modifies.body ? modifies.body : {}
+      this.editorData.codeModifyHeader = modifies.head ? modifies.head : {}
+      this.editorData.codeModifyBody = modifies.body ? modifies.body : {}
 
-      this.codeDeleteHeader = deletes.header ? deletes.header : []
-      this.codeDeleteBody = deletes.body ? deletes.body : []
+      this.editorData.codeDeleteHeader = deletes.header ? deletes.header : []
+      this.editorData.codeDeleteBody = deletes.body ? deletes.body : []
 
       this.serial = data.serial
       this.parallel = data.parallel
@@ -450,8 +402,12 @@ export default {
       this.$refs.name.validate();
       this.validators.nameErr = this.$refs.name.hasError
       this.$refs.editor.$refs.statusCode.validate();
-
       this.validators.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
+
+      const editor =this.$refs.editor
+
+      console.log("editor is")
+      console.log(editor)
 
       if (this.validators.nameErr) {
         this.validators.errCount++;
@@ -531,21 +487,21 @@ export default {
         base: {
           project_max_circular: this.maxCircular,
           circular_response: {
-            status_code: this.statusCode,
-            transform: this.transform,
-            log_before_modify: this.logBeforeModify ? this.logBeforeModify : {},
-            log_after_modify: this.logAfterModify ? this.logAfterModify : {},
+            status_code: this.editorData.statusCode,
+            transform: this.editorData.transform,
+            log_before_modify: this.editorData.logBeforeModify ? this.editorData.logBeforeModify : {},
+            log_after_modify: this.editorData.logAfterModify ? this.editorData.logAfterModify : {},
             adds: {
-              header: this.codeAddHeader,
-              body: this.codeAddBody
+              header: this.editorData.codeAddHeader,
+              body: this.editorData.codeAddBody
             },
             modifies: {
-              header: this.codeModifyHeader,
-              body: this.codeModifyBody
+              header: this.editorData.codeModifyHeader,
+              body: this.editorData.codeModifyBody
             },
             deletes: {
-              header: this.codeDeleteHeader,
-              body: this.codeDeleteBody
+              header: this.editorData.codeDeleteHeader,
+              body: this.editorData.codeDeleteBody
             }
 
           }
