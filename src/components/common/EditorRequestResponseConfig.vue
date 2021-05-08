@@ -1,204 +1,207 @@
 <template>
-  <q-splitter
-      v-model="splitterModel"
-      style="height: 600px"
-  >
+  <ValidationObserver>
+    <q-splitter
+        v-model="splitterModel"
+        style="height: 600px"
+    >
 
-    <template v-slot:before>
-      <div class="q-pa-md">
-        <q-tree
-            :nodes="simple"
-            node-key="label"
-            selected-color="primary"
-            :selected.sync="selected"
-            default-expand-all
-        />
-      </div>
-    </template>
+      <template v-slot:before>
+        <div class="q-pa-md">
+          <q-tree
+              :nodes="simple"
+              node-key="label"
+              selected-color="primary"
+              :selected.sync="selected"
+              default-expand-all
+          />
+        </div>
+      </template>
 
-    <template v-slot:after>
-      <q-tab-panels
-          v-model="selected"
-          animated
-          transition-prev="jump-up"
-          transition-next="jump-up"
-      >
+      <template v-slot:after>
+        <q-tab-panels
+            v-model="selected"
+            animated
+            transition-prev="jump-up"
+            transition-next="jump-up"
+        >
 
-        <q-tab-panel name="General">
-          <div class="text-h4 q-mb-md">General</div>
+          <q-tab-panel name="General">
+            <div class="text-h4 q-mb-md">General</div>
 
-          <div class="column">
-            <div class="col-1" v-if="configType ==='response' ">
-              <q-input
-                  :value="statusCode"
-                  type="number"
-                  label="Status Code"
-                  hint="Response Status Code"
-                  filled
-                  style="max-width: 200px"
-                  @input="onChangeStatusCode"
-              />
+            <div class="column">
+              <div class="col-1" v-if="configType ==='response' ">
+                  <q-input
+                      ref="statusCode"
+                      :value="statusCode"
+                      type="number"
+                      label="Status Code"
+                      hint="Response Status Code"
+                      filled
+                      style="max-width: 200px"
+                      :rules="[ val => val > 0 || `Please fill response status code`]"
+                      @input="onChangeStatusCode"
 
+                  />
+                <br/>
+              </div>
+
+              <div class="col-1" v-if="configType ==='request' && propEnableLoop ">
+                <q-input
+
+                    filled
+                    type="text"
+                    v-model="loop"
+                    label="Loop"
+                    hint="Request Loop only available for parallel."
+                    @input="onChangeRequestLoop"
+                />
+
+                <br/>
+              </div>
+
+              <div class="col-1" v-if="configType ==='request' ">
+                <q-input
+
+                    filled
+                    type="text"
+                    v-model="destinationUrl"
+                    label="Destination Url *"
+                    hint="Request Destination Url"
+                    :rules="[ val => val && val.length > 0 || 'Please type something']"
+                    @input="onChangeDestinationUrlRequest"
+                />
+
+                <br/>
+              </div>
+
+              <div class="col-1" v-if="configType ==='request' ">
+                <q-input
+
+                    filled
+                    type="text"
+                    v-model="destinationPath"
+                    label="Destination Path *"
+                    hint="Destination Url's Path"
+                    @input="onChangeDestinationPathRequest"
+                />
+                <br/>
+              </div>
+
+              <div class="col-1" v-if="configType ==='request' ">
+                <q-select
+
+                    outlined v-model="requestMethod" :options="methodOptions" label="Request Method"
+                    hint="Request Method'"
+                    @input="onChangeRequestMethod"
+                    style="max-width: 200px"/>
+
+                <br/>
+              </div>
+
+              <div class="col-1">
+                <q-select
+
+                    outlined v-model="transform" :options="transformOptions" label="Transform"
+                    :hint="configType === 'request' ? 'Request Transform' : 'Response Transform'  "
+                    @input="onChangeTransform"
+                    style="max-width: 200px"/>
+              </div>
               <br/>
-            </div>
-
-            <div class="col-1" v-if="configType ==='request' && propEnableLoop ">
-              <q-input
-
-                  filled
-                  type="text"
-                  v-model="loop"
-                  label="Loop"
-                  hint="Request Loop only available for parallel."
-                  @input="onChangeRequestLoop"
-              />
-
-              <br/>
-            </div>
-
-            <div class="col-1" v-if="configType ==='request' ">
-              <q-input
-
-                  filled
-                  type="text"
-                  v-model="destinationUrl"
-                  label="Destination Url *"
-                  hint="Request Destination Url"
-                  :rules="[ val => val && val.length > 0 || 'Please type something']"
-                  @input="onChangeDestinationUrlRequest"
-              />
-
-              <br/>
-            </div>
-
-            <div class="col-1" v-if="configType ==='request' ">
-              <q-input
-
-                  filled
-                  type="text"
-                  v-model="destinationPath"
-                  label="Destination Path *"
-                  hint="Destination Url's Path"
-                  @input="onChangeDestinationPathRequest"
-              />
-              <br/>
-            </div>
-
-            <div class="col-1" v-if="configType ==='request' ">
-              <q-select
-
-                  outlined v-model="requestMethod" :options="methodOptions" label="Request Method"
-                  hint="Request Method'"
-                  @input="onChangeRequestMethod"
-                  style="max-width: 200px"/>
-
-              <br/>
-            </div>
-
-            <div class="col-1">
-              <q-select
-
-                  outlined v-model="transform" :options="transformOptions" label="Transform"
-                  :hint="configType === 'request' ? 'Request Transform' : 'Response Transform'  "
-                  @input="onChangeTransform"
-                  style="max-width: 200px"/>
-            </div>
-            <br/>
-            <div class="col-2" v-if="haveLog">
-              <div class="row">
-                <div class="col-12 col-lg-6">
-                  <p class="text-h5">Log Before Modify</p>
-                  <Editor :prop-code="logBeforeModify" event-name="on-change-log-before-modify"
-                          @on-change-log-before-modify="onChangeLogBeforeModify"/>
-                </div>
-                <div class="col-12 col-lg-6">
-                  <p class="text-h5">Log After Modify</p>
-                  <Editor :prop-code="logAfterModify" event-name="on-change-log-after-modify"
-                          @on-change-log-after-modify="onChangeLogAfterModify"/>
+              <div class="col-2" v-if="haveLog">
+                <div class="row">
+                  <div class="col-12 col-lg-6">
+                    <p class="text-h5">Log Before Modify</p>
+                    <Editor :prop-code="logBeforeModify" event-name="on-change-log-before-modify"
+                            @on-change-log-before-modify="onChangeLogBeforeModify"/>
+                  </div>
+                  <div class="col-12 col-lg-6">
+                    <p class="text-h5">Log After Modify</p>
+                    <Editor :prop-code="logAfterModify" event-name="on-change-log-after-modify"
+                            @on-change-log-after-modify="onChangeLogAfterModify"/>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
 
-        </q-tab-panel>
+          </q-tab-panel>
 
 
-        <q-tab-panel name="Adds.Header">
-          <div class="text-h4 q-mb-md">Add Header</div>
-          <Editor :propCode="codeAddHeader" :event-name="'on-change-add-header'"
-                  @on-change-add-header="onChangeAddHeader"/>
-        </q-tab-panel>
+          <q-tab-panel name="Adds.Header">
+            <div class="text-h4 q-mb-md">Add Header</div>
+            <Editor :propCode="codeAddHeader" :event-name="'on-change-add-header'"
+                    @on-change-add-header="onChangeAddHeader"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Adds.Body">
-          <div class="text-h4 q-mb-md">Add Body</div>
-          <Editor :propCode="codeAddBody" :event-name="'on-change-add-body'" @on-change-add-body="onChangeAddBody"/>
-        </q-tab-panel>
+          <q-tab-panel name="Adds.Body">
+            <div class="text-h4 q-mb-md">Add Body</div>
+            <Editor :propCode="codeAddBody" :event-name="'on-change-add-body'" @on-change-add-body="onChangeAddBody"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Adds.Query" v-if="configType === 'request' ">
-          <div class="text-h4 q-mb-md">Add Query</div>
-          <Editor :propCode="codeAddQuery" :event-name="'on-change-add-query'"
-                  @on-change-add-query="onChangeAddQuery"/>
-        </q-tab-panel>
+          <q-tab-panel name="Adds.Query" v-if="configType === 'request' ">
+            <div class="text-h4 q-mb-md">Add Query</div>
+            <Editor :propCode="codeAddQuery" :event-name="'on-change-add-query'"
+                    @on-change-add-query="onChangeAddQuery"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Adds.Param" v-if="configType === 'request' ">
-          <div class="text-h4 q-mb-md">Add Param</div>
-          <Editor :propCode="codeAddParam" :event-name="'on-change-add-param'"
-                  @on-change-add-param="onChangeAddParam"/>
-        </q-tab-panel>
+          <q-tab-panel name="Adds.Param" v-if="configType === 'request' ">
+            <div class="text-h4 q-mb-md">Add Param</div>
+            <Editor :propCode="codeAddParam" :event-name="'on-change-add-param'"
+                    @on-change-add-param="onChangeAddParam"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Modifies.Header">
-          <div class="text-h4 q-mb-md">Modify Header</div>
-          <Editor :propCode="codeModifyHeader" :event-name="'on-change-modify-header'"
-                  @on-change-modify-header="onChangeModifyHeader"/>
-        </q-tab-panel>
+          <q-tab-panel name="Modifies.Header">
+            <div class="text-h4 q-mb-md">Modify Header</div>
+            <Editor :propCode="codeModifyHeader" :event-name="'on-change-modify-header'"
+                    @on-change-modify-header="onChangeModifyHeader"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Modifies.Body">
-          <div class="text-h4 q-mb-md">Modify Body</div>
-          <Editor :propCode="codeModifyBody" :event-name="'on-change-modify-body'"
-                  @on-change-modify-body="onChangeModifyBody"/>
-        </q-tab-panel>
+          <q-tab-panel name="Modifies.Body">
+            <div class="text-h4 q-mb-md">Modify Body</div>
+            <Editor :propCode="codeModifyBody" :event-name="'on-change-modify-body'"
+                    @on-change-modify-body="onChangeModifyBody"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Modifies.Query" v-if="configType === 'request' ">
-          <div class="text-h4 q-mb-md">Modify Query</div>
-          <Editor :propCode="codeModifyQuery" :event-name="'on-change-modify-query'"
-                  @on-change-modify-query="onChangeModifyQuery"/>
-        </q-tab-panel>
+          <q-tab-panel name="Modifies.Query" v-if="configType === 'request' ">
+            <div class="text-h4 q-mb-md">Modify Query</div>
+            <Editor :propCode="codeModifyQuery" :event-name="'on-change-modify-query'"
+                    @on-change-modify-query="onChangeModifyQuery"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Modifies.Param" v-if="configType === 'request' ">
-          <div class="text-h4 q-mb-md">Modify Param</div>
-          <Editor :propCode="codeModifyParam" :event-name="'on-change-modify-param'"
-                  @on-change-modify-param="onChangeModifyParam"/>
-        </q-tab-panel>
+          <q-tab-panel name="Modifies.Param" v-if="configType === 'request' ">
+            <div class="text-h4 q-mb-md">Modify Param</div>
+            <Editor :propCode="codeModifyParam" :event-name="'on-change-modify-param'"
+                    @on-change-modify-param="onChangeModifyParam"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Deletes.Header">
-          <div class="text-h4 q-mb-md">Delete Header</div>
-          <Editor :propCode="codeDeleteHeader" :event-name="'on-change-delete-header'"
-                  @on-change-delete-header="onChangeDeleteHeader"/>
-        </q-tab-panel>
+          <q-tab-panel name="Deletes.Header">
+            <div class="text-h4 q-mb-md">Delete Header</div>
+            <Editor :propCode="codeDeleteHeader" :event-name="'on-change-delete-header'"
+                    @on-change-delete-header="onChangeDeleteHeader"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Deletes.Body">
-          <div class="text-h4 q-mb-md">Delete Body</div>
-          <Editor :propCode="codeDeleteBody" :event-name="'on-change-delete-body'"
-                  @on-change-delete-body="onChangeDeleteBody"/>
-        </q-tab-panel>
+          <q-tab-panel name="Deletes.Body">
+            <div class="text-h4 q-mb-md">Delete Body</div>
+            <Editor :propCode="codeDeleteBody" :event-name="'on-change-delete-body'"
+                    @on-change-delete-body="onChangeDeleteBody"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Deletes.Query" v-if="configType === 'request' ">
-          <div class="text-h4 q-mb-md">Delete Query</div>
-          <Editor :propCode="codeDeleteQuery" :event-name="'on-change-delete-query'"
-                  @on-change-delete-query="onChangeDeleteQuery"/>
-        </q-tab-panel>
+          <q-tab-panel name="Deletes.Query" v-if="configType === 'request' ">
+            <div class="text-h4 q-mb-md">Delete Query</div>
+            <Editor :propCode="codeDeleteQuery" :event-name="'on-change-delete-query'"
+                    @on-change-delete-query="onChangeDeleteQuery"/>
+          </q-tab-panel>
 
-        <q-tab-panel name="Deletes.Param" v-if="configType === 'request' ">
-          <div class="text-h4 q-mb-md">Delete Param</div>
-          <Editor :propCode="codeDeleteParam" :event-name="'on-change-delete-param'"
-                  @on-change-delete-param="onChangeDeleteParam"/>
-        </q-tab-panel>
+          <q-tab-panel name="Deletes.Param" v-if="configType === 'request' ">
+            <div class="text-h4 q-mb-md">Delete Param</div>
+            <Editor :propCode="codeDeleteParam" :event-name="'on-change-delete-param'"
+                    @on-change-delete-param="onChangeDeleteParam"/>
+          </q-tab-panel>
 
-      </q-tab-panels>
-    </template>
-  </q-splitter>
-
+        </q-tab-panels>
+      </template>
+    </q-splitter>
+  </ValidationObserver>
 </template>
 
 <script>
@@ -239,12 +242,21 @@ export default {
   ],
   components: {Editor},
   watch: {
-    // propCodeAddHeader(val) {
-    //   this.codeAddHeader = val;
+    // error(val) {
+    //   console.log("watcher error triggered, error is")
+    //   console.log(val)
+    //   this.error = val;
+    //   if(this.error){
+    //     this.$emit('on-validation-error', this.error);
+    //     this.error= null;
+    //   }
+    //
+    //
     // }
   },
   data() {
     return {
+      error: null,
       splitterModel: 20,
       selected: "General",
       loop: this.propLoop,
@@ -282,6 +294,12 @@ export default {
     }
   },
   methods: {
+    setError(error) {
+        this.error = error;
+        this.$emit('on-validation-error', this.error);
+
+
+    },
     onChangeRequestLoop(val) {
       this.$emit('on-change-loop-' + this.configType, val)
       this.loop = val

@@ -1,8 +1,6 @@
 <template>
   <div class="full-height">
-
-    <ValidationObserver v-slot="{ handleSubmit }">
-      <form @submit.prevent="handleSubmit(onSaveClicked)" class="full-height">
+    <form class="full-height" @submit.prevent="onSaveClicked">
       <div class="column" style="height: 100%">
         <div class="col">
           <q-splitter
@@ -16,9 +14,11 @@
                   v-model="tab"
                   vertical
                   class="text-teal"
+
+
               >
-                <q-tab name="general" icon="description" label="General"/>
-                <q-tab name="base" icon="settings_application" label="Base Settings"/>
+                <q-tab name="general" icon="description" label="General" :alert="validators.nameErr ? 'red': false"/>
+                <q-tab name="base" icon="settings_application" label="Base Settings"  :alert="validators.statusCodeErr? 'red': false"/>
                 <q-tab name="configures" icon="settings_application" label="Configures"
                        v-if="$route.name ==='Projects.Detail' "/>
                 <q-tab name="serial/parallel" icon="settings_application" label="Serial/Parallel"
@@ -35,19 +35,22 @@
                   transition-prev="jump-up"
                   transition-next="jump-up"
                   style="height: 100%"
-
+                  keep-alive
+                  ref="tabs"
               >
-                <q-tab-panel name="general" >
+                <q-tab-panel name="general">
                   <div class="text-h4 q-mb-md">General</div>
-                  <ValidationProvider name="Project Name" rules="required" v-slot="{ errors }">
-                    <q-input
-                        filled
-                        v-model="name"
-                        label="Name *"
-                        hint="Project Name"
-                    />
-                    <p class="text-negative">{{errors[0]}}</p>
-                  </ValidationProvider>
+
+                  <q-input
+                      filled
+                      v-model="name"
+                      label="Name *"
+                      hint="Project Name"
+                      :rules="[ val => val && val.length > 0 || 'Please type Project Name']"
+                      name="name"
+                      ref="name"
+                  />
+                  <p class="text-negative"> {{ errorTab1 }}</p>
                   <br/>
                   <q-input
                       filled
@@ -70,30 +73,34 @@
                   />
 
                   <br/>
-                  <EditorRequestResponseConfig config-type="response"
-                                               :prop-enable-loop="false"
-                                               :have-log="false"
-                                               :prop-status-code="statusCode"
-                                               :prop-transform="transform"
-                                               :prop-log-after-modify="logAfterModify"
-                                               :prop-log-before-modify="logBeforeModify"
-                                               :prop-code-add-header="codeAddHeader"
-                                               :prop-code-add-body="codeAddBody"
-                                               :prop-code-modify-header="codeModifyHeader"
-                                               :prop-code-modify-body="codeModifyBody"
-                                               :prop-code-delete-header="codeDeleteHeader"
-                                               :prop-code-delete-body="codeDeleteBody"
-                                               @on-change-status-code-response="onChangeStatusCode"
-                                               @on-change-transform-response="onChangeTransform"
-                                               @on-change-log-before-modify-response="onChangeLogBeforeModify"
-                                               @on-change-log-after-modify-response="onChangeLogAfterModify"
-                                               @on-change-add-header-response="onChangeAddHeader"
-                                               @on-change-add-body-response="onChangeAddBody"
-                                               @on-change-modify-header-response="onChangeModifyHeader"
-                                               @on-change-modify-body-response="onChangeModifyBody"
-                                               @on-change-delete-header-response="onChangeDeleteHeader"
-                                               @on-change-delete-body-response="onChangeDeleteBody"
-                  />
+                  <keep-alive>
+                    <EditorRequestResponseConfig ref="editor"
+                                                 config-type="response"
+                                                 :prop-enable-loop="false"
+                                                 :have-log="false"
+                                                 :prop-status-code="statusCode"
+                                                 :prop-transform="transform"
+                                                 :prop-log-after-modify="logAfterModify"
+                                                 :prop-log-before-modify="logBeforeModify"
+                                                 :prop-code-add-header="codeAddHeader"
+                                                 :prop-code-add-body="codeAddBody"
+                                                 :prop-code-modify-header="codeModifyHeader"
+                                                 :prop-code-modify-body="codeModifyBody"
+                                                 :prop-code-delete-header="codeDeleteHeader"
+                                                 :prop-code-delete-body="codeDeleteBody"
+                                                 @on-change-status-code-response="onChangeStatusCode"
+                                                 @on-change-transform-response="onChangeTransform"
+                                                 @on-change-log-before-modify-response="onChangeLogBeforeModify"
+                                                 @on-change-log-after-modify-response="onChangeLogAfterModify"
+                                                 @on-change-add-header-response="onChangeAddHeader"
+                                                 @on-change-add-body-response="onChangeAddBody"
+                                                 @on-change-modify-header-response="onChangeModifyHeader"
+                                                 @on-change-modify-body-response="onChangeModifyBody"
+                                                 @on-change-delete-header-response="onChangeDeleteHeader"
+                                                 @on-change-delete-body-response="onChangeDeleteBody"
+                                                 @on-validation-error="setErrorTab2"
+                    />
+                  </keep-alive>
 
                 </q-tab-panel>
 
@@ -126,7 +133,7 @@
         <div class="col-1">
           <div class="row">
             <div class="col-1 text-center">
-              <q-btn type="submit" >Save</q-btn>
+              <q-btn type="submit">Save</q-btn>
             </div>
             <div class="col-1" v-if="$route.name === 'Projects.Detail' ">
               <q-btn @click="confirmDelete = true" type="negative">Delete</q-btn>
@@ -150,8 +157,26 @@
           </q-card-actions>
         </q-card>
       </q-dialog>
-      </form>
-    </ValidationObserver>
+      <q-dialog v-model="alertDialog">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Form Validation Error</div>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            <ul>
+              <li v-for="(error,index) in globalErrors" :key="index">
+                {{ error }}
+              </li>
+            </ul>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="OK" color="primary" v-close-popup @click="okClicked"/>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+    </form>
   </div>
 </template>
 
@@ -172,6 +197,13 @@ export default {
   },
   data() {
     return {
+      // validation provider error
+      globalErrors: [],
+      errorTab1: null,
+      errorTab2: null,
+
+      alertDialog: false,
+
       splitterModel: 10,
       tab: 'general',
       name: null,
@@ -222,7 +254,15 @@ export default {
         }
       ],
       /* serial saved data */
-      serialConfigSaved: null
+      serialConfigSaved: null,
+      validators: {
+        nameErr: false,
+        statusCodeErr: false,
+        formHasError: false,
+        errCount: 0
+      },
+
+      tabNames: this.$route.name === 'Project.New' ? ["general", "base" ] : ["general","base" ,"configures","serial/parallel"]
     }
   },
   methods: {
@@ -234,6 +274,15 @@ export default {
       actionFetchConfigures: 'configures/fetchConfigures',
       storeSerial: 'serial/storeSerial'
     }),
+    okClicked() {
+      this.alertDialog = false;
+      this.globalErrors = [];
+
+    },
+    setErrorTab2(error) {
+      this.errorTab2 = error
+    },
+
     async onConfirmSerialConfig(val) {
       this.serialConfigSaved = val
       let data = this.constructDataConfigSerial(this.serialConfigSaved);
@@ -392,18 +441,65 @@ export default {
 
       this.serial = data.serial
       this.parallel = data.parallel
-
     },
-    async onSaveClicked() {
-      let data = this.constructData();
-      if (this.$route.name === 'Projects.Detail') {
-        await this.onUpdateProject(data)
+    validateInput(){
+      this.validators.errCount = 0
+      this.globalErrors = []
+      this.validators.formHasError = false;
+      this.$refs.name.validate();
+      this.validators.nameErr = this.$refs.name.hasError
+        const editor = this.$refs.editor
+console.log("editor is ")
+      console.log(editor)
+      this.$refs.editor.$refs.statusCode.validate();
 
-      } else {
-        await this.onStoreProject(data)
+        console.log(editor)
+      this.validators.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
+
+      if(this.validators.nameErr){
+        this.validators.errCount++;
+        this.globalErrors.push(this.$refs.name.innerErrorMessage)
+
       }
+      if(this.validators.statusCodeErr){
+        this.validators.errCount++
+        this.globalErrors.push(this.$refs.editor.$refs.statusCode.innerErrorMessage)
+      }
+      if(this.validators.errCount > 0){
+        this.validators.formHasError = true
+        this.alertDialog = true;
 
+      }
     },
+    test() {
+      let traversal = this.tabNames.reduce((promiseChain, item) => {
+        return promiseChain.then(() => new Promise(resolve => {
+              console.log("done with", item)
+              resolve()
+              this.$refs.tabs.goTo(item)
+            })
+        )
+      }, Promise.resolve())
+
+
+      traversal.then(() => {
+        console.log("done")
+        console.log("refs tabs is ")
+        console.log(this.$refs.tabs)
+        this.$refs.tabs.goTo('general')
+      })
+    },
+    onSaveClicked() {
+      this.validateInput();
+      if(!this.validators.formHasError){
+        let data = this.constructData();
+        if (this.$route.name === 'Projects.Detail') {
+          this.onUpdateProject(data)
+        } else {
+          this.onStoreProject(data)
+        }
+      }
+   },
     async onStoreProject(data) {
       try {
         let response = await this.storeProject(data)
@@ -464,11 +560,12 @@ export default {
     }
   },
   async mounted() {
-    console.log(this.$route.name)
     if (this.$route.name === 'Projects.Detail') {
       await this.getProjectDetail()
       await this.fetchConfigures(this.$route.params.id);
     }
+
+    await this.test()
   }
 }
 </script>
