@@ -1,136 +1,144 @@
 <template>
   <div class="full-height">
-    <div class="column " style="height: 100%">
-      <div class="col">
-        <q-splitter
-            v-if="!isLoading"
-            v-model="splitterModel"
-            class="full-height"
-        >
-          <template v-slot:before>
-            <q-tabs
-                v-model="tab"
-                vertical
-                class="text-teal"
-            >
-              <q-tab name="general" icon="description" label="General"/>
-              <q-tab name="request" icon="list" label="Request"/>
-              <q-tab name="response" icon="list" label="Response"/>
-            </q-tabs>
-          </template>
+    <form class="full-height" @submit.prevent="onSaveClicked">
+      <div class="column " style="height: 100%">
+        <div class="col">
+          <q-splitter
+              v-if="!isLoading"
+              v-model="splitterModel"
+              class="full-height"
+          >
+            <template v-slot:before>
+              <q-tabs
+                  v-model="tab"
+                  vertical
+                  class="text-teal"
+              >
+                <q-tab name="general" icon="description" label="General"/>
+                <q-tab name="request" icon="list" label="Request" :alert="validators.destinationURLErr? 'red': false"/>
+                <q-tab name="response" icon="list" label="Response" :alert="validators.statusCodeErr? 'red': false"/>
+              </q-tabs>
+            </template>
 
-          <template v-slot:after>
-            <q-tab-panels
-                v-model="tab"
-                animated
-                swipeable
-                vertical
-                transition-prev="jump-up"
-                transition-next="jump-up"
-            >
+            <template v-slot:after>
+              <q-tab-panels
+                  v-model="tab"
+                  animated
+                  swipeable
+                  vertical
+                  transition-prev="jump-up"
+                  transition-next="jump-up"
+                  keep-alive
+                  ref="tabs"
+              >
 
-              <q-tab-panel name="general">
-                <div class="text-h4 q-mb-md">General</div>
-                <q-input v-model="id" filled hint="Config Id" label="Id" v-if="mode === 'edit' "/>
+                <q-tab-panel name="general">
+                  <div class="text-h4 q-mb-md">General</div>
+                  <q-input v-model="id" filled hint="Config Id" label="Id" v-if="mode === 'edit' "/>
 
-                <q-input v-model="description" type="textarea" filled hint="Config Description" label="Description"/>
-              </q-tab-panel>
-              <q-tab-panel name="request">
-                <div class="text-h4 q-mb-md">Request</div>
-                <EditorRequestResponseConfig config-type="request"
-                                             :have-log="true"
-                                             :prop-enable-loop="true"
-                                              :prop-loop="request.loop"
-                                             :prop-request-method="request.method"
-                                             :prop-destination-url="request.destinationUrl"
-                                             :prop-destination-path="request.destinationPath"
-                                             :prop-transform="request.transform"
-                                             :prop-log-after-modify="request.logAfterModify"
-                                             :prop-log-before-modify="request.logBeforeModify"
+                  <q-input v-model="description" type="textarea" filled hint="Config Description" label="Description"/>
+                </q-tab-panel>
+                <q-tab-panel name="request">
+                  <div class="text-h4 q-mb-md">Request</div>
+                  <EditorRequestResponseConfig
+                      ref="editorRequest"
+                      config-type="request"
+                      :have-log="true"
+                      :prop-enable-loop="true"
+                      :prop-loop="request.loop"
+                      :prop-request-method="request.method"
+                      :prop-destination-url="request.destinationUrl"
+                      :prop-destination-path="request.destinationPath"
+                      :prop-transform="request.transform"
+                      :prop-log-after-modify="request.logAfterModify"
+                      :prop-log-before-modify="request.logBeforeModify"
 
-                                             :prop-code-add-header="request.codeAddHeader"
-                                             :prop-code-add-body="request.codeAddBody"
-                                             :prop-code-add-query="request.codeAddQuery"
-                                             :prop-code-add-param="request.codeAddParam"
+                      :prop-code-add-header="request.codeAddHeader"
+                      :prop-code-add-body="request.codeAddBody"
+                      :prop-code-add-query="request.codeAddQuery"
+                      :prop-code-add-param="request.codeAddParam"
 
-                                             :prop-code-modify-header="request.codeModifyHeader"
-                                             :prop-code-modify-body="request.codeModifyBody"
-                                             :prop-code-modify-query="request.codeModifyQuery"
-                                             :prop-code-modify-param="request.codeModifyParam"
+                      :prop-code-modify-header="request.codeModifyHeader"
+                      :prop-code-modify-body="request.codeModifyBody"
+                      :prop-code-modify-query="request.codeModifyQuery"
+                      :prop-code-modify-param="request.codeModifyParam"
 
-                                             :prop-code-delete-header="request.codeDeleteHeader"
-                                             :prop-code-delete-body="request.codeDeleteBody"
-                                             :prop-code-delete-query="request.codeDeleteQuery"
-                                             :prop-code-delete-param="request.codeDeleteParam"
+                      :prop-code-delete-header="request.codeDeleteHeader"
+                      :prop-code-delete-body="request.codeDeleteBody"
+                      :prop-code-delete-query="request.codeDeleteQuery"
+                      :prop-code-delete-param="request.codeDeleteParam"
 
-                                             @on-change-transform-request="onChangeTransformRequest"
-                                             @on-change-log-before-modify-request="onChangeLogBeforeModifyRequest"
-                                             @on-change-log-after-modify-request="onChangeLogAfterModifyRequest"
-                                             @on-change-add-header-request="onChangeAddHeaderRequest"
-                                             @on-change-add-body-request="onChangeAddBodyRequest"
-                                             @on-change-add-query-request="onChangeAddQueryRequest"
-                                             @on-change-add-param-request="onChangeAddParamRequest"
+                      @on-change-transform-request="onChangeTransformRequest"
+                      @on-change-log-before-modify-request="onChangeLogBeforeModifyRequest"
+                      @on-change-log-after-modify-request="onChangeLogAfterModifyRequest"
+                      @on-change-add-header-request="onChangeAddHeaderRequest"
+                      @on-change-add-body-request="onChangeAddBodyRequest"
+                      @on-change-add-query-request="onChangeAddQueryRequest"
+                      @on-change-add-param-request="onChangeAddParamRequest"
 
-                                             @on-change-modify-header-request="onChangeModifyHeaderRequest"
-                                             @on-change-modify-body-request="onChangeModifyBodyRequest"
-                                             @on-change-modify-query-request="onChangeModifyQueryRequest"
-                                             @on-change-modify-param-request="onChangeModifyParamRequest "
+                      @on-change-modify-header-request="onChangeModifyHeaderRequest"
+                      @on-change-modify-body-request="onChangeModifyBodyRequest"
+                      @on-change-modify-query-request="onChangeModifyQueryRequest"
+                      @on-change-modify-param-request="onChangeModifyParamRequest "
 
-                                             @on-change-delete-header-request="onChangeDeleteHeaderRequest"
-                                             @on-change-delete-body-request="onChangeDeleteBodyRequest"
-                                             @on-change-method-request="onChangeMethodRequest"
-                                             @on-change-destination-url-request="onChangeDestinationUrlRequest"
-                                             @on-change-destination-path-request="onChangeDestinationPathRequest"
-                                             @on-change-loop-request="onChangeLoopRequest"
-                />
-              </q-tab-panel>
+                      @on-change-delete-header-request="onChangeDeleteHeaderRequest"
+                      @on-change-delete-body-request="onChangeDeleteBodyRequest"
+                      @on-change-method-request="onChangeMethodRequest"
+                      @on-change-destination-url-request="onChangeDestinationUrlRequest"
+                      @on-change-destination-path-request="onChangeDestinationPathRequest"
+                      @on-change-loop-request="onChangeLoopRequest"
+                  />
+                </q-tab-panel>
 
-              <q-tab-panel name="response">
-                <div class="text-h4 q-mb-md">Response</div>
-                <EditorRequestResponseConfig config-type="response"
-                                             :prop-enable-loop="false"
-                                             :have-log="true"
-                                             :prop-status-code="response.statusCode"
-                                             :prop-transform="response.transform"
-                                             :prop-log-after-modify="response.logAfterModify"
-                                             :prop-log-before-modify="response.logBeforeModify"
-                                             :prop-code-add-header="response.codeAddHeader"
-                                             :prop-code-add-body="response.codeAddBody"
-                                             :prop-code-modify-header="response.codeModifyHeader"
-                                             :prop-code-modify-body="response.codeModifyBody"
-                                             :prop-code-delete-header="response.codeDeleteHeader"
-                                             :prop-code-delete-body="response.codeDeleteBody"
+                <q-tab-panel name="response">
+                  <div class="text-h4 q-mb-md">Response</div>
+                  <EditorRequestResponseConfig
+                      ref="editorResponse"
+                      config-type="response"
+                      :prop-enable-loop="false"
+                      :have-log="true"
+                      :prop-status-code="response.statusCode"
+                      :prop-transform="response.transform"
+                      :prop-log-after-modify="response.logAfterModify"
+                      :prop-log-before-modify="response.logBeforeModify"
+                      :prop-code-add-header="response.codeAddHeader"
+                      :prop-code-add-body="response.codeAddBody"
+                      :prop-code-modify-header="response.codeModifyHeader"
+                      :prop-code-modify-body="response.codeModifyBody"
+                      :prop-code-delete-header="response.codeDeleteHeader"
+                      :prop-code-delete-body="response.codeDeleteBody"
 
-                                             @on-change-status-code-response="onChangeStatusCodeResponse"
-                                             @on-change-transform-response="onChangeTransformResponse"
-                                             @on-change-log-before-modify-response="onChangeLogBeforeModifyResponse"
-                                             @on-change-log-after-modify-response="onChangeLogAfterModifyResponse"
-                                             @on-change-add-header-response="onChangeAddHeaderResponse"
-                                             @on-change-add-body-response="onChangeAddBodyResponse"
-                                             @on-change-modify-header-response="onChangeModifyHeaderResponse"
-                                             @on-change-modify-body-response="onChangeModifyBodyResponse"
-                                             @on-change-delete-header-response="onChangeDeleteHeaderResponse"
-                                             @on-change-delete-body-repsonse="onChangeDeleteBodyResponse"
-                />
-              </q-tab-panel>
+                      @on-change-status-code-response="onChangeStatusCodeResponse"
+                      @on-change-transform-response="onChangeTransformResponse"
+                      @on-change-log-before-modify-response="onChangeLogBeforeModifyResponse"
+                      @on-change-log-after-modify-response="onChangeLogAfterModifyResponse"
+                      @on-change-add-header-response="onChangeAddHeaderResponse"
+                      @on-change-add-body-response="onChangeAddBodyResponse"
+                      @on-change-modify-header-response="onChangeModifyHeaderResponse"
+                      @on-change-modify-body-response="onChangeModifyBodyResponse"
+                      @on-change-delete-header-response="onChangeDeleteHeaderResponse"
+                      @on-change-delete-body-repsonse="onChangeDeleteBodyResponse"
+                  />
+                </q-tab-panel>
 
-            </q-tab-panels>
-          </template>
+              </q-tab-panels>
+            </template>
 
-        </q-splitter>
-      </div>
-      <div class="col-1">
-        <div class="row">
-          <div class="col-1 text-center">
-            <q-btn @click="onSaveClicked" type="primary">Save</q-btn>
-          </div>
-          <div class="col-1" v-if="$route.name === 'Configures.Detail' ">
-            <q-btn @click="confirmDelete = true" type="negative">Delete</q-btn>
-          </div>
+          </q-splitter>
         </div>
+        <div class="col-1">
+          <div class="row">
+            <div class="col-1 text-center">
+              <q-btn type="submit">Save</q-btn>
+            </div>
+            <div class="col-1" v-if="$route.name === 'Configures.Detail' ">
+              <q-btn @click="confirmDelete = true" type="negative">Delete</q-btn>
+            </div>
+          </div>
 
+        </div>
       </div>
-    </div>
+    </form>
 
 
     <q-dialog v-model="confirmDelete" persistent>
@@ -143,6 +151,26 @@
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="primary" v-close-popup/>
           <q-btn flat label="Delete" color="primary" v-close-popup @click="onDeleteClicked"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="alertDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Form Validation Error</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <ul>
+            <li v-for="(error,index) in globalErrors" :key="index">
+              {{ error }}
+            </li>
+          </ul>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -173,7 +201,7 @@ export default {
       id: '',
       description: '',
       request: {
-        loop : null,
+        loop: null,
         destinationUrl: '',
         destinationPath: '',
         method: 'POST',
@@ -209,7 +237,17 @@ export default {
         codeDeleteHeader: [],
         codeDeleteBody: [],
 
-      }
+      },
+      validators: {
+        destinationURLErr: false,
+        statusCodeErr: false,
+        formHasError: false,
+        errCount: 0
+      },
+      tabNames: ["general", "request", "response"],
+      globalErrors: [],
+      alertDialog: false,
+
     }
   },
   methods: {
@@ -217,30 +255,74 @@ export default {
       fetchSpecificConfigure: 'configures/fetchSpecificConfigure',
       storeConfigure: 'configures/storeConfigure',
       updateConfigure: 'configures/updateConfigure',
-      deleteConfigure : 'configures/deleteConfigure'
+      deleteConfigure: 'configures/deleteConfigure'
     }),
-    async onSaveClicked() {
-      if (this.$route.name === 'Configures.Detail') {
-        await this.onUpdateConfig()
-      } else {
-        await this.onStoreConfig()
+    visitTabs() {
+      let traversal = this.tabNames.reduce((promiseChain, item) => {
+        return promiseChain.then(() => new Promise(resolve => {
+              console.log("done with", item)
+              resolve()
+              this.$refs.tabs.goTo(item)
+            })
+        )
+      }, Promise.resolve())
+
+
+      traversal.then(() => {
+        this.$refs.tabs.goTo('general')
+      })
+    },
+    validateInput() {
+      this.validators.errCount = 0
+      this.globalErrors = []
+      this.validators.formHasError = false;
+      this.$refs.editorRequest.$refs.destinationURL.validate();
+      this.validators.destinationURLErr = this.$refs.editorRequest.$refs.destinationURL.hasError
+
+      this.$refs.editorResponse.$refs.statusCode.validate();
+      this.validators.statusCodeErr = this.$refs.editorResponse.$refs.statusCode.hasError
+
+      if (this.validators.destinationURLErr) {
+        this.validators.errCount++;
+        this.globalErrors.push(this.$refs.editorRequest.$refs.destinationURL.innerErrorMessage)
+
       }
+      if (this.validators.statusCodeErr) {
+        this.validators.errCount++
+        this.globalErrors.push(this.$refs.editorResponse.$refs.statusCode.innerErrorMessage)
+      }
+      if (this.validators.errCount > 0) {
+        this.validators.formHasError = true
+        this.alertDialog = true;
+
+      }
+    },
+    async onSaveClicked() {
+      this.validateInput()
+      if (!this.validators.formHasError) {
+        if (this.$route.name === 'Configures.Detail') {
+          await this.onUpdateConfig()
+        } else {
+          await this.onStoreConfig()
+        }
+      }
+
     },
     async onDeleteClicked() {
       try {
-        let params  ={
-          project_id : this.$route.params.projectId,
-          configure_id : this.$route.params.id
+        let params = {
+          project_id: this.$route.params.projectId,
+          configure_id: this.$route.params.id
         }
-       await this.deleteConfigure(params)
+        await this.deleteConfigure(params)
         this.$q.notify({
           message: 'Delete Success.',
           color: 'secondary'
         })
-        await this.$router.replace({name: 'Projects.Detail', params : {id : this.$route.params.projectId}})
+        await this.$router.replace({name: 'Projects.Detail', params: {id: this.$route.params.projectId}})
 
-      }catch (err) {
-       console.log(err)
+      } catch (err) {
+        console.log(err)
       }
     },
     async onUpdateConfig() {
@@ -276,53 +358,53 @@ export default {
     },
     constructData() {
       return {
-        project_id : this.$route.params.projectId,
-        config : {
-          id : this.$route.params.id,
-          description : this.description,
-          request : {
-            loop : this.request.loop,
-            destination_url : this.request.destinationUrl,
-            destination_path : this.request.destinationPath,
-            method : this.request.method,
-            transform : this.request.transform,
-            log_before_modify : this.request.logBeforeModify ? this.request.logBeforeModify : {},
-            log_after_modify : this.request.logAfterModify ? this.request.logAfterModify : {},
-            adds : {
-              header : this.request.codeAddHeader,
-              body : this.request.codeAddBody,
-              query : this.request.codeAddQuery,
-              param : this.request.codeAddParam,
+        project_id: this.$route.params.projectId,
+        config: {
+          id: this.$route.params.id,
+          description: this.description,
+          request: {
+            loop: this.request.loop,
+            destination_url: this.request.destinationUrl,
+            destination_path: this.request.destinationPath,
+            method: this.request.method,
+            transform: this.request.transform,
+            log_before_modify: this.request.logBeforeModify ? this.request.logBeforeModify : {},
+            log_after_modify: this.request.logAfterModify ? this.request.logAfterModify : {},
+            adds: {
+              header: this.request.codeAddHeader,
+              body: this.request.codeAddBody,
+              query: this.request.codeAddQuery,
+              param: this.request.codeAddParam,
             },
-            modifies : {
-              header : this.request.codeModifyHeader,
-              body : this.request.codeModifyBody,
-              query : this.request.codeModifyQuery,
-              param : this.request.codeModifyParam,
+            modifies: {
+              header: this.request.codeModifyHeader,
+              body: this.request.codeModifyBody,
+              query: this.request.codeModifyQuery,
+              param: this.request.codeModifyParam,
             },
-            deletes : {
-              header : this.request.codeDeleteHeader,
-              body : this.request.codeDeleteBody,
-              query : this.request.codeDeleteQuery,
-              param : this.request.codeDeleteParam,
+            deletes: {
+              header: this.request.codeDeleteHeader,
+              body: this.request.codeDeleteBody,
+              query: this.request.codeDeleteQuery,
+              param: this.request.codeDeleteParam,
             }
           },
-          response : {
-            status_code : this.response.statusCode,
-            transform : this.response.transform,
-            log_before_modify : this.response.logBeforeModify ? this.response.logBeforeModify : {},
-            log_after_modify : this.response.logAfterModify ? this.response.logAfterModify : {},
-            adds : {
-              header : this.response.codeAddHeader,
-              body : this.response.codeAddBody,
+          response: {
+            status_code: this.response.statusCode,
+            transform: this.response.transform,
+            log_before_modify: this.response.logBeforeModify ? this.response.logBeforeModify : {},
+            log_after_modify: this.response.logAfterModify ? this.response.logAfterModify : {},
+            adds: {
+              header: this.response.codeAddHeader,
+              body: this.response.codeAddBody,
             },
-            modifies : {
-              header : this.response.codeModifyHeader,
-              body : this.response.codeModifyBody,
+            modifies: {
+              header: this.response.codeModifyHeader,
+              body: this.response.codeModifyBody,
             },
-            deletes : {
-              header : this.response.codeDeleteHeader,
-              body : this.response.codeDeleteBody,
+            deletes: {
+              header: this.response.codeDeleteHeader,
+              body: this.response.codeDeleteBody,
             }
           }
 
@@ -333,7 +415,8 @@ export default {
     async loadConfigure(projectId, configureId) {
       this.isLoading = true
       const param = {
-        configure_id: configureId, project_id : projectId}
+        configure_id: configureId, project_id: projectId
+      }
       try {
         let response = await this.fetchSpecificConfigure(param)
         this.fillData(response.data)
@@ -402,7 +485,7 @@ export default {
       }
     },
     /* Request */
-    onChangeLoopRequest(val){
+    onChangeLoopRequest(val) {
       this.request.loop = val;
     },
     onChangeDestinationUrlRequest(val) {
@@ -502,6 +585,8 @@ export default {
     if (this.$route.name === 'Configures.Detail') {
       await this.loadConfigure(this.$route.params.projectId, this.$route.params.id)
     }
+
+    await this.visitTabs()
   }
 }
 </script>

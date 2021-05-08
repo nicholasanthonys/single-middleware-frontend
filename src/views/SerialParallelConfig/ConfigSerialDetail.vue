@@ -14,8 +14,10 @@
                 vertical
                 class="text-teal"
             >
-              <q-tab name="general" icon="description" label="General"/>
-              <q-tab name="next_failure" icon="settings_application" label="Next Failure"/>
+              <q-tab name="general" icon="description" label="General"
+                     :alert="validators.configIdErr|| validators.aliasErr? 'red': false"/>
+              <q-tab name="next_failure" icon="settings_application" label="Next Failure"
+                     :alert="validators.statusCodeErr? 'red': false"/>
               <q-tab name="c_logics" icon="settings_application" label="CLogics" v-if="propSerialConfig!= null"/>
             </q-tabs>
           </template>
@@ -29,14 +31,21 @@
                 transition-prev="jump-up"
                 transition-next="jump-up"
                 style="height: 100%"
+                keep-alive
+                ref="tabs"
 
             >
               <q-tab-panel name="general">
                 <div class="text-h4 q-mb-md">General</div>
                 <q-select v-model="selectedConfigId" :options="configureOptions" label="Select Configuration Id"
-                          style="max-width: 300px"/>
+                          style="max-width: 300px"
+                          ref="configId"
+                          :rules="[ val => val && val.length > 0 || 'Please Select Configuration Id']"
+
+                />
                 <br/>
                 <q-input
+                    ref="alias"
                     filled
                     v-model="alias"
                     label="Alias *"
@@ -47,27 +56,29 @@
 
               <q-tab-panel name="next_failure">
                 <div class="text-h4 q-mb-md">Failure Response</div>
-                <EditorRequestResponseConfig config-type="response"
-                                             :prop-status-code="statusCode"
-                                             :prop-transform="transform"
-                                             :prop-log-after-modify="logAfterModify"
-                                             :prop-log-before-modify="logBeforeModify"
-                                             :prop-code-add-header="codeAddHeader"
-                                             :prop-code-add-body="codeAddBody"
-                                             :prop-code-modify-header="codeModifyHeader"
-                                             :prop-code-modify-body="codeModifyBody"
-                                             :prop-code-delete-header="codeDeleteHeader"
-                                             :prop-code-delete-body="codeDeleteBody"
-                                             @on-change-status-code-response="onChangeStatusCode"
-                                             @on-change-transform-response="onChangeTransform"
-                                             @on-change-log-before-modify-response="onChangeLogBeforeModify"
-                                             @on-change-log-after-modify-response="onChangeLogAfterModify"
-                                             @on-change-add-header-response="onChangeAddHeader"
-                                             @on-change-add-body-response="onChangeAddBody"
-                                             @on-change-modify-header-response="onChangeModifyHeader"
-                                             @on-change-modify-body-response="onChangeModifyBody"
-                                             @on-change-delete-header-response="onChangeDeleteHeader"
-                                             @on-change-delete-body-response="onChangeDeleteBody"
+                <EditorRequestResponseConfig
+                    ref="editor"
+                    config-type="response"
+                    :prop-status-code="statusCode"
+                    :prop-transform="transform"
+                    :prop-log-after-modify="logAfterModify"
+                    :prop-log-before-modify="logBeforeModify"
+                    :prop-code-add-header="codeAddHeader"
+                    :prop-code-add-body="codeAddBody"
+                    :prop-code-modify-header="codeModifyHeader"
+                    :prop-code-modify-body="codeModifyBody"
+                    :prop-code-delete-header="codeDeleteHeader"
+                    :prop-code-delete-body="codeDeleteBody"
+                    @on-change-status-code-response="onChangeStatusCode"
+                    @on-change-transform-response="onChangeTransform"
+                    @on-change-log-before-modify-response="onChangeLogBeforeModify"
+                    @on-change-log-after-modify-response="onChangeLogAfterModify"
+                    @on-change-add-header-response="onChangeAddHeader"
+                    @on-change-add-body-response="onChangeAddBody"
+                    @on-change-modify-header-response="onChangeModifyHeader"
+                    @on-change-modify-body-response="onChangeModifyBody"
+                    @on-change-delete-header-response="onChangeDeleteHeader"
+                    @on-change-delete-body-response="onChangeDeleteBody"
                 />
 
               </q-tab-panel>
@@ -240,6 +251,18 @@ export default {
       dialog: false,
       maximizedToggle: true,
 
+      validators: {
+        configIdErr: false,
+        aliasErr: false,
+        statusCodeErr: false,
+        formHasError: false,
+        errCount: 0
+      },
+
+      tabNames: ["general", "next_failure", "c_logics"],
+      globalErrors: [],
+      alertDialog: false,
+
 
     }
   },
@@ -251,12 +274,61 @@ export default {
       storeSingleConfig: 'serial/storeSingleConfig',
       updateSpecificConfig: 'serial/updateSingleConfig',
     }),
+    validateInput() {
+      this.validators.errCount = 0
+      this.globalErrors = []
+      this.validators.formHasError = false;
+      this.$refs.configId.validate();
+      this.validators.configIdErr = this.$refs.configId.hasError
+
+      this.$refs.alias.validate();
+      this.validators.aliasErr = this.$refs.alias.hasError
+
+      this.$refs.editor.$refs.statusCode.validate();
+
+      this.validators.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
+
+      if (this.validators.configIdErr) {
+        this.validators.errCount++;
+        this.globalErrors.push(this.$refs.configId.innerErrorMessage)
+
+      }
+      if (this.validators.aliasErr) {
+        this.validators.errCount++;
+        this.globalErrors.push(this.$refs.alias.innerErrorMessage)
+      }
+
+      if (this.validators.statusCodeErr) {
+        this.validators.errCount++
+        this.globalErrors.push(this.$refs.editor.$refs.statusCode.innerErrorMessage)
+      }
+      if (this.validators.errCount > 0) {
+        this.validators.formHasError = true
+        this.alertDialog = true;
+
+      }
+    },
+    visitTabs() {
+      let traversal = this.tabNames.reduce((promiseChain, item) => {
+        return promiseChain.then(() => new Promise(resolve => {
+              console.log("done with", item)
+              resolve()
+              this.$refs.tabs.goTo(item)
+            })
+        )
+      }, Promise.resolve())
+
+
+      traversal.then(() => {
+        this.$refs.tabs.goTo('general')
+      })
+    },
     openDialogAddCLogic() {
       this.mode = 'add'
       this.dialog = true
     },
-    async onSaveClick() {
-      let data = {
+    constructData() {
+      return {
         project_id: this.$route.params.id,
         configure_id: this.selectedConfigId,
         alias: this.alias,
@@ -278,36 +350,38 @@ export default {
         },
         mode: this.propMode,
       }
-      console.log("data is ")
-      console.log(data)
-      if (this.propMode === 'edit') {
-        /* add id */
-        try {
-          data.id = this.id;
-          await this.updateSpecificConfig(data);
-          this.$q.notify({
-            message: 'Update Config Serial Success.',
-            color: 'secondary'
-          })
+    },
+    async onSaveClick() {
+      this.validateInput()
+      if (!this.validators.formHasError) {
+        let data = this.constructData()
+        if (this.propMode === 'edit') {
+          /* add id */
+          try {
+            data.id = this.id;
+            await this.updateSpecificConfig(data);
+            this.$q.notify({
+              message: 'Update Config Serial Success.',
+              color: 'secondary'
+            })
 
-          this.$emit('on-confirm-clicked')
-        } catch (e) {
-          console.log(e)
-        }
-      } else {
-        try {
-          await this.storeSingleConfig(data)
-          this.$q.notify({
-            message: 'Store Config Serial Success.',
-            color: 'secondary'
-          })
-          this.$emit('on-confirm-clicked')
-        } catch (e) {
-          console.log(e)
+            this.$emit('on-confirm-clicked')
+          } catch (e) {
+            console.log(e)
+          }
+        } else {
+          try {
+            await this.storeSingleConfig(data)
+            this.$q.notify({
+              message: 'Store Config Serial Success.',
+              color: 'secondary'
+            })
+            this.$emit('on-confirm-clicked')
+          } catch (e) {
+            console.log(e)
+          }
         }
       }
-
-
     },
 
     onCLogicSave() {
@@ -422,11 +496,15 @@ export default {
       // })
     }
   },
-  mounted() {
+  async mounted() {
 
     if (this.propMode === 'edit') {
       this.fillDataFromProps(this.propSerialConfig)
     }
+  },
+  created() {
+
+    this.visitTabs()
   }
 }
 </script>
