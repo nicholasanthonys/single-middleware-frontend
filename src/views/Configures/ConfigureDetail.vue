@@ -40,84 +40,25 @@
                 </q-tab-panel>
                 <q-tab-panel name="request">
                   <div class="text-h4 q-mb-md">Request</div>
+                  {{ request }}
                   <EditorRequestResponseConfig
                       ref="editorRequest"
                       config-type="request"
                       :have-log="true"
                       :prop-enable-loop="true"
-                      :prop-loop="request.loop"
-                      :prop-request-method="request.method"
-                      :prop-destination-url="request.destinationUrl"
-                      :prop-destination-path="request.destinationPath"
-                      :prop-transform="request.transform"
-                      :prop-log-after-modify="request.logAfterModify"
-                      :prop-log-before-modify="request.logBeforeModify"
-
-                      :prop-code-add-header="request.codeAddHeader"
-                      :prop-code-add-body="request.codeAddBody"
-                      :prop-code-add-query="request.codeAddQuery"
-                      :prop-code-add-param="request.codeAddParam"
-
-                      :prop-code-modify-header="request.codeModifyHeader"
-                      :prop-code-modify-body="request.codeModifyBody"
-                      :prop-code-modify-query="request.codeModifyQuery"
-                      :prop-code-modify-param="request.codeModifyParam"
-
-                      :prop-code-delete-header="request.codeDeleteHeader"
-                      :prop-code-delete-body="request.codeDeleteBody"
-                      :prop-code-delete-query="request.codeDeleteQuery"
-                      :prop-code-delete-param="request.codeDeleteParam"
-
-                      @on-change-transform-request="onChangeTransformRequest"
-                      @on-change-log-before-modify-request="onChangeLogBeforeModifyRequest"
-                      @on-change-log-after-modify-request="onChangeLogAfterModifyRequest"
-                      @on-change-add-header-request="onChangeAddHeaderRequest"
-                      @on-change-add-body-request="onChangeAddBodyRequest"
-                      @on-change-add-query-request="onChangeAddQueryRequest"
-                      @on-change-add-param-request="onChangeAddParamRequest"
-
-                      @on-change-modify-header-request="onChangeModifyHeaderRequest"
-                      @on-change-modify-body-request="onChangeModifyBodyRequest"
-                      @on-change-modify-query-request="onChangeModifyQueryRequest"
-                      @on-change-modify-param-request="onChangeModifyParamRequest "
-
-                      @on-change-delete-header-request="onChangeDeleteHeaderRequest"
-                      @on-change-delete-body-request="onChangeDeleteBodyRequest"
-                      @on-change-method-request="onChangeMethodRequest"
-                      @on-change-destination-url-request="onChangeDestinationUrlRequest"
-                      @on-change-destination-path-request="onChangeDestinationPathRequest"
-                      @on-change-loop-request="onChangeLoopRequest"
+                      v-model="request"
                   />
                 </q-tab-panel>
 
                 <q-tab-panel name="response">
                   <div class="text-h4 q-mb-md">Response</div>
+                  {{ response }}
                   <EditorRequestResponseConfig
                       ref="editorResponse"
                       config-type="response"
                       :prop-enable-loop="false"
                       :have-log="true"
-                      :prop-status-code="response.statusCode"
-                      :prop-transform="response.transform"
-                      :prop-log-after-modify="response.logAfterModify"
-                      :prop-log-before-modify="response.logBeforeModify"
-                      :prop-code-add-header="response.codeAddHeader"
-                      :prop-code-add-body="response.codeAddBody"
-                      :prop-code-modify-header="response.codeModifyHeader"
-                      :prop-code-modify-body="response.codeModifyBody"
-                      :prop-code-delete-header="response.codeDeleteHeader"
-                      :prop-code-delete-body="response.codeDeleteBody"
-
-                      @on-change-status-code-response="onChangeStatusCodeResponse"
-                      @on-change-transform-response="onChangeTransformResponse"
-                      @on-change-log-before-modify-response="onChangeLogBeforeModifyResponse"
-                      @on-change-log-after-modify-response="onChangeLogAfterModifyResponse"
-                      @on-change-add-header-response="onChangeAddHeaderResponse"
-                      @on-change-add-body-response="onChangeAddBodyResponse"
-                      @on-change-modify-header-response="onChangeModifyHeaderResponse"
-                      @on-change-modify-body-response="onChangeModifyBodyResponse"
-                      @on-change-delete-header-response="onChangeDeleteHeaderResponse"
-                      @on-change-delete-body-repsonse="onChangeDeleteBodyResponse"
+                      v-model="response"
                   />
                 </q-tab-panel>
 
@@ -204,7 +145,7 @@ export default {
         loop: null,
         destinationUrl: '',
         destinationPath: '',
-        method: 'POST',
+        requestMethod: 'POST',
 
         codeAddHeader: {},
         codeAddBody: {},
@@ -240,6 +181,7 @@ export default {
       },
       validators: {
         destinationURLErr: false,
+        requestMethodErr :  false,
         statusCodeErr: false,
         formHasError: false,
         errCount: 0
@@ -279,14 +221,25 @@ export default {
       this.$refs.editorRequest.$refs.destinationURL.validate();
       this.validators.destinationURLErr = this.$refs.editorRequest.$refs.destinationURL.hasError
 
+      this.$refs.editorRequest.$refs.requestMethod.validate();
+      this.validators.requestMethodErr= this.$refs.editorRequest.$refs.requestMethod.hasError
+
+      const editor = this.$refs.editorResponse
+      console.log("editor is")
+      console.log(editor)
       this.$refs.editorResponse.$refs.statusCode.validate();
       this.validators.statusCodeErr = this.$refs.editorResponse.$refs.statusCode.hasError
 
       if (this.validators.destinationURLErr) {
         this.validators.errCount++;
         this.globalErrors.push(this.$refs.editorRequest.$refs.destinationURL.innerErrorMessage)
-
       }
+
+      if (this.validators.requestMethodErr) {
+        this.validators.errCount++;
+        this.globalErrors.push(this.$refs.editorRequest.$refs.requestMethod.innerErrorMessage)
+      }
+
       if (this.validators.statusCodeErr) {
         this.validators.errCount++
         this.globalErrors.push(this.$refs.editorResponse.$refs.statusCode.innerErrorMessage)
@@ -328,6 +281,8 @@ export default {
     async onUpdateConfig() {
       try {
         let data = this.constructData();
+        console.log("data is ")
+        console.log(data)
         await this.updateConfigure(data)
         this.$q.notify({
           message: 'Update Success.',
@@ -366,7 +321,7 @@ export default {
             loop: this.request.loop,
             destination_url: this.request.destinationUrl,
             destination_path: this.request.destinationPath,
-            method: this.request.method,
+            method: this.request.requestMethod,
             transform: this.request.transform,
             log_before_modify: this.request.logBeforeModify ? this.request.logBeforeModify : {},
             log_after_modify: this.request.logAfterModify ? this.request.logAfterModify : {},
@@ -483,102 +438,6 @@ export default {
         codeDeleteHeader: deletes.header ? deletes.header : [],
         codeDeleteBody: deletes.body ? deletes.body : [],
       }
-    },
-    /* Request */
-    onChangeLoopRequest(val) {
-      this.request.loop = val;
-    },
-    onChangeDestinationUrlRequest(val) {
-      this.request.destinationUrl = val
-    },
-    onChangeDestinationPathRequest(val) {
-      this.request.destinationPath = val
-    },
-    onChangeMethodRequest(val) {
-      this.request.method = val
-    },
-    onChangeTransformRequest(val) {
-      this.request.transform = val;
-    },
-    onChangeLogBeforeModifyRequest(val) {
-      this.request.logBeforeModify = val;
-    },
-    onChangeLogAfterModifyRequest(val) {
-      this.request.logAfterModify = val;
-    },
-
-    /* Add header, body, query, param for request*/
-    onChangeAddHeaderRequest(val) {
-      this.request.codeAddHeader = val;
-    },
-    onChangeAddBodyRequest(val) {
-      this.request.codeAddBody = val;
-    },
-    onChangeAddQueryRequest(val) {
-      this.request.codeAddQuery = val;
-    },
-    onChangeAddParamRequest(val) {
-      this.request.codeAddParam = val;
-    },
-
-    /* Modify header, body, query, param for request*/
-    onChangeModifyHeaderRequest(val) {
-      this.request.codeModifyHeaderRequest = val
-    },
-    onChangeModifyBodyRequest(val) {
-      this.request.codeModifyBody = val
-    },
-    onChangeModifyQueryRequest(val) {
-      this.request.codeModifyQuery = val
-    },
-    onChangeModifyParamRequest(val) {
-      this.request.codeModifyParam = val
-    },
-
-    /* Delete header, body, query, param for request*/
-    onChangeDeleteHeaderRequest(val) {
-      this.request.codeDeleteHeader = val
-    },
-    onChangeDeleteBodyRequest(val) {
-      this.request.codeDeleteBody = val
-    },
-    onChangeDeleteQueryRequest(val) {
-      this.request.codeDeleteQuery = val
-    },
-    onChangeDeleteParamRequest(val) {
-      this.request.codeDeleteParam = val
-    },
-
-    /* Response */
-    onChangeStatusCodeResponse(val) {
-      this.response.statusCode = val
-    },
-    onChangeTransformResponse(val) {
-      this.response.transform = val;
-    },
-    onChangeLogBeforeModifyResponse(val) {
-      this.response.logBeforeModify = val;
-    },
-    onChangeLogAfterModifyResponse(val) {
-      this.response.logAfterModify = val;
-    },
-    onChangeAddHeaderResponse(val) {
-      this.response.codeAddHeader = val;
-    },
-    onChangeAddBodyResponse(val) {
-      this.response.codeAddBody = val;
-    },
-    onChangeModifyHeaderResponse(val) {
-      this.response.codeModifyHeaderRequest = val
-    },
-    onChangeModifyBodyResponse(val) {
-      this.response.codeModifyBody = val
-    },
-    onChangeDeleteHeaderResponse(val) {
-      this.response.codeDeleteHeader = val
-    },
-    onChangeDeleteBodyResponse(val) {
-      this.response.codeDeleteBody = val
     },
   },
   async mounted() {
