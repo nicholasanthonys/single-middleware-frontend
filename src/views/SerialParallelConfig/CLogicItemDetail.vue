@@ -15,7 +15,11 @@
 
     <q-separator/>
 
-    <q-tab-panels v-model="tab" animated>
+    <q-tab-panels v-model="tab" animated
+                  swipeable
+                  keep-alive
+                  ref="tabs"
+    >
       <q-tab-panel name="data">
         <div class="text-h6">JSON logic data</div>
         <Editor :prop-code="data" event-name="on-change-code-data" @on-change-code-data="onChangeCodeData"/>
@@ -33,6 +37,7 @@
             v-model="nextSuccess"
             label="Next Success *"
             hint="Config Alias for next success"
+            ref="nextSuccess"
         />
       </q-tab-panel>
 
@@ -43,6 +48,7 @@
             label="Enable Response"
         />
         <EditorRequestResponseConfig v-if="enableResponse"
+                                     ref="editor"
                                      :have-log="false"
                                      :prop-enable-loop="false"
                                      config-type="response"
@@ -71,6 +77,26 @@
       </q-tab-panel>
     </q-tab-panels>
     <q-btn @click="onSaveClicked">Save</q-btn>
+
+    <q-dialog v-model="alertDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Form Validation Error</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <ul>
+            <li v-for="(error,index) in globalErrors" :key="index">
+              {{ error }}
+            </li>
+          </ul>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -117,6 +143,16 @@ export default {
       transform: "ToJson",
       logBeforeModify: {},
       logAfterModify: {},
+
+      validators: {
+        nextSuccess: false,
+        statusCodeErr: false,
+        formHasError: false,
+        errCount: 0
+      },
+      tabNames: ["data", "rule", "next_success","response"],
+      globalErrors: [],
+      alertDialog: false,
     }
   },
   methods: {
