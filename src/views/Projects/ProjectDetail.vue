@@ -18,7 +18,8 @@
 
               >
                 <q-tab name="general" icon="description" label="General" :alert="validators.nameErr ? 'red': false"/>
-                <q-tab name="base" icon="settings_application" label="Base Settings"  :alert="validators.statusCodeErr? 'red': false"/>
+                <q-tab name="base" icon="settings_application" label="Base Settings"
+                       :alert="validators.statusCodeErr? 'red': false"/>
                 <q-tab name="configures" icon="settings_application" label="Configures"
                        v-if="$route.name ==='Projects.Detail' "/>
                 <q-tab name="serial/parallel" icon="settings_application" label="Serial/Parallel"
@@ -262,7 +263,7 @@ export default {
         errCount: 0
       },
 
-      tabNames: this.$route.name === 'Project.New' ? ["general", "base" ] : ["general","base" ,"configures","serial/parallel"]
+      tabNames: this.$route.name === 'Project.New' ? ["general", "base"] : ["general", "base", "configures", "serial/parallel"]
     }
   },
   methods: {
@@ -442,36 +443,32 @@ export default {
       this.serial = data.serial
       this.parallel = data.parallel
     },
-    validateInput(){
+    validateInput() {
       this.validators.errCount = 0
       this.globalErrors = []
       this.validators.formHasError = false;
       this.$refs.name.validate();
       this.validators.nameErr = this.$refs.name.hasError
-        const editor = this.$refs.editor
-console.log("editor is ")
-      console.log(editor)
       this.$refs.editor.$refs.statusCode.validate();
 
-        console.log(editor)
       this.validators.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
 
-      if(this.validators.nameErr){
+      if (this.validators.nameErr) {
         this.validators.errCount++;
         this.globalErrors.push(this.$refs.name.innerErrorMessage)
 
       }
-      if(this.validators.statusCodeErr){
+      if (this.validators.statusCodeErr) {
         this.validators.errCount++
         this.globalErrors.push(this.$refs.editor.$refs.statusCode.innerErrorMessage)
       }
-      if(this.validators.errCount > 0){
+      if (this.validators.errCount > 0) {
         this.validators.formHasError = true
         this.alertDialog = true;
 
       }
     },
-    test() {
+    visitTabs() {
       let traversal = this.tabNames.reduce((promiseChain, item) => {
         return promiseChain.then(() => new Promise(resolve => {
               console.log("done with", item)
@@ -483,15 +480,12 @@ console.log("editor is ")
 
 
       traversal.then(() => {
-        console.log("done")
-        console.log("refs tabs is ")
-        console.log(this.$refs.tabs)
         this.$refs.tabs.goTo('general')
       })
     },
     onSaveClicked() {
       this.validateInput();
-      if(!this.validators.formHasError){
+      if (!this.validators.formHasError) {
         let data = this.constructData();
         if (this.$route.name === 'Projects.Detail') {
           this.onUpdateProject(data)
@@ -499,7 +493,7 @@ console.log("editor is ")
           this.onStoreProject(data)
         }
       }
-   },
+    },
     async onStoreProject(data) {
       try {
         let response = await this.storeProject(data)
@@ -565,7 +559,7 @@ console.log("editor is ")
       await this.fetchConfigures(this.$route.params.id);
     }
 
-    await this.test()
+    await this.visitTabs()
   }
 }
 </script>

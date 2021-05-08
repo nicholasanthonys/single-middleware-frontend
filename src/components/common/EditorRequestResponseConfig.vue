@@ -61,13 +61,13 @@
 
               <div class="col-1" v-if="configType ==='request' ">
                 <q-input
-
+                  ref="destinationURL"
                     filled
                     type="text"
                     v-model="destinationUrl"
                     label="Destination Url *"
                     hint="Request Destination Url"
-                    :rules="[ val => val && val.length > 0 || 'Please type something']"
+                    :rules="[ val => val && val.length > 0 || 'Please fill Request Destination URL']"
                     @input="onChangeDestinationUrlRequest"
                 />
 
