@@ -74,6 +74,38 @@ const parallel = {
             })
         },
 
+        deleteSpecificCLogic(context, data) {
+            return new Promise((resolve, reject) => {
+                const {projectId, cLogicId} = data
+                ApiService.init()
+                ApiService.delete(`/api/v1/project/${projectId}/parallel/clogic/${cLogicId}`,).then(
+                    response => {
+                        context.commit('removeSpecificCLogic', {projectId, cLogicId})
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
+        deleteSpecificConfigFile(context, data) {
+            return new Promise((resolve, reject) => {
+                const {projectId, configFileId} = data
+                ApiService.init()
+                ApiService.delete(`/api/v1/project/${projectId}/parallel/configure-file/${configFileId}`,).then(
+                    response => {
+                        context.commit('removeSpecificConfigFile', {projectId, configFileId})
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
         updateSingleConfigParallel(context, data) {
             return new Promise((resolve, reject) => {
                 const {id, configure_id, alias, projectId} = data
@@ -166,6 +198,15 @@ const parallel = {
         },
         addSingleCLogic(state, cLogic) {
             state.parallel.c_logics.push(cLogic)
+        },
+        removeSpecificCLogic(state, data) {
+            const {cLogicId} = data
+
+            state.parallel.c_logics = state.parallel.c_logics.filter(c => c.id !== cLogicId)
+        },
+        removeSpecificConfigFile(state, data) {
+            const {configFileId} = data
+            state.parallel.configures = state.parallel.configures.filter(c => c.id !== configFileId)
         },
         updateSingleConfigParallel(state, data) {
             const {id, configure_id, alias} = data;

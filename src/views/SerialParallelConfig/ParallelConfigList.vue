@@ -40,13 +40,25 @@
                 >
 
                   <p v-if=" col.name !== 'action' ">{{ col.value }}</p>
+                  <div v-else>
+                    <q-btn color="primary" icon="edit" label="edit" size="sm"
+                           class="q-mr-sm"
 
-                  <q-icon
-                      v-else
-                      size="xs"
-                      name="edit"
-                      @click="onSelectedConfig(props.row, props.rowIndex)"
-                  />
+                           @click="onSelectedConfig(props.row, props.rowIndex)"
+                    />
+
+                    <q-btn color="negative" icon="delete" label="Delete" size="sm"
+                           @click="onDeleteConfig($route.params.id, props.row)"
+                    />
+
+
+<!--                    <q-icon-->
+<!--                        size="xs"-->
+<!--                        name="edit"-->
+<!--                        @click="onSelectedConfig(props.row, props.rowIndex)"-->
+<!--                    />-->
+                  </div>
+
 
                 </q-td>
               </q-tr>
@@ -124,13 +136,25 @@
                       </q-tooltip>
                     </p>
                   </div>
-                  <q-icon
-                      v-if="col.name==='action'"
-                      size="xs"
-                      name="edit"
-                      @click="selectCLogic(props.row, props.rowIndex)"
 
-                  />
+                  <div v-if="col.name ==='action' ">
+                    <q-btn
+                        v-if="col.name==='action'"
+                        size="sm"
+                        color="primary"
+                        icon="edit"
+                        label="edit"
+                        @click="selectCLogic(props.row, props.rowIndex)"
+                        class="q-mr-sm"
+
+                    />
+
+                    <q-btn color="negative" icon="delete" label="Delete" size="sm"
+                           @click="onDeleteCLogic($route.params.id, props.row)"
+                    />
+
+                  </div>
+
 
                 </q-td>
               </q-tr>
@@ -200,6 +224,34 @@
             <CLogicItemDetail :prop-c-logic="selectedCLogic" @on-clogic-save="onCLogicSave" :prop-mode="cLogicMode"
                               :prop-index="selectedCLogicIndex" prop-request-type="parallel"/>
           </q-card-section>
+        </q-card>
+      </q-dialog>
+
+      <q-dialog v-model="dialogDeleteCLogic" persistent v-if="selectedCLogic">
+        <q-card>
+          <q-card-section class="row items-center">
+            <q-avatar icon="delete" color="negative" text-color="white" />
+            <span class="q-ml-sm">Are you sure want to delete cLogic with id {{selectedCLogic.id}} ? </span>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="Cancel" color="primary" v-close-popup />
+            <q-btn flat label="Delete" color="primary" :loading="isDeletingCLogic" @click="deleteCLogic($route.params.id, selectedCLogic.id)"/>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <q-dialog v-model="dialogDeleteConfig" persistent v-if="selectedConfigId">
+        <q-card>
+          <q-card-section class="row items-center">
+            <q-avatar icon="delete" color="negative" text-color="white" />
+            <span class="q-ml-sm">Are you sure want to delete config parallel with id {{selectedConfigId}} ? </span>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="Cancel" color="primary" v-close-popup />
+            <q-btn flat label="Delete" color="primary" :loading="isDeletingConfig" @click="deleteConfig($route.params.id, selectedConfigId)"/>
+          </q-card-actions>
         </q-card>
       </q-dialog>
     </div>
@@ -312,7 +364,13 @@ export default {
       validatorNextFailure :{
        statusCodeErr : false,
        formHasError : false,
-      }
+      },
+
+      dialogDeleteCLogic : false,
+      isDeletingCLogic : false,
+
+      dialogDeleteConfig : false,
+      isDeletingConfig : false,
     }
   },
   methods: {
@@ -324,7 +382,53 @@ export default {
       updateSingleCLogicParallel: 'parallel/updateSingleCLogicParallel',
       storeNextFailureParallel: 'parallel/storeNextFailure',
       actionFetchParallel: 'parallel/fetchParallel',
+      deleteCLogicParallel : 'parallel/deleteSpecificCLogic',
+      deleteConfigFileParallel : 'parallel/deleteSpecificConfigFile',
     }),
+  onDeleteConfig(projectId, config){
+   this.selectedConfigId = config.id
+   this.dialogDeleteConfig = true;
+  },
+    async deleteConfig(projectId, configFileId){
+      this.isDeletingConfig = true;
+      try{
+       await this.deleteConfigFileParallel({projectId,configFileId})
+        this.$q.notify({
+          message: 'Delete Success.',
+          color: 'secondary'
+        })
+        this.dialogDeleteConfig= false;
+      }catch (e) {
+        this.$q.notify({
+          message: 'Somethings wrong when deleting parallel config file',
+          color: 'negative'
+        })
+       console.log(e)
+      }
+      this.isDeletingConfig = false;
+    },
+    onDeleteCLogic(projectId, cLogic){
+      this.selectedCLogic = cLogic
+      this.dialogDeleteCLogic = true;
+    },
+    async deleteCLogic(projectId, cLogicId){
+      this.isDeletingCLogic = true;
+     try{
+        await this.deleteCLogicParallel({projectId, cLogicId});
+       this.$q.notify({
+         message: 'Delete Success.',
+         color: 'secondary'
+       })
+      this.dialogDeleteCLogic = false;
+     } catch (err){
+       this.$q.notify({
+         message: 'Somethings wrong when deleting clogic.',
+         color: 'negative'
+       })
+      console.log(err)
+     }
+     this.isDeletingCLogic = false;
+    },
 
     validateInputNextFailure() {
       this.validatorNextFailure.formHasError = false;
@@ -398,47 +502,7 @@ export default {
       this.cLogicMode = 'add',
           this.cLogicDialog = true
     },
-    async onCLogicSave(val) {
-      const {mode, data} = val
-
-      if (mode === 'edit') {
-        try {
-          await this.updateSingleCLogicParallel({
-            projectId: this.$route.params.id,
-            data: data.data,
-            rule: data.rule,
-            next_success: data.next_success,
-            response: data.response,
-            id: data.id
-          })
-          // let temp = [...this.cLogics];
-          // temp[index] = res.data
-          // this.cLogics = temp;
-          this.$q.notify({
-            message: 'Update Parallel CLogic Success.',
-            color: 'secondary'
-          })
-        } catch (err) {
-          console.log(err)
-        }
-      } else {
-        try {
-          await this.storeSingleCLogicParallel({
-            projectId: this.$route.params.id,
-            data: data.data,
-            rule: data.rule,
-            next_success: data.next_success,
-            response: data.response
-          })
-          // this.cLogics.push(res.data)
-          this.$q.notify({
-            message: 'Add Parallel CLogic Success.',
-            color: 'secondary'
-          })
-        } catch (e) {
-          console.log(e)
-        }
-      }
+    async onCLogicSave() {
       this.cLogicDialog = false
     },
     async onConfigFileSave() {
