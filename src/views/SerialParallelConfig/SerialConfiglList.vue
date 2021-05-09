@@ -220,36 +220,6 @@ export default {
       });
       return options
     },
-    onChangeStatusCode(val) {
-      this.statusCode = val;
-    },
-    onChangeTransform(val) {
-      this.transform = val;
-    },
-    onChangeLogBeforeModify(val) {
-      this.logBeforeModify = val;
-    },
-    onChangeLogAfterModify(val) {
-      this.logAfterModify = val;
-    },
-    onChangeAddHeader(val) {
-      this.codeAddHeader = val;
-    },
-    onChangeAddBody(val) {
-      this.codeAddBody = val;
-    },
-    onChangeModifyHeader(val) {
-      this.codeModifyHeader = val
-    },
-    onChangeModifyBody(val) {
-      this.codeModifyBody = val
-    },
-    onChangeDeleteHeader(val) {
-      this.codeDeleteHeader = val
-    },
-    onChangeDeleteBody(val) {
-      this.codeDeleteBody = val
-    },
   },
   async mounted() {
     await this.loadSerial(this.$route.params.id)
