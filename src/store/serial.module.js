@@ -112,6 +112,22 @@ const serial = {
             })
         },
 
+        deleteCLogic(context,data){
+            return new Promise((resolve, reject) => {
+                const {projectId, configId, cLogicId} = data
+                ApiService.init()
+                ApiService.delete(`/api/v1/project/${projectId}/serial/config/${configId}/clogic/${cLogicId}`,).then(
+                    response => {
+                        context.commit('removeSpecificCLogic', {projectId, configId, cLogicId})
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
         updateSingleCLogic(context, body) {
             return new Promise((resolve, reject) => {
                 const {projectId, configId, id, rule, data, next_success,response} = body
@@ -144,6 +160,15 @@ const serial = {
             let configIndex = state.serial.configures.findIndex(e => e.id === configId) ;
             if(configIndex >= 0){
                 state.serial.configures[configIndex].c_logics.push(cLogic);
+            }
+        },
+        removeSpecificCLogic(state, data) {
+            const {configId, cLogicId} = data
+            let configIndex = state.serial.configures.findIndex(e => e.id === configId) ;
+            console.log("config index is")
+            console.log(configIndex)
+            if(configIndex >= 0){
+                state.serial.configures[configIndex].c_logics = state.serial.configures[configIndex].c_logics.filter(c => c.id !== cLogicId)
             }
         },
         updateSingleCLogicSerial(state,data){

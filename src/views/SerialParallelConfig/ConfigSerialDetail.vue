@@ -66,51 +66,74 @@
               </q-tab-panel>
 
               <q-tab-panel name="c_logics" v-if="propSerialConfig!= null">
-                <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
-                <q-table
-                    style="height: 400px"
-                    title="CLogic List"
-                    :data="propSerialConfig? propSerialConfig.c_logics : [] "
-                    :columns="cLogicTableColumns"
-                    row-key="index"
-                    virtual-scroll
-                    :pagination.sync="pagination"
-                    :rows-per-page-options="[0]"
-                >
+                <div class="column" style="height: 500px">
+                  <div class="col-1">
+                    <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
+                  </div>
+                  <div class="col">
+                    <q-table
+                        style="height: 400px"
+                        title="CLogic List"
+                        :data="propSerialConfig? propSerialConfig.c_logics : [] "
+                        :columns="cLogicTableColumns"
+                        row-key="index"
+                        virtual-scroll
+                        :pagination.sync="pagination"
+                        :rows-per-page-options="[0]"
+                    >
 
-                  <template v-slot:header="props">
-                    <q-tr :props="props">
-                      <q-th
-                          v-for="col in props.cols"
-                          :key="col.name"
-                          :props="props"
-                      >
-                        {{ col.label }}
-                      </q-th>
-                    </q-tr>
-                  </template>
-                  <template v-slot:body="props">
-                    <q-tr :props="props">
+                      <template v-slot:header="props">
+                        <q-tr :props="props">
+                          <q-th
+                              v-for="col in props.cols"
+                              :key="col.name"
+                              :props="props"
+                          >
+                            {{ col.label }}
+                          </q-th>
+                        </q-tr>
+                      </template>
+                      <template v-slot:body="props">
+                        <q-tr :props="props">
 
-                      <q-td
-                          v-for="col in props.cols"
-                          :key="col.name"
-                          :props="props"
-                      >
+                          <q-td
+                              v-for="col in props.cols"
+                              :key="col.name"
+                              :props="props"
+                          >
 
-                        <p>{{ propSerialConfig.c_logics[props.rowIndex][col.name] }} </p>
+                            <p>{{ propSerialConfig.c_logics[props.rowIndex][col.name] }} </p>
 
-                        <q-icon
-                            v-if="col.name==='action'"
-                            size="xs"
-                            name="edit"
-                            @click="selectCLogic( props.rowIndex)"
-                        />
+                            <div
+                                v-if="col.name==='action'"
+                            >
+                              <q-btn
+                                  class="q-mr-sm"
+                                  icon="edit"
+                                  size="sm"
+                                  label="Edit"
+                                  color="primary"
+                                  @click="selectCLogic( props.rowIndex)"
+                              />
 
-                      </q-td>
-                    </q-tr>
-                  </template>
-                </q-table>
+                              <q-btn
+                                  icon="delete"
+                                  size="sm"
+                                  label="Delete"
+                                  color="negative"
+                                  @click="onDeleteCLogicSerial(props.row)"
+                              />
+
+                            </div>
+
+
+                          </q-td>
+                        </q-tr>
+                      </template>
+                    </q-table>
+                  </div>
+                </div>
+
               </q-tab-panel>
 
 
@@ -169,10 +192,26 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="OK" color="primary" v-close-popup @click="okClicked"/>
+          <q-btn flat label="OK" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="dialogDeleteCLogic" persistent v-if="selectedCLogic">
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="negative" text-color="white" />
+          <span class="q-ml-sm">Are you sure want to delete cLogic with id {{selectedCLogic.id}} ? </span>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn flat label="Delete" color="primary" :loading="isDeletingCLogic" @click="deleteCLogicSerial($route.params.id, propSerialConfig.id,selectedCLogic.id)"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+
     <q-btn @click="onSaveClick">Confirm</q-btn>
 
   </div>
@@ -267,6 +306,8 @@ export default {
       globalErrors: [],
       alertDialog: false,
 
+      dialogDeleteCLogic : false,
+      isDeletingCLogic : false,
 
     }
   },
@@ -277,7 +318,30 @@ export default {
       actionStoreSerial: 'serial/storeSerial',
       storeSingleConfig: 'serial/storeSingleConfig',
       updateSpecificConfig: 'serial/updateSingleConfig',
+      actionDeleteCLogicSerial : 'serial/deleteCLogic'
     }),
+    onDeleteCLogicSerial(cLogic){
+      this.selectedCLogic = cLogic
+     this.dialogDeleteCLogic = true;
+    },
+    async deleteCLogicSerial(projectId, configId, cLogicId){
+      this.isDeletingCLogic = true;
+     try {
+       await this.actionDeleteCLogicSerial({projectId,configId,cLogicId})
+       this.$q.notify({
+         message: 'Delete Success.',
+         color: 'secondary'
+       })
+       this.dialogDeleteCLogic = false;
+     } catch (err) {
+       this.$q.notify({
+         message: 'Somethings wrong when deleting c logic serial.',
+         color: 'negative'
+       })
+       console.log(err)
+     }
+     this.isDeletingCLogic = false;
+    },
     validateInput() {
       this.validators.errCount = 0
       this.globalErrors = []
