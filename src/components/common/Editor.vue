@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-jsoneditor
-        :value="propCode"
+        :value="value"
         :plus="false"
         style="height:300px"
         @error="onError"
@@ -19,11 +19,11 @@
 
 export default {
   props :[
-    'propCode'
+    'value'
   ],
   data(){
     return {
-      code : this.propCode,
+      code : this.value,
       options: {
         mode: null,
         // onEditable: function (node) {
