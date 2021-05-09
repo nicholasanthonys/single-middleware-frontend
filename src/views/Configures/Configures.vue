@@ -49,15 +49,28 @@
                     </q-tooltip>
                   </p>
                 </div>
-                <q-icon
-                    v-if="col.name === 'action'"
-                    size="xs"
-                    name="edit"
-                    @click="$router.push({name : 'Configures.Detail', params : {
+                <div  v-if="col.name === 'action'">
+                  <q-btn
+                      class="q-mr-sm"
+                      icon="edit"
+                      size="sm"
+                      color="primary"
+                      label="Edit"
+                      @click="$router.push({name : 'Configures.Detail', params : {
                       projectId : $route.params.id,
                       id : props.row.id
                     }})"
-                />
+                  />
+
+                  <q-btn
+                      icon="delete"
+                      size="sm"
+                      color="negative"
+                      label="Delete"
+                      @click="onDeleteConfigure(props.row)"
+                  />
+                </div>
+
 
               </q-td>
             </q-tr>
@@ -66,6 +79,20 @@
 
       </div>
 
+
+      <q-dialog v-model="dialogDeleteConfigure" persistent v-if="selectedConfig">
+        <q-card>
+          <q-card-section class="row items-center">
+            <q-avatar icon="delete" color="negative" text-color="white" />
+            <span class="q-ml-sm">Are you sure want to delete configure with id {{selectedConfig.id}} ? </span>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="Cancel" color="primary" v-close-popup />
+            <q-btn flat label="Delete" color="primary" :loading="isDeletingConfigure" @click="deleteConfigure($route.params.id, selectedConfig.id)"/>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
     </div>
 
 
@@ -73,16 +100,14 @@
 </template>
 
 <script>
+import {mapActions} from "vuex";
+
 export default {
   props : {
    projectId : String,
     propConfigs : Array
   },
-  components : {
 
-  },
-  computed : {
-  },
   data() {
     return {
       configs : this.propConfigs,
@@ -111,9 +136,38 @@ export default {
           label: 'Action',
         }
       ],
-
+      dialogDeleteConfigure : false,
+      isDeletingConfigure : false,
     }
   },
+  methods : {
+    ...mapActions({
+     actionDeleteConfigure : 'configures/deleteConfigure'
+    }),
+    onDeleteConfigure( configure) {
+     this.dialogDeleteConfigure = true;
+     this.selectedConfig = configure
+    },
+    async deleteConfigure(projectId, configureId){
+     try{
+       await this.actionDeleteConfigure({
+         project_id : projectId,
+         configure_id : configureId
+       }),
+       this.$q.notify({
+         message: 'Delete Success.',
+         color: 'secondary'
+       })
+       this.dialogDeleteConfigure = false;
+     } catch (err){
+       this.$q.notify({
+         message: 'Somethings wrong when deleting condfigure.',
+         color: 'negative'
+       })
+       console.log(err)
+     }
+    },
+  }
 
 
 }
