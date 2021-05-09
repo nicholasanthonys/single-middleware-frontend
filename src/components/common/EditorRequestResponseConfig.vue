@@ -23,6 +23,7 @@
             animated
             transition-prev="jump-up"
             transition-next="jump-up"
+            keep-alive
         >
 
           <q-tab-panel name="General">
