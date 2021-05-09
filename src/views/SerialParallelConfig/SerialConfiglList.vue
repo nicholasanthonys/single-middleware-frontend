@@ -40,12 +40,24 @@
 
                     <p v-if="col.name !=='action'">{{ col.value }} </p>
 
-                    <q-icon
-                        v-else
-                        size="xs"
-                        name="edit"
-                        @click="selectConfigureSerial(props.rowIndex)"
-                    />
+                    <div v-else>
+                      <q-btn
+                          class="q-mr-sm"
+                          size="sm"
+                          icon="edit"
+                          label="Edit"
+                          color="primary"
+                          @click="selectConfigureSerial(props.rowIndex)"
+                      />
+                      <q-btn
+                          size="sm"
+                          icon="delete"
+                          label="Delete"
+                          color="negative"
+                          @click="onDeleteConfigureFileSerial(props.row)"
+                      />
+                    </div>
+
                     <!--                    @click="$router.push(`/projects/${propProjectId}/serial/${props.row.id}`)"-->
 
                   </q-td>
@@ -105,6 +117,20 @@
               @on-confirm-clicked="onConfirmConfigSerial"
           />
         </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="dialogDeleteConfig" persistent v-if="selectedConfigureSerial">
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="negative" text-color="white" />
+          <span class="q-ml-sm">Are you sure want to delete config serial with id {{selectedConfigureSerial.id}} ? </span>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn flat label="Delete" color="primary" :loading="isDeletingConfig" @click="deleteConfigFileSerial($route.params.id, selectedConfigureSerial.id)"/>
+        </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
@@ -171,13 +197,40 @@ export default {
       index: -1,
 
       options: [],
+
+      dialogDeleteConfig : false,
+      isDeletingConfig :false
+
     }
   },
   methods: {
     ...mapActions({
       actionFetchConfigures: 'configures/fetchConfigures',
       fetchSerial : 'serial/fetchSerial',
+      actionDeleteConfigFileSerial : 'serial/deleteSpecificConfigFile'
     }),
+    onDeleteConfigureFileSerial(config){
+     this.selectedConfigureSerial = config
+      this.dialogDeleteConfig = true;
+    },
+    async deleteConfigFileSerial(projectId, configFileId){
+      this.isDeletingConfig = true;
+      try{
+        await this.actionDeleteConfigFileSerial({projectId,configFileId})
+        this.$q.notify({
+          message: 'Delete Success.',
+          color: 'secondary'
+        })
+        this.dialogDeleteConfig= false;
+      }catch (e) {
+        this.$q.notify({
+          message: 'Somethings wrong when deleting parallel config file',
+          color: 'negative'
+        })
+        console.log(e)
+      }
+      this.isDeletingConfig = false;
+    },
     openDialogAddSerial() {
       this.mode = 'add'
       this.dialog = true

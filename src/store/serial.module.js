@@ -128,6 +128,23 @@ const serial = {
             })
         },
 
+        deleteSpecificConfigFile(context, data) {
+            return new Promise((resolve, reject) => {
+                const {projectId, configFileId} = data
+                ApiService.init()
+                ApiService.delete(`/api/v1/project/${projectId}/serial/configure-file/${configFileId}`,).then(
+                    response => {
+                        context.commit('removeSpecificConfigFile', {projectId, configFileId})
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
+
         updateSingleCLogic(context, body) {
             return new Promise((resolve, reject) => {
                 const {projectId, configId, id, rule, data, next_success,response} = body
@@ -171,6 +188,11 @@ const serial = {
                 state.serial.configures[configIndex].c_logics = state.serial.configures[configIndex].c_logics.filter(c => c.id !== cLogicId)
             }
         },
+        removeSpecificConfigFile(state, data) {
+            const {configFileId} = data
+            state.serial.configures = state.serial.configures.filter(c => c.id !== configFileId)
+        },
+
         updateSingleCLogicSerial(state,data){
             const { configId, id, cLogic} = data
             let configIndex = state.serial.configures.findIndex(e => e.id === configId) ;
