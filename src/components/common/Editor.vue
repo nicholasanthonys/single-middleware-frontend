@@ -11,7 +11,7 @@
     />
     <br/>
     <p class="text-h5">Raw JSON Representation</p>
-    <pre>{{ JSON.stringify(propCode, null, '\t') }}</pre>
+    <pre>{{ JSON.stringify(value, null, '\t') }}</pre>
   </div>
 </template>
 
