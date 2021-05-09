@@ -22,12 +22,12 @@
     >
       <q-tab-panel name="data">
         <div class="text-h6">JSON logic data</div>
-        <Editor :prop-code="data" event-name="on-change-code-data" @on-change-code-data="onChangeCodeData"/>
+        <Editor v-model="data" event-name="on-change-code-data" />
       </q-tab-panel>
 
       <q-tab-panel name="rule">
         <div class="text-h6">JSON logic Rule</div>
-        <Editor :prop-code="rule" event-name="on-change-code-rule" @on-change-code-rule="onChangeCodeRule"/>
+        <Editor v-model="rule" event-name="on-change-code-rule"/>
       </q-tab-panel>
 
       <q-tab-panel name="next_success">
@@ -186,6 +186,7 @@ export default {
           message: 'Update CLogic Success',
           color: 'secondary'
         })
+        this.$emit('on-clogic-save')
       } else {
         try {
           if (this.propRequestType === 'serial') {
@@ -198,6 +199,7 @@ export default {
             color: 'secondary'
           })
 
+          this.$emit('on-clogic-save')
         } catch (err) {
           console.log(err)
         }

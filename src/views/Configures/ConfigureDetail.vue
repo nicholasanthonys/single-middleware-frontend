@@ -218,6 +218,7 @@ export default {
       this.validators.errCount = 0
       this.globalErrors = []
       this.validators.formHasError = false;
+
       this.$refs.editorRequest.$refs.destinationURL.validate();
       this.validators.destinationURLErr = this.$refs.editorRequest.$refs.destinationURL.hasError
 
@@ -406,7 +407,7 @@ export default {
         loop,
         destinationUrl: destination_url,
         destinationPath: destination_path,
-        method,
+        requestMethod : method,
         transform,
         logBeforeModify: log_before_modify,
         logAfterModify: log_after_modify,
