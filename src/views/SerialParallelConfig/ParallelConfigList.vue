@@ -66,25 +66,7 @@
                 config-type="response"
                                          :have-log="false"
 
-                                         :prop-status-code="nextFailure.statusCode"
-                                         :prop-transform="nextFailure.transform"
-                                         :prop-log-after-modify="nextFailure.logAfterModify"
-                                         :prop-log-before-modify="nextFailure.logBeforeModify"
-                                         :prop-code-add-header="nextFailure.codeAddHeader"
-                                         :prop-code-add-body="nextFailure.codeAddBody"
-                                         :prop-code-modify-header="nextFailure.codeModifyHeader"
-                                         :prop-code-modify-body="nextFailure.codeModifyBody"
-                                         :prop-code-delete-header="nextFailure.codeDeleteHeader"
-                                         :prop-code-delete-body="nextFailure.codeDeleteBody"
-
-                                         @on-change-status-code-response="onChangeStatusCodeResponse"
-                                         @on-change-transform-response="onChangeTransformResponse"
-                                         @on-change-add-header-response="onChangeAddHeaderResponse"
-                                         @on-change-add-body-response="onChangeAddBodyResponse"
-                                         @on-change-modify-header-response="onChangeModifyHeaderResponse"
-                                         @on-change-modify-body-response="onChangeModifyBodyResponse"
-                                         @on-change-delete-header-response="onChangeDeleteHeaderResponse"
-                                         @on-change-delete-body-repsonse="onChangeDeleteBodyResponse"
+                                         v-model="nextFailure"
             />
           </div>
         </div>
@@ -538,32 +520,7 @@ export default {
       });
       return options
     },
-    /* Response */
-    onChangeStatusCodeResponse(val) {
-      this.nextFailure.statusCode = val
-    },
-    onChangeTransformResponse(val) {
-      this.nextFailure.transform = val;
-    },
 
-    onChangeAddHeaderResponse(val) {
-      this.nextFailure.codeAddHeader = val;
-    },
-    onChangeAddBodyResponse(val) {
-      this.nextFailure.codeAddBody = val;
-    },
-    onChangeModifyHeaderResponse(val) {
-      this.nextFailure.codeModifyHeaderRequest = val
-    },
-    onChangeModifyBodyResponse(val) {
-      this.nextFailure.codeModifyBody = val
-    },
-    onChangeDeleteHeaderResponse(val) {
-      this.nextFailure.codeDeleteHeader = val
-    },
-    onChangeDeleteBodyResponse(val) {
-      this.response.codeDeleteBody = val
-    },
     fillDataNextFailure(parallel) {
       console.log("parallel is ")
       console.log(parallel)

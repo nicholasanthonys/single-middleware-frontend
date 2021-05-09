@@ -6,7 +6,7 @@
         style="height:300px"
         @error="onError"
         :options="options"
-        @input="$emit(eventName, $event)"
+        @input="updateValue"
 
     />
     <br/>
@@ -19,7 +19,6 @@
 
 export default {
   props :[
-    'eventName',
     'propCode'
   ],
   data(){
@@ -36,6 +35,9 @@ export default {
     }
   },
   methods : {
+    updateValue(val){
+     this.$emit('input',val)
+    },
     onError(err) {
       console.log("error with editor")
       console.log(err);

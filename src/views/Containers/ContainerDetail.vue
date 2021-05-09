@@ -625,7 +625,7 @@ export default {
     },
     clearDataInputRoute() {
       this.dataInputRoute = {
-        method: '',
+        requestMethod: '',
         projectId: '',
         type: '',
         path: '',
@@ -640,7 +640,7 @@ export default {
       this.formModeRoute = 'edit';
       this.dataInputRoute = {
         id : route.id,
-        method: route.method,
+        requestMethod: route.method,
         project_id: route.project_id,
         type: route.type,
         path: route.path,

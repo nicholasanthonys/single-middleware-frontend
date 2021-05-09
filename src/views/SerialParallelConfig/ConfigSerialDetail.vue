@@ -50,35 +50,17 @@
                     v-model="alias"
                     label="Alias *"
                     hint="Config Alias"
-                    :rules="[ val => val && val.length > 0 || 'Please type something']"
+                    :rules="[ val => val && val.length > 0 || 'Please type alias']"
                 />
               </q-tab-panel>
 
               <q-tab-panel name="next_failure">
                 <div class="text-h4 q-mb-md">Failure Response</div>
+                {{editorData}}
                 <EditorRequestResponseConfig
                     ref="editor"
                     config-type="response"
-                    :prop-status-code="statusCode"
-                    :prop-transform="transform"
-                    :prop-log-after-modify="logAfterModify"
-                    :prop-log-before-modify="logBeforeModify"
-                    :prop-code-add-header="codeAddHeader"
-                    :prop-code-add-body="codeAddBody"
-                    :prop-code-modify-header="codeModifyHeader"
-                    :prop-code-modify-body="codeModifyBody"
-                    :prop-code-delete-header="codeDeleteHeader"
-                    :prop-code-delete-body="codeDeleteBody"
-                    @on-change-status-code-response="onChangeStatusCode"
-                    @on-change-transform-response="onChangeTransform"
-                    @on-change-log-before-modify-response="onChangeLogBeforeModify"
-                    @on-change-log-after-modify-response="onChangeLogAfterModify"
-                    @on-change-add-header-response="onChangeAddHeader"
-                    @on-change-add-body-response="onChangeAddBody"
-                    @on-change-modify-header-response="onChangeModifyHeader"
-                    @on-change-modify-body-response="onChangeModifyBody"
-                    @on-change-delete-header-response="onChangeDeleteHeader"
-                    @on-change-delete-body-response="onChangeDeleteBody"
+                    v-model="editorData"
                 />
 
               </q-tab-panel>
@@ -171,6 +153,26 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="alertDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Form Validation Error</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <ul>
+            <li v-for="(error,index) in globalErrors" :key="index">
+              {{ error }}
+            </li>
+          </ul>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup @click="okClicked"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <q-btn @click="onSaveClick">Confirm</q-btn>
 
   </div>
@@ -212,17 +214,19 @@ export default {
       options: [],
 
       id: null,
-      /* Next Failure*/
-      codeAddHeader: {},
-      codeAddBody: {},
-      codeModifyHeader: {},
-      codeModifyBody: {},
-      codeDeleteHeader: [],
-      codeDeleteBody: [],
-      statusCode: null,
-      transform: "ToJson",
-      logBeforeModify: {},
-      logAfterModify: {},
+      editorData : {
+        /* Next Failure*/
+        codeAddHeader: {},
+        codeAddBody: {},
+        codeModifyHeader: {},
+        codeModifyBody: {},
+        codeDeleteHeader: [],
+        codeDeleteBody: [],
+        statusCode: null,
+        transform: "ToJson",
+        logBeforeModify: {},
+        logAfterModify: {},
+      },
 
       /* C Logics */
       cLogicTableColumns: [
@@ -333,19 +337,19 @@ export default {
         configure_id: this.selectedConfigId,
         alias: this.alias,
         next_failure: {
-          status_code: this.statusCode,
-          transform: this.transform,
+          status_code: this.editorData.statusCode,
+          transform: this.editorData.transform,
           adds: {
-            header: this.codeAddHeader,
-            body: this.codeAddBody
+            header: this.editorData.codeAddHeader,
+            body: this.editorData.codeAddBody
           },
           modifies: {
-            header: this.codeModifyHeader,
-            body: this.codeModifyBody
+            header: this.editorData.codeModifyHeader,
+            body: this.editorData.codeModifyBody
           },
           deletes: {
-            header: this.codeDeleteHeader,
-            body: this.codeDeleteBody
+            header: this.editorData.codeDeleteHeader,
+            body: this.editorData.codeDeleteBody
           }
         },
         mode: this.propMode,
@@ -412,37 +416,6 @@ export default {
       return options
     },
 
-    onChangeStatusCode(val) {
-      this.statusCode = val;
-    },
-    onChangeTransform(val) {
-      this.transform = val;
-    },
-    onChangeLogBeforeModify(val) {
-      this.logBeforeModify = val;
-    },
-    onChangeLogAfterModify(val) {
-      this.logAfterModify = val;
-    },
-    onChangeAddHeader(val) {
-      this.codeAddHeader = val;
-    },
-    onChangeAddBody(val) {
-      this.codeAddBody = val;
-    },
-    onChangeModifyHeader(val) {
-      this.codeModifyHeader = val
-    },
-    onChangeModifyBody(val) {
-      this.codeModifyBody = val
-    },
-    onChangeDeleteHeader(val) {
-      this.codeDeleteHeader = val
-    },
-    onChangeDeleteBody(val) {
-      this.codeDeleteBody = val
-    },
-
     fillDataFromProps(config) {
       const {alias, configure_id, next_failure, id} = config
       this.id = id
@@ -451,49 +424,18 @@ export default {
 
       /* Next Failure*/
       const {status_code, transform, adds, modifies, deletes, log_before_modify, log_after_modify} = next_failure
-      this.statusCode = status_code,
-          this.transform = transform,
-          this.codeAddHeader = adds.header,
-          this.codeAddBody = adds.body,
-          this.codeModifyHeader = modifies.header
-      this.codeModifyBody = modifies.body,
-          this.codeDeleteHeader = deletes.header,
-          this.codeDeleteBody = deletes.body,
+      this.editorData.statusCode = status_code,
+          this.editorData.transform = transform,
+          this.editorData.codeAddHeader = adds.header,
+          this.editorData.codeAddBody = adds.body,
+          this.editorData.codeModifyHeader = modifies.header
+      this.editorData.codeModifyBody = modifies.body,
+          this.editorData.codeDeleteHeader = deletes.header,
+          this.editorData.codeDeleteBody = deletes.body,
 
-          this.logBeforeModify = log_before_modify,
-          this.logAfterModify = log_after_modify
+          this.editorData.logBeforeModify = log_before_modify,
+          this.editorData.logAfterModify = log_after_modify
 
-      // /* C Logics */
-      // c_logics.forEach(clogic => {
-      //   let id = clogic.id;
-      //   let rule = clogic.rule;
-      //   let alias = clogic.alias;
-      //   let next_success = clogic.next_success;
-      //   let response = null;
-      //   if (clogic.response) {
-      //     response = {
-      //       status_code: clogic.response.status_code,
-      //       transform: clogic.response.transform,
-      //       adds: {
-      //         header: clogic.response.adds.header,
-      //         body: clogic.response.adds.body
-      //       },
-      //       modifies: {
-      //         header: clogic.response.modifies.header,
-      //         body: clogic.response.modifies.body
-      //       },
-      //       deletes: {
-      //         header: clogic.response.deletes.header,
-      //         body: clogic.response.deletes.body
-      //       }
-      //     }
-      //   }
-      //   this.cLogics.push({
-      //     id,
-      //     rule, alias, next_success, response
-      //   })
-      //
-      // })
     }
   },
   async mounted() {
