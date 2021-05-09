@@ -70,6 +70,8 @@
                       label="Max Circular Limit*"
                       hint="Maximum limit of circular request"
                       type="number"
+                      ref="maxCircular"
+                      :rules="[ val => val && val > 0  || 'Please specify max circular request']"
                       filled
                   />
 
@@ -243,6 +245,7 @@ export default {
       validators: {
         nameErr: false,
         statusCodeErr: false,
+        maxCircularErr : false,
         formHasError: false,
         errCount: 0
       },
@@ -401,23 +404,29 @@ export default {
       this.validators.formHasError = false;
       this.$refs.name.validate();
       this.validators.nameErr = this.$refs.name.hasError
+
+      this.$refs.maxCircular.validate();
+      this.validators.maxCircularErr =this.$refs.maxCircular.hasError
+
       this.$refs.editor.$refs.statusCode.validate();
       this.validators.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
 
-      const editor =this.$refs.editor
-
-      console.log("editor is")
-      console.log(editor)
 
       if (this.validators.nameErr) {
         this.validators.errCount++;
         this.globalErrors.push(this.$refs.name.innerErrorMessage)
-
       }
+
+      if(this.validators.maxCircularErr){
+        this.validators.errCount++;
+        this.globalErrors.push(this.$refs.maxCircular.innerErrorMessage)
+      }
+
       if (this.validators.statusCodeErr) {
         this.validators.errCount++
         this.globalErrors.push(this.$refs.editor.$refs.statusCode.innerErrorMessage)
       }
+
       if (this.validators.errCount > 0) {
         this.validators.formHasError = true
         this.alertDialog = true;
