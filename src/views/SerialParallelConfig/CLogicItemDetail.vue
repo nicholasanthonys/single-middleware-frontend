@@ -15,7 +15,11 @@
 
     <q-separator/>
 
-    <q-tab-panels v-model="tab" animated>
+    <q-tab-panels v-model="tab" animated
+                  swipeable
+                  keep-alive
+                  ref="tabs"
+    >
       <q-tab-panel name="data">
         <div class="text-h6">JSON logic data</div>
         <Editor :prop-code="data" event-name="on-change-code-data" @on-change-code-data="onChangeCodeData"/>
@@ -33,6 +37,7 @@
             v-model="nextSuccess"
             label="Next Success *"
             hint="Config Alias for next success"
+            ref="nextSuccess"
         />
       </q-tab-panel>
 
@@ -43,34 +48,36 @@
             label="Enable Response"
         />
         <EditorRequestResponseConfig v-if="enableResponse"
+                                     ref="editor"
                                      :have-log="false"
                                      :prop-enable-loop="false"
                                      config-type="response"
-                                     :prop-status-code="statusCode"
-                                     :prop-transform="transform"
-                                     :prop-log-after-modify="logAfterModify"
-                                     :prop-log-before-modify="logBeforeModify"
-                                     :prop-code-add-header="codeAddHeader"
-                                     :prop-code-add-body="codeAddBody"
-                                     :prop-code-modify-header="codeModifyHeader"
-                                     :prop-code-modify-body="codeModifyBody"
-                                     :prop-code-delete-header="codeDeleteHeader"
-                                     :prop-code-delete-body="codeDeleteBody"
-                                     @on-change-status-code-response="onChangeStatusCode"
-                                     @on-change-transform-response="onChangeTransform"
-                                     @on-change-log-before-modify-response="onChangeLogBeforeModify"
-                                     @on-change-log-after-modify-response="onChangeLogAfterModify"
-                                     @on-change-add-header-response="onChangeAddHeader"
-                                     @on-change-add-body-response="onChangeAddBody"
-                                     @on-change-modify-header-response="onChangeModifyHeader"
-                                     @on-change-modify-body-response="onChangeModifyBody"
-                                     @on-change-delete-header-response="onChangeDeleteHeader"
-                                     @on-change-delete-body-response="onChangeDeleteBody"
+                                     v-model="editorData"
         />
 
       </q-tab-panel>
     </q-tab-panels>
     <q-btn @click="onSaveClicked">Save</q-btn>
+
+    <q-dialog v-model="alertDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Form Validation Error</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <ul>
+            <li v-for="(error,index) in globalErrors" :key="index">
+              {{ error }}
+            </li>
+          </ul>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -78,7 +85,6 @@
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 import Editor from "../../components/common/Editor";
 import {mapActions} from "vuex";
-import snakecaseKeys from "snakecase-keys";
 
 export default {
   props: {
@@ -107,17 +113,31 @@ export default {
       data: {},
       rule: {},
 
-      /* response */
-      codeAddHeader: {},
-      codeAddBody: {},
-      codeModifyHeader: {},
-      codeModifyBody: {},
-      codeDeleteHeader: [],
-      codeDeleteBody: [],
-      statusCode: '',
-      transform: "ToJson",
-      logBeforeModify: {},
-      logAfterModify: {},
+      editorData : {
+
+        /* response */
+        codeAddHeader: {},
+        codeAddBody: {},
+        codeModifyHeader: {},
+        codeModifyBody: {},
+        codeDeleteHeader: [],
+        codeDeleteBody: [],
+        statusCode: '',
+        transform: "ToJson",
+        logBeforeModify: {},
+        logAfterModify: {},
+      },
+
+
+      validators: {
+        nextSuccess: false,
+        statusCodeErr: false,
+        formHasError: false,
+        errCount: 0
+      },
+      tabNames: ["data", "rule", "next_success","response"],
+      globalErrors: [],
+      alertDialog: false,
     }
   },
   methods: {
@@ -133,25 +153,25 @@ export default {
         configId: this.propConfigId,
         data: this.data ? this.data : {},
         rule: this.rule ? this.rule : {},
-        nextSuccess: this.nextSuccess,
+        next_success: this.nextSuccess,
       }
-      console.log("rule is")
-      console.log(snakecaseKeys(this.rule, { deep : true, exclude : ["=="]}));
+
+
       if(this.enableResponse){
         data.response = {
-          transform: this.transform,
-              status_code: this.statusCode,
+          transform: this.editorData.transform,
+              status_code: this.editorData.statusCode,
               adds: {
-            header: this.codeAddHeader ? this.codeAddHeader : {},
-                body: this.codeAddBody ? this.codeAddBody : {},
+            header: this.editorData.codeAddHeader ? this.editorData.codeAddHeader : {},
+                body: this.editorData.codeAddBody ? this.editorData.codeAddBody : {},
           },
           modifies: {
-            header: this.codeModifyHeader ? this.codeModifyHeader : {},
-                body: this.codeModifyBody ? this.codeModifyBody : {}
+            header: this.editorData.codeModifyHeader ? this.editorData.codeModifyHeader : {},
+                body: this.editorData.codeModifyBody ? this.editorData.codeModifyBody : {}
           },
           deletes: {
-            header: this.codeDeleteHeader ? this.codeDeleteHeader : [],
-                body: this.codeDeleteBody ? this.codeDeleteBody : []
+            header: this.editorData.codeDeleteHeader ? this.editorData.codeDeleteHeader : [],
+                body: this.editorData.codeDeleteBody ? this.editorData.codeDeleteBody : []
           }
         }
       }
@@ -188,42 +208,7 @@ export default {
       // console.log(data)
       // this.$emit('on-clogic-save', {mode : this.propMode, data : data, index : this.propIndex})
     },
-    onChangeCodeData(val) {
-      this.data = val
-    },
-    onChangeCodeRule(val) {
-      this.rule = val
-    },
-    onChangeStatusCode(val) {
-      this.statusCode = val;
-    },
-    onChangeTransform(val) {
-      this.transform = val;
-    },
-    onChangeLogBeforeModify(val) {
-      this.logBeforeModify = val;
-    },
-    onChangeLogAfterModify(val) {
-      this.logAfterModify = val;
-    },
-    onChangeAddHeader(val) {
-      this.codeAddHeader = val;
-    },
-    onChangeAddBody(val) {
-      this.codeAddBody = val;
-    },
-    onChangeModifyHeader(val) {
-      this.codeModifyHeader = val
-    },
-    onChangeModifyBody(val) {
-      this.codeModifyBody = val
-    },
-    onChangeDeleteHeader(val) {
-      this.codeDeleteHeader = val
-    },
-    onChangeDeleteBody(val) {
-      this.codeDeleteBody = val
-    },
+
     filLData(cLogicData) {
       const {id, data, next_success, response, rule, log_before_modify, log_after_modify} = cLogicData
       this.id = id
@@ -233,17 +218,17 @@ export default {
       if (response) {
       this.enableResponse = true
         const {adds, modifies, deletes, transform, status_code} = response
-        this.statusCode = status_code
-        this.transform = transform
-        this.codeAddBody = adds.body ? adds.body : {},
-            this.codeAddHeader = adds.header ? adds.header : {},
-            this.codeModifyHeader = modifies.header ? modifies.header : {}
-        this.codeModifyBody = modifies.body ? modifies.body : {},
-            this.codeDeleteHeader = deletes.header ? deletes.header : [],
-            this.codeDeleteBody = deletes.body ? deletes.body : [],
+        this.editorData.statusCode = status_code
+        this.editorData.transform = transform
+        this.editorData.codeAddBody = adds.body ? adds.body : {},
+            this.editorData.codeAddHeader = adds.header ? adds.header : {},
+            this.editorData.codeModifyHeader = modifies.header ? modifies.header : {}
+        this.editorData.codeModifyBody = modifies.body ? modifies.body : {},
+            this.editorData.codeDeleteHeader = deletes.header ? deletes.header : [],
+            this.editorData.codeDeleteBody = deletes.body ? deletes.body : [],
 
-            this.logBeforeModify = log_before_modify
-        this.logAfterModify = log_after_modify
+            this.editorData.logBeforeModify = log_before_modify
+        this.editorData.logAfterModify = log_after_modify
       }
 
     },

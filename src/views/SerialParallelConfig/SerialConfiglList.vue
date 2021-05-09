@@ -1,7 +1,6 @@
 <template>
   <div>
     <div id="serial">
-
       <div v-if="serial!= null">
         <div class="column" style="height: 500px">
           <div class="col-1">
@@ -39,7 +38,7 @@
                       :props="props"
                   >
 
-                    <p v-if="col.name !=='action'">{{ col.value }} - {{props.rowIndex}}</p>
+                    <p v-if="col.name !=='action'">{{ col.value }} </p>
 
                     <q-icon
                         v-else
@@ -74,9 +73,6 @@
       </div>
     </div>
 
-    <div id="parallel">
-
-    </div>
     <q-dialog
         v-model="dialog"
         persistent
@@ -102,7 +98,7 @@
         <q-card-section class="q-pt-none full-height">
           <div class="text-h6">Serial Config</div>
           <ConfigSerialDetail
-              :prop-serial-config="serial.configures[index]"
+              :prop-serial-config="selectedConfigureSerial"
               :configure-options="options"
               :prop-index="index"
               :prop-mode="mode"
@@ -173,6 +169,7 @@ export default {
       selectedConfigureSerial: null,
       mode: 'add',
       index: -1,
+
       options: [],
     }
   },
@@ -190,8 +187,8 @@ export default {
       this.dialog = false;
     },
     selectConfigureSerial( index) {
-      // this.selectedConfigureSerial = this.serial.configures[index]
-      this.index = index
+       this.selectedConfigureSerial = this.serial.configures[index]
+
       this.mode = 'edit',
           this.dialog = true;
     },

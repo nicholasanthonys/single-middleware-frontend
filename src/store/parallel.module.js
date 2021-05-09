@@ -35,10 +35,10 @@ const parallel = {
 
         storeSingleConfigParallel(context, data) {
             return new Promise((resolve, reject) => {
-                const {configureId, alias, projectId} = data
+                const {configure_id, alias, projectId} = data
                 ApiService.init()
                 ApiService.post(`/api/v1/project/${projectId}/parallel/config/new`, {
-                    configureId,
+                    configure_id,
                     alias
                 }).then(
                     response => {
@@ -55,12 +55,12 @@ const parallel = {
 
         storeSingleCLogicParallel(context, body) {
             return new Promise((resolve, reject) => {
-                const {projectId, data, rule, nextSuccess, response,} = body
+                const {projectId, data, rule, next_success, response,} = body
                 ApiService.init()
                 ApiService.post(`/api/v1/project/${projectId}/parallel/clogic/new`, {
                     data,
                     rule,
-                    nextSuccess,
+                    next_success,
                     response
                 }).then(
                     response => {
@@ -76,15 +76,15 @@ const parallel = {
 
         updateSingleConfigParallel(context, data) {
             return new Promise((resolve, reject) => {
-                const {id, configureId, alias, projectId} = data
+                const {id, configure_id, alias, projectId} = data
                 ApiService.init()
                 ApiService.put(`/api/v1/project/${projectId}/parallel/config`, {
                     id,
-                    configureId,
+                    configure_id,
                     alias
                 }).then(
                     response => {
-                        context.commit('updateSingleConfigParallel', {id, configureId, alias})
+                        context.commit('updateSingleConfigParallel', {id, configure_id, alias})
                         resolve(response)
                     },
                     error => {
@@ -96,10 +96,10 @@ const parallel = {
 
         storeNextFailure(context, data) {
             return new Promise((resolve, reject) => {
-                const {transform, statusCode, adds, modifies, deletes, projectId} = data
+                const {transform, status_code, adds, modifies, deletes, projectId} = data
                 ApiService.init()
                 ApiService.post(`/api/v1/project/${projectId}/parallel/next-failure`, {
-                    transform, statusCode, adds, modifies, deletes
+                    transform, status_code, adds, modifies, deletes
                 }).then(
                     response => {
                         resolve(response)
@@ -113,10 +113,10 @@ const parallel = {
 
         updateSingleCLogicParallel(context, body) {
             return new Promise((resolve, reject) => {
-                const {projectId, data, rule, nextSuccess, response, id} = body
+                const {projectId, data, rule, next_success, response, id} = body
                 ApiService.init()
                 ApiService.put(`/api/v1/project/${projectId}/parallel/clogic`, {
-                    data, rule, nextSuccess, response, id
+                    data, rule, next_success, response, id
                 }).then(
                     response => {
                         context.commit('updateSingleCLogicParallel', {id, cLogic: response.data})
@@ -168,11 +168,11 @@ const parallel = {
             state.parallel.c_logics.push(cLogic)
         },
         updateSingleConfigParallel(state, data) {
-            const {id, configureId, alias} = data;
+            const {id, configure_id, alias} = data;
             let confIndex = state.parallel.configures.findIndex(e => e.id === id);
             if (confIndex >= 0) {
                 let temp = [...state.parallel.configures];
-                temp[confIndex].configure_id = configureId;
+                temp[confIndex].configure_id = configure_id;
                 temp[confIndex].alias = alias;
                 state.parallel.configures = temp;
             }

@@ -1,8 +1,6 @@
 <template>
   <div class="full-height">
-
-    <ValidationObserver v-slot="{ handleSubmit }">
-      <form @submit.prevent="handleSubmit(onSaveClicked)" class="full-height">
+    <form class="full-height" @submit.prevent="onSaveClicked">
       <div class="column" style="height: 100%">
         <div class="col">
           <q-splitter
@@ -16,9 +14,12 @@
                   v-model="tab"
                   vertical
                   class="text-teal"
+
+
               >
-                <q-tab name="general" icon="description" label="General"/>
-                <q-tab name="base" icon="settings_application" label="Base Settings"/>
+                <q-tab name="general" icon="description" label="General" :alert="validators.nameErr ? 'red': false"/>
+                <q-tab name="base" icon="settings_application" label="Base Settings"
+                       :alert="validators.statusCodeErr? 'red': false"/>
                 <q-tab name="configures" icon="settings_application" label="Configures"
                        v-if="$route.name ==='Projects.Detail' "/>
                 <q-tab name="serial/parallel" icon="settings_application" label="Serial/Parallel"
@@ -35,19 +36,22 @@
                   transition-prev="jump-up"
                   transition-next="jump-up"
                   style="height: 100%"
-
+                  keep-alive
+                  ref="tabs"
               >
-                <q-tab-panel name="general" >
+                <q-tab-panel name="general">
                   <div class="text-h4 q-mb-md">General</div>
-                  <ValidationProvider name="Project Name" rules="required" v-slot="{ errors }">
-                    <q-input
-                        filled
-                        v-model="name"
-                        label="Name *"
-                        hint="Project Name"
-                    />
-                    <p class="text-negative">{{errors[0]}}</p>
-                  </ValidationProvider>
+
+                  <q-input
+                      filled
+                      v-model="name"
+                      label="Name *"
+                      hint="Project Name"
+                      :rules="[ val => val && val.length > 0 || 'Please type Project Name']"
+                      name="name"
+                      ref="name"
+                  />
+                  <p class="text-negative"> {{ errorTab1 }}</p>
                   <br/>
                   <q-input
                       filled
@@ -70,34 +74,17 @@
                   />
 
                   <br/>
-                  <EditorRequestResponseConfig config-type="response"
-                                               :prop-enable-loop="false"
-                                               :have-log="false"
-                                               :prop-status-code="statusCode"
-                                               :prop-transform="transform"
-                                               :prop-log-after-modify="logAfterModify"
-                                               :prop-log-before-modify="logBeforeModify"
-                                               :prop-code-add-header="codeAddHeader"
-                                               :prop-code-add-body="codeAddBody"
-                                               :prop-code-modify-header="codeModifyHeader"
-                                               :prop-code-modify-body="codeModifyBody"
-                                               :prop-code-delete-header="codeDeleteHeader"
-                                               :prop-code-delete-body="codeDeleteBody"
-                                               @on-change-status-code-response="onChangeStatusCode"
-                                               @on-change-transform-response="onChangeTransform"
-                                               @on-change-log-before-modify-response="onChangeLogBeforeModify"
-                                               @on-change-log-after-modify-response="onChangeLogAfterModify"
-                                               @on-change-add-header-response="onChangeAddHeader"
-                                               @on-change-add-body-response="onChangeAddBody"
-                                               @on-change-modify-header-response="onChangeModifyHeader"
-                                               @on-change-modify-body-response="onChangeModifyBody"
-                                               @on-change-delete-header-response="onChangeDeleteHeader"
-                                               @on-change-delete-body-response="onChangeDeleteBody"
-                  />
+                    code add header is {{editorData}}
+                    <EditorRequestResponseConfig ref="editor"
+                                                 config-type="response"
+                                                 :prop-enable-loop="false"
+                                                 :have-log="false"
+                                                v-model="editorData"
+                    />
 
                 </q-tab-panel>
 
-                <q-tab-panel name="configures" style="height: 100%;">
+                <q-tab-panel name="configures" style="height: 100%;"  v-if="$route.name === 'Projects.Detail'">
                   <Configures :project-id="$route.params.id" :prop-configs="configs" v-if="!isLoadConfigures"/>
                   <div style="height: 100%;" v-else class="flex justify-center items-center">
                     <q-spinner
@@ -108,7 +95,7 @@
 
                 </q-tab-panel>
 
-                <q-tab-panel name="serial/parallel">
+                <q-tab-panel name="serial/parallel"  v-if="$route.name === 'Projects.Detail'">
                   <ConfigSerialList :prop-serial="serial" :prop-project-id="$route.params.id"
                                     @on-confirm-serial-config="onConfirmSerialConfig"/>
                   <br/>
@@ -126,7 +113,7 @@
         <div class="col-1">
           <div class="row">
             <div class="col-1 text-center">
-              <q-btn type="submit" >Save</q-btn>
+              <q-btn type="submit">Save</q-btn>
             </div>
             <div class="col-1" v-if="$route.name === 'Projects.Detail' ">
               <q-btn @click="confirmDelete = true" type="negative">Delete</q-btn>
@@ -150,8 +137,26 @@
           </q-card-actions>
         </q-card>
       </q-dialog>
-      </form>
-    </ValidationObserver>
+      <q-dialog v-model="alertDialog">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Form Validation Error</div>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            <ul>
+              <li v-for="(error,index) in globalErrors" :key="index">
+                {{ error }}
+              </li>
+            </ul>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="OK" color="primary" v-close-popup @click="okClicked"/>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+    </form>
   </div>
 </template>
 
@@ -172,24 +177,36 @@ export default {
   },
   data() {
     return {
+      // validation provider error
+      globalErrors: [],
+      errorTab1: null,
+      errorTab2: null,
+
+      alertDialog: false,
+
       splitterModel: 10,
       tab: 'general',
       name: null,
       description: '',
       maxCircular: 10,
       id: null,
+
       selected: 'Adds.Header',
-      codeAddHeader: {},
-      codeAddBody: {},
-      codeModifyHeader: {},
-      codeModifyBody: {},
-      codeDeleteHeader: [],
-      codeDeleteBody: [],
-      statusCode: null,
-      transform: "ToJson",
-      logBeforeModify: {},
-      logAfterModify: {},
-      isLoading: false,
+      editorData : {
+        codeAddHeader: {},
+        codeAddBody: {},
+        codeModifyHeader: {},
+        codeModifyBody: {},
+        codeDeleteHeader: [],
+        codeDeleteBody: [],
+        statusCode: null,
+        transform: "ToJson",
+        logBeforeModify: {},
+        logAfterModify: {},
+
+      },
+
+     isLoading: false,
       isLoadConfigures: false,
       confirmDelete: false,
 
@@ -222,7 +239,15 @@ export default {
         }
       ],
       /* serial saved data */
-      serialConfigSaved: null
+      serialConfigSaved: null,
+      validators: {
+        nameErr: false,
+        statusCodeErr: false,
+        formHasError: false,
+        errCount: 0
+      },
+
+      tabNames: this.$route.name === 'Project.New' ? ["general", "base"] : ["general", "base", "configures", "serial/parallel"]
     }
   },
   methods: {
@@ -234,6 +259,13 @@ export default {
       actionFetchConfigures: 'configures/fetchConfigures',
       storeSerial: 'serial/storeSerial'
     }),
+
+    okClicked() {
+      this.alertDialog = false;
+      this.globalErrors = [];
+
+    },
+
     async onConfirmSerialConfig(val) {
       this.serialConfigSaved = val
       let data = this.constructDataConfigSerial(this.serialConfigSaved);
@@ -295,36 +327,6 @@ export default {
         console.log(err)
       }
     },
-    onChangeStatusCode(val) {
-      this.statusCode = val;
-    },
-    onChangeTransform(val) {
-      this.transform = val;
-    },
-    onChangeLogBeforeModify(val) {
-      this.logBeforeModify = val;
-    },
-    onChangeLogAfterModify(val) {
-      this.logAfterModify = val;
-    },
-    onChangeAddHeader(val) {
-      this.codeAddHeader = val;
-    },
-    onChangeAddBody(val) {
-      this.codeAddBody = val;
-    },
-    onChangeModifyHeader(val) {
-      this.codeModifyHeader = val
-    },
-    onChangeModifyBody(val) {
-      this.codeModifyBody = val
-    },
-    onChangeDeleteHeader(val) {
-      this.codeDeleteHeader = val
-    },
-    onChangeDeleteBody(val) {
-      this.codeDeleteBody = val
-    },
     async fetchConfigures(projectId) {
       this.isLoadConfigures = true;
       try {
@@ -374,35 +376,79 @@ export default {
       this.maxCircular = project_max_circular
 
       const {adds, modifies, deletes, log_before_modify, log_after_modify, status_code, transform} = circular_response
-      this.statusCode = status_code
-      this.transform = transform
-      this.logBeforeModify = log_before_modify
-      this.logAfterModify = log_after_modify
+      this.editorData.statusCode = status_code
+      this.editorData.transform = transform
+      this.editorData.logBeforeModify = log_before_modify
+      this.editorData.logAfterModify = log_after_modify
 
 
-      this.codeAddHeader = adds.header ? adds.header : {}
+      this.editorData.codeAddHeader = adds.header ? adds.header : {}
 
-      this.codeAddBody = adds.body ? adds.body : {}
+      this.editorData.codeAddBody = adds.body ? adds.body : {}
 
-      this.codeModifyHeader = modifies.head ? modifies.head : {}
-      this.codeModifyBody = modifies.body ? modifies.body : {}
+      this.editorData.codeModifyHeader = modifies.head ? modifies.head : {}
+      this.editorData.codeModifyBody = modifies.body ? modifies.body : {}
 
-      this.codeDeleteHeader = deletes.header ? deletes.header : []
-      this.codeDeleteBody = deletes.body ? deletes.body : []
+      this.editorData.codeDeleteHeader = deletes.header ? deletes.header : []
+      this.editorData.codeDeleteBody = deletes.body ? deletes.body : []
 
       this.serial = data.serial
       this.parallel = data.parallel
-
     },
-    async onSaveClicked() {
-      let data = this.constructData();
-      if (this.$route.name === 'Projects.Detail') {
-        await this.onUpdateProject(data)
+    validateInput() {
+      this.validators.errCount = 0
+      this.globalErrors = []
+      this.validators.formHasError = false;
+      this.$refs.name.validate();
+      this.validators.nameErr = this.$refs.name.hasError
+      this.$refs.editor.$refs.statusCode.validate();
+      this.validators.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
 
-      } else {
-        await this.onStoreProject(data)
+      const editor =this.$refs.editor
+
+      console.log("editor is")
+      console.log(editor)
+
+      if (this.validators.nameErr) {
+        this.validators.errCount++;
+        this.globalErrors.push(this.$refs.name.innerErrorMessage)
+
       }
+      if (this.validators.statusCodeErr) {
+        this.validators.errCount++
+        this.globalErrors.push(this.$refs.editor.$refs.statusCode.innerErrorMessage)
+      }
+      if (this.validators.errCount > 0) {
+        this.validators.formHasError = true
+        this.alertDialog = true;
 
+      }
+    },
+    visitTabs() {
+      let traversal = this.tabNames.reduce((promiseChain, item) => {
+        return promiseChain.then(() => new Promise(resolve => {
+              console.log("done with", item)
+              resolve()
+              this.$refs.tabs.goTo(item)
+            })
+        )
+      }, Promise.resolve())
+
+
+      traversal.then(() => {
+        this.$refs.tabs.goTo('general')
+      })
+    },
+    onSaveClicked() {
+      this.validateInput();
+      if (!this.validators.formHasError) {
+        let data = this.constructData();
+        if (this.$route.name === 'Projects.Detail') {
+          this.onUpdateProject(data)
+        } else {
+          this.onStoreProject(data)
+        }
+      }
     },
     async onStoreProject(data) {
       try {
@@ -439,23 +485,23 @@ export default {
         name: this.name,
         description: this.description,
         base: {
-          projectMaxCircular: this.maxCircular,
-          circularResponse: {
-            statusCode: this.statusCode,
-            transform: this.transform,
-            logBeforeModify: this.logBeforeModify ? this.logBeforeModify : {},
-            logAfterModify: this.logAfterModify ? this.logAfterModify : {},
+          project_max_circular: this.maxCircular,
+          circular_response: {
+            status_code: this.editorData.statusCode,
+            transform: this.editorData.transform,
+            log_before_modify: this.editorData.logBeforeModify ? this.editorData.logBeforeModify : {},
+            log_after_modify: this.editorData.logAfterModify ? this.editorData.logAfterModify : {},
             adds: {
-              header: this.codeAddHeader,
-              body: this.codeAddBody
+              header: this.editorData.codeAddHeader,
+              body: this.editorData.codeAddBody
             },
             modifies: {
-              header: this.codeModifyHeader,
-              body: this.codeModifyBody
+              header: this.editorData.codeModifyHeader,
+              body: this.editorData.codeModifyBody
             },
             deletes: {
-              header: this.codeDeleteHeader,
-              body: this.codeDeleteBody
+              header: this.editorData.codeDeleteHeader,
+              body: this.editorData.codeDeleteBody
             }
 
           }
@@ -464,11 +510,12 @@ export default {
     }
   },
   async mounted() {
-    console.log(this.$route.name)
     if (this.$route.name === 'Projects.Detail') {
       await this.getProjectDetail()
       await this.fetchConfigures(this.$route.params.id);
     }
+
+    await this.visitTabs()
   }
 }
 </script>

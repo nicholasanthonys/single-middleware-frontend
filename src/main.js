@@ -5,7 +5,7 @@ import router from './router/routes'
 
 
 /* for form validation */
-import {extend, ValidationObserver, ValidationProvider} from 'vee-validate';
+import {extend, ValidationObserver, ValidationProvider,} from 'vee-validate';
 
 import store from './store'
 import {email, required} from "vee-validate/dist/rules";

@@ -30,9 +30,9 @@
             >
               <q-tab-panel name="general">
                 <div class="text-h4 q-mb-md">General</div>
-                <p class="text-h7 q-mb-md"> Container Created : {{ container.containerId ? 'Yes' : 'No' }}</p>
+                <p class="text-h7 q-mb-md"> Container Created : {{ container.container_id ? 'Yes' : 'No' }}</p>
 
-                <div v-if="container.containerId">
+                <div v-if="container.container_id">
                   <div v-if="!isToggling">
                     <q-icon
                         class="icon-toggle"
@@ -71,7 +71,7 @@
                 </div>
 
                 <q-btn @click="createDockerContainer" v-if="!isCreatingDockerContainer">
-                  {{ container.containerId ? "Recreate" : "Create" }} Docker Container
+                  {{ container.container_id ? "Recreate" : "Create" }} Docker Container
                 </q-btn>
                 <q-spinner-hourglass color="light-green" v-else size="3em"
                                      :thickness="2"/>
@@ -104,7 +104,7 @@
                 <q-table
                     style="height: 400px"
                     title="Assigned Projects"
-                    :data="container.projectIds"
+                    :data="container.project_ids"
                     :columns="projectAssignedColumns"
                     row-key="index"
                     virtual-scroll
@@ -309,7 +309,7 @@
                       <q-select v-model="dataInputRoute.method" :options="method" label="Select REST Method"
                                 style="max-width: 300px"/>
 
-                      <q-select v-model="dataInputRoute.projectId" :options="container.projectIds"
+                      <q-select v-model="dataInputRoute.project_id" :options="container.project_ids"
                                 label="Select Project Id"
                                 style="max-width: 300px"/>
                       <br/>
@@ -366,7 +366,7 @@ export default {
     filteredProject: function () {
       let projectNotAssigned = [];
       this.projects.forEach(e => {
-        if (!this.container.projectIds.includes(e.id)) {
+        if (!this.container.project_ids.includes(e.id)) {
           projectNotAssigned.push(e);
         }
       })
@@ -381,10 +381,10 @@ export default {
       description: '',
 
       container: {
-        containerId: null,
+        container_id: null,
         name: '',
         description: '',
-        projectIds: [],
+        project_ids: [],
         routers: [],
         running: false,
       },
@@ -430,7 +430,7 @@ export default {
         }
       ],
 
-      /* for table projectIds */
+      /* for table project_ids */
       projectAssignedColumns: [
         {
           name: 'projectId',
@@ -457,7 +457,7 @@ export default {
         path: '',
         type: '',
         method: '',
-        projectId: ''
+        project_id: ''
 
       },
       method: ['POST', 'GET', 'PUT', 'DELETE'],
@@ -521,7 +521,7 @@ export default {
         let response = await this.actionCreateDockerContainer({
           dbContainerId: this.$route.params.id
         })
-        this.container.containerId = response.data.container_id;
+        this.container.container_id = response.data.container_id;
         this.container.running = false
         this.$q.notify({
           message: 'Create Docker Container Success.',
@@ -569,7 +569,7 @@ export default {
         let response = await this.storeContainer({
           name: this.container.name,
           description: this.container.description,
-          projectIds: this.container.projectIds,
+          project_ids: this.container.project_ids,
           routers: this.container.routers
 
         });
@@ -589,7 +589,7 @@ export default {
           id: this.$route.params.id,
           name: this.container.name,
           description: this.container.description,
-          projectIds: this.container.projectIds,
+          project_ids: this.container.project_ids,
           routers: this.container.routers
         });
         this.$q.notify({
@@ -605,7 +605,7 @@ export default {
         path: this.dataInputRoute.path,
         method: this.dataInputRoute.method,
         type: this.dataInputRoute.type,
-        project_id: this.dataInputRoute.projectId
+        project_id: this.dataInputRoute.project_id
       })
       this.clearDataInputRoute()
     },
@@ -618,14 +618,14 @@ export default {
           path: this.dataInputRoute.path,
           method : this.dataInputRoute.method,
           type : this.dataInputRoute.type,
-          project_id : this.dataInputRoute.projectId
+          project_id : this.dataInputRoute.project_id
         }
         this.container.routers = temp;
       }
     },
     clearDataInputRoute() {
       this.dataInputRoute = {
-        method: '',
+        requestMethod: '',
         projectId: '',
         type: '',
         path: '',
@@ -640,8 +640,8 @@ export default {
       this.formModeRoute = 'edit';
       this.dataInputRoute = {
         id : route.id,
-        method: route.method,
-        projectId: route.project_id,
+        requestMethod: route.method,
+        project_id: route.project_id,
         type: route.type,
         path: route.path,
       }
@@ -651,14 +651,14 @@ export default {
       this.container.routers.splice(index, 1)
     },
     removeAssignedProject(projectId) {
-      this.container.projectIds = this.container.projectIds.filter(e => e !== projectId)
+      this.container.project_ids = this.container.project_ids.filter(e => e !== projectId)
     },
     addProject(project) {
-      if (this.container.projectIds.includes(project.id)) {
+      if (this.container.project_ids.includes(project.id)) {
         /* show alert */
         this.alert = true
       } else {
-        this.container.projectIds.push(project.id)
+        this.container.project_ids.push(project.id)
       }
     },
     async loadContainerById(id) {
@@ -684,9 +684,9 @@ export default {
     fillContainerData(data) {
       this.container = {
         name: data.name,
-        containerId: data.container_id,
+        container_id: data.container_id,
         description: data.description,
-        projectIds: data.project_ids,
+        project_ids: data.project_ids,
         routers: data.routers,
         running: data.running,
       }

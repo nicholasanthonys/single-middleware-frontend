@@ -14,8 +14,10 @@
                 vertical
                 class="text-teal"
             >
-              <q-tab name="general" icon="description" label="General"/>
-              <q-tab name="next_failure" icon="settings_application" label="Next Failure"/>
+              <q-tab name="general" icon="description" label="General"
+                     :alert="validators.configIdErr|| validators.aliasErr? 'red': false"/>
+              <q-tab name="next_failure" icon="settings_application" label="Next Failure"
+                     :alert="validators.statusCodeErr? 'red': false"/>
               <q-tab name="c_logics" icon="settings_application" label="CLogics" v-if="propSerialConfig!= null"/>
             </q-tabs>
           </template>
@@ -29,45 +31,36 @@
                 transition-prev="jump-up"
                 transition-next="jump-up"
                 style="height: 100%"
+                keep-alive
+                ref="tabs"
 
             >
               <q-tab-panel name="general">
                 <div class="text-h4 q-mb-md">General</div>
                 <q-select v-model="selectedConfigId" :options="configureOptions" label="Select Configuration Id"
-                          style="max-width: 300px"/>
+                          style="max-width: 300px"
+                          ref="configId"
+                          :rules="[ val => val && val.length > 0 || 'Please Select Configuration Id']"
+
+                />
                 <br/>
                 <q-input
+                    ref="alias"
                     filled
                     v-model="alias"
                     label="Alias *"
                     hint="Config Alias"
-                    :rules="[ val => val && val.length > 0 || 'Please type something']"
+                    :rules="[ val => val && val.length > 0 || 'Please type alias']"
                 />
               </q-tab-panel>
 
               <q-tab-panel name="next_failure">
                 <div class="text-h4 q-mb-md">Failure Response</div>
-                <EditorRequestResponseConfig config-type="response"
-                                             :prop-status-code="statusCode"
-                                             :prop-transform="transform"
-                                             :prop-log-after-modify="logAfterModify"
-                                             :prop-log-before-modify="logBeforeModify"
-                                             :prop-code-add-header="codeAddHeader"
-                                             :prop-code-add-body="codeAddBody"
-                                             :prop-code-modify-header="codeModifyHeader"
-                                             :prop-code-modify-body="codeModifyBody"
-                                             :prop-code-delete-header="codeDeleteHeader"
-                                             :prop-code-delete-body="codeDeleteBody"
-                                             @on-change-status-code-response="onChangeStatusCode"
-                                             @on-change-transform-response="onChangeTransform"
-                                             @on-change-log-before-modify-response="onChangeLogBeforeModify"
-                                             @on-change-log-after-modify-response="onChangeLogAfterModify"
-                                             @on-change-add-header-response="onChangeAddHeader"
-                                             @on-change-add-body-response="onChangeAddBody"
-                                             @on-change-modify-header-response="onChangeModifyHeader"
-                                             @on-change-modify-body-response="onChangeModifyBody"
-                                             @on-change-delete-header-response="onChangeDeleteHeader"
-                                             @on-change-delete-body-response="onChangeDeleteBody"
+                {{editorData}}
+                <EditorRequestResponseConfig
+                    ref="editor"
+                    config-type="response"
+                    v-model="editorData"
                 />
 
               </q-tab-panel>
@@ -77,7 +70,7 @@
                 <q-table
                     style="height: 400px"
                     title="CLogic List"
-                    :data="serial.configures[propIndex] ? serial.configures[propIndex].c_logics : [] "
+                    :data="propSerialConfig? propSerialConfig.c_logics : [] "
                     :columns="cLogicTableColumns"
                     row-key="index"
                     virtual-scroll
@@ -105,7 +98,7 @@
                           :props="props"
                       >
 
-                        <p>{{ serial.configures[propIndex].c_logics[props.rowIndex][col.name] }}   </p>
+                        <p>{{ propSerialConfig.c_logics[props.rowIndex][col.name] }} </p>
 
                         <q-icon
                             v-if="col.name==='action'"
@@ -128,7 +121,7 @@
       </div>
     </div>
     <q-dialog
-        v-if="serial.configures[propIndex] "
+        v-if="propSerialConfig "
         v-model="dialog"
         persistent
         :maximized="maximizedToggle"
@@ -153,9 +146,31 @@
         <q-card-section class="q-pt-none">
 
           <div class="text-h6">CLogic</div>
-          <CLogicItemDetail :prop-c-logic=" serial.configures[propIndex].c_logics[selectedIndex]" @on-clogic-save="onCLogicSave" :prop-mode="mode"
-                            :prop-index="selectedIndex" :prop-config-id="propSerialConfig.id" prop-request-type="serial"/>
+          <CLogicItemDetail :prop-c-logic=" propSerialConfig.c_logics[selectedIndex]"
+                            @on-clogic-save="onCLogicSave" :prop-mode="mode"
+                            :prop-index="selectedIndex" :prop-config-id="propSerialConfig.id"
+                            prop-request-type="serial"/>
         </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="alertDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Form Validation Error</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <ul>
+            <li v-for="(error,index) in globalErrors" :key="index">
+              {{ error }}
+            </li>
+          </ul>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup @click="okClicked"/>
+        </q-card-actions>
       </q-card>
     </q-dialog>
     <q-btn @click="onSaveClick">Confirm</q-btn>
@@ -167,7 +182,7 @@
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 
 import {mapActions, mapGetters} from "vuex";
- import CLogicItemDetail from "./CLogicItemDetail";
+import CLogicItemDetail from "./CLogicItemDetail";
 
 export default {
   props: {
@@ -178,12 +193,12 @@ export default {
     propConfigureId: String,
   },
   components: {
-     CLogicItemDetail,
+    CLogicItemDetail,
     EditorRequestResponseConfig
   },
   computed: {
     ...mapGetters({
-      serial : 'serial/getSerial'
+      serial: 'serial/getSerial'
     })
   },
 
@@ -199,17 +214,19 @@ export default {
       options: [],
 
       id: null,
-      /* Next Failure*/
-      codeAddHeader: {},
-      codeAddBody: {},
-      codeModifyHeader: {},
-      codeModifyBody: {},
-      codeDeleteHeader: [],
-      codeDeleteBody: [],
-      statusCode: null,
-      transform: "ToJson",
-      logBeforeModify: {},
-      logAfterModify: {},
+      editorData : {
+        /* Next Failure*/
+        codeAddHeader: {},
+        codeAddBody: {},
+        codeModifyHeader: {},
+        codeModifyBody: {},
+        codeDeleteHeader: [],
+        codeDeleteBody: [],
+        statusCode: null,
+        transform: "ToJson",
+        logBeforeModify: {},
+        logAfterModify: {},
+      },
 
       /* C Logics */
       cLogicTableColumns: [
@@ -238,6 +255,18 @@ export default {
       dialog: false,
       maximizedToggle: true,
 
+      validators: {
+        configIdErr: false,
+        aliasErr: false,
+        statusCodeErr: false,
+        formHasError: false,
+        errCount: 0
+      },
+
+      tabNames: ["general", "next_failure", "c_logics"],
+      globalErrors: [],
+      alertDialog: false,
+
 
     }
   },
@@ -249,66 +278,120 @@ export default {
       storeSingleConfig: 'serial/storeSingleConfig',
       updateSpecificConfig: 'serial/updateSingleConfig',
     }),
-    openDialogAddCLogic() {
-      this.mode = 'add',
-          this.dialog = true
+    validateInput() {
+      this.validators.errCount = 0
+      this.globalErrors = []
+      this.validators.formHasError = false;
+      this.$refs.configId.validate();
+      this.validators.configIdErr = this.$refs.configId.hasError
+
+      this.$refs.alias.validate();
+      this.validators.aliasErr = this.$refs.alias.hasError
+
+      this.$refs.editor.$refs.statusCode.validate();
+
+      this.validators.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
+
+      if (this.validators.configIdErr) {
+        this.validators.errCount++;
+        this.globalErrors.push(this.$refs.configId.innerErrorMessage)
+
+      }
+      if (this.validators.aliasErr) {
+        this.validators.errCount++;
+        this.globalErrors.push(this.$refs.alias.innerErrorMessage)
+      }
+
+      if (this.validators.statusCodeErr) {
+        this.validators.errCount++
+        this.globalErrors.push(this.$refs.editor.$refs.statusCode.innerErrorMessage)
+      }
+      if (this.validators.errCount > 0) {
+        this.validators.formHasError = true
+        this.alertDialog = true;
+
+      }
     },
-    async onSaveClick() {
-      let data = {
-        projectId: this.$route.params.id,
-        configureId: this.selectedConfigId,
+    visitTabs() {
+      let traversal = this.tabNames.reduce((promiseChain, item) => {
+        return promiseChain.then(() => new Promise(resolve => {
+              console.log("done with", item)
+              resolve()
+              this.$refs.tabs.goTo(item)
+            })
+        )
+      }, Promise.resolve())
+
+
+      traversal.then(() => {
+        this.$refs.tabs.goTo('general')
+      })
+    },
+    openDialogAddCLogic() {
+      this.mode = 'add'
+      this.dialog = true
+    },
+    constructData() {
+      return {
+        project_id: this.$route.params.id,
+        configure_id: this.selectedConfigId,
         alias: this.alias,
-        nextFailure: {
-          statusCode: this.statusCode,
-          transform: this.transform,
+        next_failure: {
+          status_code: this.editorData.statusCode,
+          transform: this.editorData.transform,
           adds: {
-            header: this.codeAddHeader,
-            body: this.codeAddBody
+            header: this.editorData.codeAddHeader,
+            body: this.editorData.codeAddBody
           },
           modifies: {
-            header: this.codeModifyHeader,
-            body: this.codeModifyBody
+            header: this.editorData.codeModifyHeader,
+            body: this.editorData.codeModifyBody
           },
           deletes: {
-            header: this.codeDeleteHeader,
-            body: this.codeDeleteBody
+            header: this.editorData.codeDeleteHeader,
+            body: this.editorData.codeDeleteBody
           }
         },
         mode: this.propMode,
       }
-      if (this.propMode === 'edit') {
-        /* add id */
-        try{
-          data.id = this.id;
-          await this.updateSpecificConfig(data);
-          this.$q.notify({
-            message: 'Update Config Serial Success.',
-            color: 'secondary'
-          })
-          this.$emit('on-confirm-clicked')
-        }catch (e) {
-         console.log(e)
-        }
-      } else {
-        try {
-          await this.storeSingleConfig(data)
-          this.$q.notify({
-            message: 'Store Config Serial Success.',
-            color: 'secondary'
-          })
-          this.$emit('on-confirm-clicked')
-        } catch (e) {
-          console.log(e)
+    },
+    async onSaveClick() {
+      this.validateInput()
+      if (!this.validators.formHasError) {
+        let data = this.constructData()
+        if (this.propMode === 'edit') {
+          /* add id */
+          try {
+            data.id = this.id;
+            await this.updateSpecificConfig(data);
+            this.$q.notify({
+              message: 'Update Config Serial Success.',
+              color: 'secondary'
+            })
+
+            this.$emit('on-confirm-clicked')
+          } catch (e) {
+            console.log(e)
+          }
+        } else {
+          try {
+            await this.storeSingleConfig(data)
+            this.$q.notify({
+              message: 'Store Config Serial Success.',
+              color: 'secondary'
+            })
+            this.$emit('on-confirm-clicked')
+          } catch (e) {
+            console.log(e)
+          }
         }
       }
-
-
     },
 
     onCLogicSave() {
       this.dialog = false
     },
-    selectCLogic( index) {
+    selectCLogic(index) {
       this.selectedIndex = index
       this.mode = 'edit';
       this.dialog = true
@@ -333,95 +416,37 @@ export default {
       return options
     },
 
-    onChangeStatusCode(val) {
-      this.statusCode = val;
-    },
-    onChangeTransform(val) {
-      this.transform = val;
-    },
-    onChangeLogBeforeModify(val) {
-      this.logBeforeModify = val;
-    },
-    onChangeLogAfterModify(val) {
-      this.logAfterModify = val;
-    },
-    onChangeAddHeader(val) {
-      this.codeAddHeader = val;
-    },
-    onChangeAddBody(val) {
-      this.codeAddBody = val;
-    },
-    onChangeModifyHeader(val) {
-      this.codeModifyHeader = val
-    },
-    onChangeModifyBody(val) {
-      this.codeModifyBody = val
-    },
-    onChangeDeleteHeader(val) {
-      this.codeDeleteHeader = val
-    },
-    onChangeDeleteBody(val) {
-      this.codeDeleteBody = val
-    },
-
     fillDataFromProps(config) {
-      const {alias, configure_id,  next_failure, id} = config
+      const {alias, configure_id, next_failure, id} = config
       this.id = id
       this.alias = alias
       this.selectedConfigId = configure_id
 
       /* Next Failure*/
       const {status_code, transform, adds, modifies, deletes, log_before_modify, log_after_modify} = next_failure
-      this.statusCode = status_code,
-          this.transform = transform,
-          this.codeAddHeader = adds.header,
-          this.codeAddBody = adds.body,
-          this.codeModifyHeader = modifies.header
-      this.codeModifyBody = modifies.body,
-          this.codeDeleteHeader = deletes.header,
-          this.codeDeleteBody = deletes.body,
+      this.editorData.statusCode = status_code,
+          this.editorData.transform = transform,
+          this.editorData.codeAddHeader = adds.header,
+          this.editorData.codeAddBody = adds.body,
+          this.editorData.codeModifyHeader = modifies.header
+      this.editorData.codeModifyBody = modifies.body,
+          this.editorData.codeDeleteHeader = deletes.header,
+          this.editorData.codeDeleteBody = deletes.body,
 
-          this.logBeforeModify = log_before_modify,
-          this.logAfterModify = log_after_modify
+          this.editorData.logBeforeModify = log_before_modify,
+          this.editorData.logAfterModify = log_after_modify
 
-          // /* C Logics */
-          // c_logics.forEach(clogic => {
-          //   let id = clogic.id;
-          //   let rule = clogic.rule;
-          //   let alias = clogic.alias;
-          //   let next_success = clogic.next_success;
-          //   let response = null;
-          //   if (clogic.response) {
-          //     response = {
-          //       status_code: clogic.response.status_code,
-          //       transform: clogic.response.transform,
-          //       adds: {
-          //         header: clogic.response.adds.header,
-          //         body: clogic.response.adds.body
-          //       },
-          //       modifies: {
-          //         header: clogic.response.modifies.header,
-          //         body: clogic.response.modifies.body
-          //       },
-          //       deletes: {
-          //         header: clogic.response.deletes.header,
-          //         body: clogic.response.deletes.body
-          //       }
-          //     }
-          //   }
-          //   this.cLogics.push({
-          //     id,
-          //     rule, alias, next_success, response
-          //   })
-          //
-          // })
     }
   },
-  mounted() {
+  async mounted() {
 
     if (this.propMode === 'edit') {
       this.fillDataFromProps(this.propSerialConfig)
     }
+  },
+  created() {
+
+    this.visitTabs()
   }
 }
 </script>

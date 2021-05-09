@@ -47,12 +47,12 @@ const containers = {
 
         storeContainer(context, data) {
             return new Promise((resolve, reject) => {
-                const {name, description, projectIds, routers} = data
+                const {name, description, project_ids, routers} = data
                 ApiService.init()
                 ApiService.post('/api/v1/container', {
                     name,
                     description,
-                    projectIds,
+                    project_ids,
                     routers
                 }).then(
                     response => {
@@ -68,13 +68,13 @@ const containers = {
 
         updateContainer(context, data) {
             return new Promise((resolve, reject) => {
-                const {id, name, description, projectIds, routers} = data
+                const {id, name, description, project_ids, routers} = data
                 ApiService.init()
                 ApiService.put('/api/v1/container', {
                     id,
                     name,
                     description,
-                    projectIds,
+                    project_ids,
                     routers
                 }).then(
                     response => {

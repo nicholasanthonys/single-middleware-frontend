@@ -14,10 +14,10 @@ const configures = {
 
     },
     actions: {
-        fetchConfigures(context, projectId) {
+        fetchConfigures(context, project_id) {
             return new Promise((resolve, reject) => {
                 ApiService.init()
-                ApiService.get(`/api/v1/configure/project/${projectId}`).then(
+                ApiService.get(`/api/v1/configure/project/${project_id}`).then(
                     response => {
                         if (response.status === 200) {
                             context.commit('setDescription', response.data.description)
@@ -32,10 +32,10 @@ const configures = {
             })
         },
         fetchSpecificConfigure(context, data) {
-            const {configureId, projectId} = data
+            const {configure_id, project_id} = data
             return new Promise((resolve, reject) => {
                 ApiService.init()
-                ApiService.get(`/api/v1/configure/${configureId}/project/${projectId}`).then(
+                ApiService.get(`/api/v1/configure/${configure_id}/project/${project_id}`).then(
                     response => {
                         if (response.status === 200) {
                             resolve(response)
@@ -50,11 +50,11 @@ const configures = {
 
         storeConfigure(context, data) {
             return new Promise((resolve, reject) => {
-                const {projectId, config} = data
+                const {project_id, config} = data
                 const { request, response, description} = config
                 ApiService.init()
                 ApiService.post('/api/v1/configure', {
-                    projectId,
+                    project_id,
                     config: {
                         description,
                         request,
@@ -73,11 +73,11 @@ const configures = {
 
         updateConfigure(context, data) {
             return new Promise((resolve, reject) => {
-                const {projectId, config} = data
+                const {project_id, config} = data
                 const {id, request, response, description} = config
                 ApiService.init()
                 ApiService.put('/api/v1/configure', {
-                    projectId,
+                    project_id,
                     config: {
                         id,
                         description,
@@ -96,14 +96,14 @@ const configures = {
         },
 
         deleteConfigure(context, params) {
-            const {projectId, configureId} = params
+            const {project_id, configure_id} = params
             return new Promise((resolve, reject) => {
                 ApiService.delete(`/api/v1/configure/`, {
-                    projectId,
-                    configureId
+                    project_id,
+                    configure_id
                 }).then(
                     response => {
-                        context.commit('deleteConfigure', configureId)
+                        context.commit('deleteConfigure', configure_id)
                         resolve(response)
                     },
                     error => {
