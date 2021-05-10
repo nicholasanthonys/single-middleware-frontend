@@ -1,9 +1,8 @@
 <template>
-  <div class="full-height">
-    <div class="column">
+  <div>
+    <div class="column" style="height: 600px">
       <div class="col">
         <q-splitter
-            class="full-height"
             v-model="splitterModel"
             v-if="!isLoading"
         >
@@ -37,26 +36,31 @@
             >
               <q-tab-panel name="general">
                 <div class="text-h4 q-mb-md">General</div>
-                <q-select v-model="selectedConfigId" :options="configureOptions" label="Select Configuration Id"
-                          style="max-width: 300px"
-                          ref="configId"
-                          :rules="[ val => val && val.length > 0 || 'Please Select Configuration Id']"
+                <div class="column" style="height: 500px" >
+                 <div class="col-2">
+                   <q-select v-model="selectedConfigId" :options="configureOptions" label="Select Configuration Id"
+                             style="max-width: 300px"
+                             ref="configId"
+                             :rules="[ val => val && val.length > 0 || 'Please Select Configuration Id']"
 
-                />
-                <br/>
-                <q-input
-                    ref="alias"
-                    filled
-                    v-model="alias"
-                    label="Alias *"
-                    hint="Config Alias"
-                    :rules="[ val => val && val.length > 0 || 'Please type alias']"
-                />
+                   />
+                 </div>
+                  <div class="col-1">
+                    <q-input
+                        ref="alias"
+                        filled
+                        v-model="alias"
+                        label="Alias *"
+                        hint="Config Alias"
+                        :rules="[ val => val && val.length > 0 || 'Please type alias']"
+                    />
+                  </div>
+                </div>
+
               </q-tab-panel>
 
               <q-tab-panel name="next_failure">
                 <div class="text-h4 q-mb-md">Failure Response</div>
-                {{editorData}}
                 <EditorRequestResponseConfig
                     ref="editor"
                     config-type="response"
@@ -66,7 +70,7 @@
               </q-tab-panel>
 
               <q-tab-panel name="c_logics" v-if="propSerialConfig!= null">
-                <div class="column" style="height: 500px">
+                <div class="column" style="height: 500px" >
                   <div class="col-1">
                     <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
                   </div>
