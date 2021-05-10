@@ -8,8 +8,6 @@
       </div>
       <br/>
       <div class="col">
-<!--    configs is {{configs}}-->
-<!--        {{columns}}-->
         <q-table
             style="height: 600px"
             title="Your Configures"

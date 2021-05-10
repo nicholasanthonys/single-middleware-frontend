@@ -40,7 +40,6 @@
                 </q-tab-panel>
                 <q-tab-panel name="request">
                   <div class="text-h4 q-mb-md">Request</div>
-                  {{ request }}
                   <EditorRequestResponseConfig
                       ref="editorRequest"
                       config-type="request"
@@ -52,7 +51,6 @@
 
                 <q-tab-panel name="response">
                   <div class="text-h4 q-mb-md">Response</div>
-                  {{ response }}
                   <EditorRequestResponseConfig
                       ref="editorResponse"
                       config-type="response"

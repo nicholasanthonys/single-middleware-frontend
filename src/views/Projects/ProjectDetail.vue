@@ -51,7 +51,6 @@
                       name="name"
                       ref="name"
                   />
-                  <p class="text-negative"> {{ errorTab1 }}</p>
                   <br/>
                   <q-input
                       filled
@@ -76,7 +75,6 @@
                   />
 
                   <br/>
-                    code add header is {{editorData}}
                     <EditorRequestResponseConfig ref="editor"
                                                  config-type="response"
                                                  :prop-enable-loop="false"

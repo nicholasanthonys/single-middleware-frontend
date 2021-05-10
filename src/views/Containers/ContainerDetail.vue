@@ -75,7 +75,7 @@
                 </q-btn>
                 <q-spinner-hourglass color="light-green" v-else size="3em"
                                      :thickness="2"/>
-                <br/>
+                <br/> <br/>
                 <q-input
 
                     filled
@@ -144,6 +144,7 @@
                   </template>
                 </q-table>
 
+                <br/> <br/>
 
                 <q-table
                     style="height: 400px"
@@ -216,6 +217,7 @@
               <q-tab-panel name="router">
                 <div class="text-h4 q-mb-md">Define Router</div>
                 <q-btn @click="openAddRouteDialog">Add route</q-btn>
+                <br/> <br/>
                 <q-table
                     style="height: 400px"
                     title="Router"
@@ -318,7 +320,7 @@
 
                     <q-card-actions align="right" class="bg-white text-teal">
                       <q-btn flat label="Add" v-close-popup @click="addRoute" v-if="formModeRoute  === 'add' "/>
-                      <q-btn flat label="Edit" v-close-popup @click="editRoute" v-else />
+                      <q-btn flat label="Edit" v-close-popup @click="editRoute" v-else/>
                     </q-card-actions>
                   </q-card>
                 </q-dialog>
@@ -453,7 +455,7 @@ export default {
       type: ['serial', 'parallel'],
       routerDialog: false,
       dataInputRoute: {
-        id : null,
+        id: null,
         path: '',
         type: '',
         method: '',
@@ -609,16 +611,16 @@ export default {
       })
       this.clearDataInputRoute()
     },
-    editRoute(){
-      let index = this.container.routers.findIndex(e => e.id === this.dataInputRoute.id );
-      if(index >= 0){
+    editRoute() {
+      let index = this.container.routers.findIndex(e => e.id === this.dataInputRoute.id);
+      if (index >= 0) {
         let temp = [...this.container.routers]
         temp[index] = {
-          id : this.dataInputRoute.id,
+          id: this.dataInputRoute.id,
           path: this.dataInputRoute.path,
-          method : this.dataInputRoute.method,
-          type : this.dataInputRoute.type,
-          project_id : this.dataInputRoute.project_id
+          method: this.dataInputRoute.method,
+          type: this.dataInputRoute.type,
+          project_id: this.dataInputRoute.project_id
         }
         this.container.routers = temp;
       }
@@ -639,7 +641,7 @@ export default {
     openEditRouteDialog(route) {
       this.formModeRoute = 'edit';
       this.dataInputRoute = {
-        id : route.id,
+        id: route.id,
         requestMethod: route.method,
         project_id: route.project_id,
         type: route.type,
