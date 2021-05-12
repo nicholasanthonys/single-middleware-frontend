@@ -23,7 +23,6 @@ export default {
   ],
   data(){
     return {
-      code : this.value,
       options: {
         mode: null,
         // onEditable: function (node) {
