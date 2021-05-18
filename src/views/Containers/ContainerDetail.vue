@@ -32,6 +32,8 @@
                 <div class="text-h4 q-mb-md">General</div>
                 <p class="text-h7 q-mb-md"> Container Created : {{ container.container_id ? 'Yes' : 'No' }}</p>
                 <p class="text-h7 q-mb-md" > Docker Container Id : {{ container.container_id ? container.container_id : '-'  }}</p>
+                <p class="text-h7 q-mb-md" > Docker Container Name: {{ container.container_id ? container._id: '-'  }}</p>
+
                 <div v-if="container.container_id">
                   <div v-if="!isToggling">
                     <q-icon
@@ -383,6 +385,7 @@ export default {
       description: '',
 
       container: {
+        _id : null,
         container_id: null,
         name: '',
         description: '',
@@ -685,6 +688,7 @@ export default {
     },
     fillContainerData(data) {
       this.container = {
+        _id:  data._id,
         name: data.name,
         container_id: data.container_id,
         description: data.description,
