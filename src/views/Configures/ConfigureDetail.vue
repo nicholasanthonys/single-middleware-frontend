@@ -148,17 +148,17 @@ export default {
         codeAddHeader: {},
         codeAddBody: {},
         codeAddQuery: {},
-        codeAddParam: {},
+        // codeAddParam: {},
 
         codeModifyHeader: {},
         codeModifyBody: {},
         codeModifyQuery: {},
-        codeModifyParam: {},
+        // codeModifyParam: {},
 
         codeDeleteHeader: [],
         codeDeleteBody: [],
         codeDeleteQuery: [],
-        codeDeleteParam: [],
+        // codeDeleteParam: [],
 
         transform: "ToJson",
         logBeforeModify: {},
@@ -328,19 +328,19 @@ export default {
               header: this.request.codeAddHeader,
               body: this.request.codeAddBody,
               query: this.request.codeAddQuery,
-              param: this.request.codeAddParam,
+              // param: this.request.codeAddParam,
             },
             modifies: {
               header: this.request.codeModifyHeader,
               body: this.request.codeModifyBody,
               query: this.request.codeModifyQuery,
-              param: this.request.codeModifyParam,
+              // param: this.request.codeModifyParam,
             },
             deletes: {
               header: this.request.codeDeleteHeader,
               body: this.request.codeDeleteBody,
               query: this.request.codeDeleteQuery,
-              param: this.request.codeDeleteParam,
+              // param: this.request.codeDeleteParam,
             }
           },
           response: {
@@ -412,13 +412,15 @@ export default {
         codeAddHeader: adds.header ? adds.header : {},
         codeAddBody: adds.body ? adds.body : {},
         codeAddQuery: adds.query ? adds.query : {},
-        codeAddParam: adds.param ? adds.param : {},
+        // codeAddParam: adds.param ? adds.param : {},
         codeModifyHeader: modifies.head ? modifies.head : {},
         codeModifyBody: modifies.body ? modifies.body : {},
-        codeModifyParam: modifies.param ? modifies.param : {},
+        // codeModifyParam: modifies.param ? modifies.param : {},
         codeModifyQuery: modifies.query ? modifies.query : {},
         codeDeleteHeader: deletes.header ? deletes.header : [],
         codeDeleteBody: deletes.body ? deletes.body : [],
+        codeDeleteQuery : deletes.query ? deletes.query : [],
+        // codeDeleteParam : deletes.param ? deletes.param : []
       }
     },
 
