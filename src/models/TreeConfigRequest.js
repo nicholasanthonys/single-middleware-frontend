@@ -28,12 +28,12 @@ export default        {
                     body: 'story',
                     story: 'Lorem ipsum dolor sit amet.',
                 },
-                {
-                    label: 'Adds.Param',
-                    header: 'generic',
-                    body: 'story',
-                    story: 'Lorem ipsum dolor sit amet.',
-                },
+                // {
+                //     label: 'Adds.Param',
+                //     header: 'generic',
+                //     body: 'story',
+                //     story: 'Lorem ipsum dolor sit amet.',
+                // },
 
             ]
         },
@@ -60,12 +60,12 @@ export default        {
                     body: 'story',
                     story: 'Lorem ipsum dolor sit amet.',
                 },
-                {
-                    label: 'Modifies.Param',
-                    header: 'generic',
-                    body: 'story',
-                    story: 'Lorem ipsum dolor sit amet.',
-                },
+                // {
+                //     label: 'Modifies.Param',
+                //     header: 'generic',
+                //     body: 'story',
+                //     story: 'Lorem ipsum dolor sit amet.',
+                // },
 
             ]
         },
@@ -92,12 +92,12 @@ export default        {
                     body: 'story',
                     story: 'Lorem ipsum dolor sit amet.',
                 },
-                {
-                    label: 'Deletes.Param',
-                    header: 'generic',
-                    body: 'story',
-                    story: 'Lorem ipsum dolor sit amet.',
-                },
+                // {
+                //     label: 'Deletes.Param',
+                //     header: 'generic',
+                //     body: 'story',
+                //     story: 'Lorem ipsum dolor sit amet.',
+                // },
 
             ]
         }
