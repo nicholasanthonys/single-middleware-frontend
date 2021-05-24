@@ -223,9 +223,7 @@ export default {
       this.$refs.editorRequest.$refs.requestMethod.validate();
       this.validators.requestMethodErr= this.$refs.editorRequest.$refs.requestMethod.hasError
 
-      const editor = this.$refs.editorResponse
-      console.log("editor is")
-      console.log(editor)
+
       this.$refs.editorResponse.$refs.statusCode.validate();
       this.validators.statusCodeErr = this.$refs.editorResponse.$refs.statusCode.hasError
 
