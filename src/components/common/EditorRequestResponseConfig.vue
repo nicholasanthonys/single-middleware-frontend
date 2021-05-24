@@ -46,19 +46,7 @@
                 <br/>
               </div>
 
-              <div class="col-1" v-if="configType ==='request' && propEnableLoop ">
-                <q-input
 
-                    filled
-                    type="text"
-                    v-model="data.loop"
-                    label="Loop"
-                    hint="Request Loop only available for parallel."
-                    @input="emitValue"
-                />
-
-                <br/>
-              </div>
 
               <div class="col-1" v-if="configType ==='request' ">
                 <q-input
@@ -146,11 +134,11 @@
                     @input="emitValue"/>
           </q-tab-panel>
 
-          <q-tab-panel name="Adds.Param" v-if="configType === 'request' ">
-            <div class="text-h4 q-mb-md">Add Param</div>
-            <Editor v-model="data.codeAddParam" :event-name="'on-change-add-param'"
-                    @input="emitValue"/>
-          </q-tab-panel>
+<!--          <q-tab-panel name="Adds.Param" v-if="configType === 'request' ">-->
+<!--            <div class="text-h4 q-mb-md">Add Param</div>-->
+<!--            <Editor v-model="data.codeAddParam" :event-name="'on-change-add-param'"-->
+<!--                    @input="emitValue"/>-->
+<!--          </q-tab-panel>-->
 
           <q-tab-panel name="Modifies.Header">
             <div class="text-h4 q-mb-md">Modify Header</div>
@@ -170,11 +158,11 @@
                     @input="emitValue"/>
           </q-tab-panel>
 
-          <q-tab-panel name="Modifies.Param" v-if="configType === 'request' ">
-            <div class="text-h4 q-mb-md">Modify Param</div>
-            <Editor v-model="data.codeModifyParam" :event-name="'on-change-modify-param'"
-                    @input="emitValue"/>
-          </q-tab-panel>
+<!--          <q-tab-panel name="Modifies.Param" v-if="configType === 'request' ">-->
+<!--            <div class="text-h4 q-mb-md">Modify Param</div>-->
+<!--            <Editor v-model="data.codeModifyParam" :event-name="'on-change-modify-param'"-->
+<!--                    @input="emitValue"/>-->
+<!--          </q-tab-panel>-->
 
           <q-tab-panel name="Deletes.Header">
             <div class="text-h4 q-mb-md">Delete Header</div>
@@ -194,11 +182,11 @@
                     @input="emitValue"/>
           </q-tab-panel>
 
-          <q-tab-panel name="Deletes.Param" v-if="configType === 'request' ">
-            <div class="text-h4 q-mb-md">Delete Param</div>
-            <Editor v-model="data.codeDeleteParam" :event-name="'on-change-delete-param'"
-                    @input="emitValue"/>
-          </q-tab-panel>
+<!--          <q-tab-panel name="Deletes.Param" v-if="configType === 'request' ">-->
+<!--            <div class="text-h4 q-mb-md">Delete Param</div>-->
+<!--            <Editor v-model="data.codeDeleteParam" :event-name="'on-change-delete-param'"-->
+<!--                    @input="emitValue"/>-->
+<!--          </q-tab-panel>-->
 
         </q-tab-panels>
       </template>
@@ -216,7 +204,6 @@ export default {
     'value',
     'configType',
     'haveLog',
-    'propEnableLoop'
 
 
   ],
@@ -229,7 +216,6 @@ export default {
       selected: "General",
 
       data: {
-        loop: this.value.loop,
 
         requestMethod: this.value.requestMethod,
         destinationUrl: this.value.destinationUrl,
@@ -243,18 +229,18 @@ export default {
         codeAddHeader: this.value.codeAddHeader,
         codeAddBody: this.value.codeAddBody,
         codeAddQuery: this.value.codeAddQuery,
-        codeAddParam: this.value.codeAddParam,
+        // codeAddParam: this.value.codeAddParam,
 
         codeModifyHeader: this.value.codeModifyHeader,
         codeModifyBody: this.value.codeModifyBody,
         codeModifyQuery: this.value.codeModifyQuery,
-        codeModifyParam: this.value.codeModifyParam,
+        // codeModifyParam: this.value.codeModifyParam,
 
         codeDeleteHeader: this.value.codeDeleteHeader,
         codeDeleteBody: this.value.codeDeleteBody,
 
         codeDeleteQuery: this.value.codeDeleteQuery,
-        codeDeleteParam: this.value.codeDeleteParam,
+        // codeDeleteParam: this.value.codeDeleteParam,
       },
       simple: [
         this.configType === "request" ? TreeConfigRequest : TreeConfigCircularResponse

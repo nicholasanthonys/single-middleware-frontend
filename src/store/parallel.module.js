@@ -35,11 +35,12 @@ const parallel = {
 
         storeSingleConfigParallel(context, data) {
             return new Promise((resolve, reject) => {
-                const {configure_id, alias, projectId} = data
+                const {configure_id, alias, projectId, loop} = data
                 ApiService.init()
                 ApiService.post(`/api/v1/project/${projectId}/parallel/config/new`, {
                     configure_id,
-                    alias
+                    alias,
+                    loop
                 }).then(
                     response => {
                         context.commit('addSingleConfigSerial', response.data)
@@ -108,12 +109,13 @@ const parallel = {
 
         updateSingleConfigParallel(context, data) {
             return new Promise((resolve, reject) => {
-                const {id, configure_id, alias, projectId} = data
+                const {id, configure_id, alias, projectId, loop} = data
                 ApiService.init()
                 ApiService.put(`/api/v1/project/${projectId}/parallel/config`, {
                     id,
                     configure_id,
-                    alias
+                    alias,
+                    loop
                 }).then(
                     response => {
                         context.commit('updateSingleConfigParallel', {id, configure_id, alias})
