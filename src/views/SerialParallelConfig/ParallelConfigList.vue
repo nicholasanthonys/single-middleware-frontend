@@ -75,7 +75,7 @@
           </div>
           <div class="col">
             <EditorRequestResponseConfig ref="editor"
-                config-type="response"
+                                         config-type="response"
                                          :have-log="false"
 
                                          v-model="nextFailure"
@@ -192,6 +192,17 @@
                 ref="alias"
             />
 
+            <q-input
+
+                filled
+                type="text"
+                v-model="loop"
+                label="Loop"
+                hint="Request Loop only available for parallel."
+            />
+
+            <br/>
+
             <q-btn @click="onConfigFileSave">Save</q-btn>
           </q-card-section>
         </q-card>
@@ -230,13 +241,14 @@
       <q-dialog v-model="dialogDeleteCLogic" persistent v-if="selectedCLogic">
         <q-card>
           <q-card-section class="row items-center">
-            <q-avatar icon="delete" color="negative" text-color="white" />
-            <span class="q-ml-sm">Are you sure want to delete cLogic with id {{selectedCLogic.id}} ? </span>
+            <q-avatar icon="delete" color="negative" text-color="white"/>
+            <span class="q-ml-sm">Are you sure want to delete cLogic with id {{ selectedCLogic.id }} ? </span>
           </q-card-section>
 
           <q-card-actions align="right">
-            <q-btn flat label="Cancel" color="primary" v-close-popup />
-            <q-btn flat label="Delete" color="primary" :loading="isDeletingCLogic" @click="deleteCLogic($route.params.id, selectedCLogic.id)"/>
+            <q-btn flat label="Cancel" color="primary" v-close-popup/>
+            <q-btn flat label="Delete" color="primary" :loading="isDeletingCLogic"
+                   @click="deleteCLogic($route.params.id, selectedCLogic.id)"/>
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -244,13 +256,14 @@
       <q-dialog v-model="dialogDeleteConfig" persistent v-if="selectedConfigId">
         <q-card>
           <q-card-section class="row items-center">
-            <q-avatar icon="delete" color="negative" text-color="white" />
-            <span class="q-ml-sm">Are you sure want to delete config parallel with id {{selectedConfigId}} ? </span>
+            <q-avatar icon="delete" color="negative" text-color="white"/>
+            <span class="q-ml-sm">Are you sure want to delete config parallel with id {{ selectedConfigId }} ? </span>
           </q-card-section>
 
           <q-card-actions align="right">
-            <q-btn flat label="Cancel" color="primary" v-close-popup />
-            <q-btn flat label="Delete" color="primary" :loading="isDeletingConfig" @click="deleteConfig($route.params.id, selectedConfigId)"/>
+            <q-btn flat label="Cancel" color="primary" v-close-popup/>
+            <q-btn flat label="Delete" color="primary" :loading="isDeletingConfig"
+                   @click="deleteConfig($route.params.id, selectedConfigId)"/>
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -346,6 +359,7 @@ export default {
       selectedConfig: false,
       selectedConfigId: null,
       alias: null,
+      loop: null,
 
       /* for dialog clogic parallel */
       cLogicMode: 'add',
@@ -361,16 +375,16 @@ export default {
         formHasError: false,
       },
 
-      validatorNextFailure :{
-       statusCodeErr : false,
-       formHasError : false,
+      validatorNextFailure: {
+        statusCodeErr: false,
+        formHasError: false,
       },
 
-      dialogDeleteCLogic : false,
-      isDeletingCLogic : false,
+      dialogDeleteCLogic: false,
+      isDeletingCLogic: false,
 
-      dialogDeleteConfig : false,
-      isDeletingConfig : false,
+      dialogDeleteConfig: false,
+      isDeletingConfig: false,
     }
   },
   methods: {
@@ -382,58 +396,58 @@ export default {
       updateSingleCLogicParallel: 'parallel/updateSingleCLogicParallel',
       storeNextFailureParallel: 'parallel/storeNextFailure',
       actionFetchParallel: 'parallel/fetchParallel',
-      deleteCLogicParallel : 'parallel/deleteSpecificCLogic',
-      deleteConfigFileParallel : 'parallel/deleteSpecificConfigFile',
+      deleteCLogicParallel: 'parallel/deleteSpecificCLogic',
+      deleteConfigFileParallel: 'parallel/deleteSpecificConfigFile',
     }),
-  onDeleteConfig(projectId, config){
-   this.selectedConfigId = config.id
-   this.dialogDeleteConfig = true;
-  },
-    async deleteConfig(projectId, configFileId){
+    onDeleteConfig(projectId, config) {
+      this.selectedConfigId = config.id
+      this.dialogDeleteConfig = true;
+    },
+    async deleteConfig(projectId, configFileId) {
       this.isDeletingConfig = true;
-      try{
-       await this.deleteConfigFileParallel({projectId,configFileId})
+      try {
+        await this.deleteConfigFileParallel({projectId, configFileId})
         this.$q.notify({
           message: 'Delete Success.',
           color: 'secondary'
         })
-        this.dialogDeleteConfig= false;
-      }catch (e) {
+        this.dialogDeleteConfig = false;
+      } catch (e) {
         this.$q.notify({
           message: 'Somethings wrong when deleting parallel config file',
           color: 'negative'
         })
-       console.log(e)
+        console.log(e)
       }
       this.isDeletingConfig = false;
     },
-    onDeleteCLogic(projectId, cLogic){
+    onDeleteCLogic(projectId, cLogic) {
       this.selectedCLogic = cLogic
       this.dialogDeleteCLogic = true;
     },
-    async deleteCLogic(projectId, cLogicId){
+    async deleteCLogic(projectId, cLogicId) {
       this.isDeletingCLogic = true;
-     try{
+      try {
         await this.deleteCLogicParallel({projectId, cLogicId});
-       this.$q.notify({
-         message: 'Delete Success.',
-         color: 'secondary'
-       })
-      this.dialogDeleteCLogic = false;
-     } catch (err){
-       this.$q.notify({
-         message: 'Somethings wrong when deleting clogic.',
-         color: 'negative'
-       })
-      console.log(err)
-     }
-     this.isDeletingCLogic = false;
+        this.$q.notify({
+          message: 'Delete Success.',
+          color: 'secondary'
+        })
+        this.dialogDeleteCLogic = false;
+      } catch (err) {
+        this.$q.notify({
+          message: 'Somethings wrong when deleting clogic.',
+          color: 'negative'
+        })
+        console.log(err)
+      }
+      this.isDeletingCLogic = false;
     },
 
     validateInputNextFailure() {
       this.validatorNextFailure.formHasError = false;
       this.$refs.editor.$refs.statusCode.validate()
-      this.validatorNextFailure.statusCodeErr= this.$refs.editor.$refs.statusCode.hasError
+      this.validatorNextFailure.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
 
       if (this.validatorNextFailure.statusCodeErr) {
         this.validatorNextFailure.formHasError = true
@@ -469,7 +483,7 @@ export default {
 
     async onSaveNextFailure() {
       this.validateInputNextFailure()
-      if(!this.validatorNextFailure.formHasError){
+      if (!this.validatorNextFailure.formHasError) {
         try {
           await this.storeNextFailureParallel({
             projectId: this.$route.params.id,
@@ -514,7 +528,8 @@ export default {
               projectId: this.$route.params.id,
               id: this.parallel.configures  [this.selectedConfigIndex].id,
               configure_id: this.selectedConfigId,
-              alias: this.alias
+              alias: this.alias,
+              loop: this.loop
             })
             this.$q.notify({
               message: 'Update Parallel Config Success.',
@@ -529,7 +544,8 @@ export default {
             await this.storeSingleConfigParallel({
               projectId: this.$route.params.id,
               configure_id: this.selectedConfigId,
-              alias: this.alias
+              alias: this.alias,
+              loop: this.loop
             })
 
             this.$q.notify({
@@ -561,6 +577,8 @@ export default {
       this.selectedConfigIndex = index
       this.selectedConfigId = val.configure_id
       this.alias = val.alias
+      this.loop = val.loop
+
       this.mode = 'edit'
       this.dialogParallelConfig = true
     },
