@@ -97,69 +97,8 @@
           <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
         </div>
         <div class="col">
-          <q-table
-              style="height: 400px"
-              title="CLogic Parallel"
-              :data="parallel.c_logics"
-              :columns="cLogicColumns"
-              row-key="index"
-              virtual-scroll
-              :pagination.sync="cLogicPagination"
-              :rows-per-page-options="[0]"
-          >
-
-            <template v-slot:header="props">
-              <q-tr :props="props">
-                <q-th
-                    v-for="col in props.cols"
-                    :key="col.name"
-                    :props="props"
-                >
-                  {{ col.label }}
-                </q-th>
-              </q-tr>
-            </template>
-            <template v-slot:body="props">
-              <q-tr :props="props">
-
-                <q-td
-                    v-for="col in props.cols"
-                    :key="col.name"
-                    :props="props"
-                >
-
-                  <p v-if="col.name !=='description' && col.name !== 'action' ">{{ col.value }}</p>
-                  <div v-if="col.name === 'description'">
-                    <p>{{ col.value }}
-                      <q-tooltip anchor="bottom middle" self="top middle" :offset="[10, 10]">
-                        {{ props.row.description }}
-                      </q-tooltip>
-                    </p>
-                  </div>
-
-                  <div v-if="col.name ==='action' ">
-                    <q-btn
-                        v-if="col.name==='action'"
-                        size="sm"
-                        color="primary"
-                        icon="edit"
-                        label="edit"
-                        @click="selectCLogic(props.row, props.rowIndex)"
-                        class="q-mr-sm"
-
-                    />
-
-                    <q-btn color="negative" icon="delete" label="Delete" size="sm"
-                           @click="onDeleteCLogic($route.params.id, props.row)"
-                    />
-
-                  </div>
-
-
-                </q-td>
-              </q-tr>
-            </template>
-          </q-table>
+        <CLogicTable :c-logics="parallel.c_logics" @on-select-clogic="selectCLogic"
+                     @on-delete-clogic="onDeleteCLogic" />
         </div>
       </div>
 
@@ -275,6 +214,7 @@
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 import {mapActions, mapGetters} from "vuex";
 import CLogicItemDetail from "./CLogicItemDetail";
+import CLogicTable from "../../components/CLogic/CLogicTable";
 
 export default {
   computed: {
@@ -283,6 +223,7 @@ export default {
     })
   },
   components: {
+    CLogicTable,
     CLogicItemDetail,
     EditorRequestResponseConfig
   },
@@ -329,26 +270,6 @@ export default {
           required: true,
           label: 'Action',
         }
-      ],
-      /* c logics table */
-      cLogicPagination: {
-        rowsPerPage: 1000
-      },
-      cLogicColumns: [
-        {
-          name: 'id',
-          label: 'Id',
-          field: 'id',
-          align: 'left',
-        },
-
-        {
-          name: 'action',
-          required: true,
-          label: 'Action',
-        }
-
-
       ],
 
       /* for dialog config file parallel */
@@ -421,7 +342,8 @@ export default {
       }
       this.isDeletingConfig = false;
     },
-    onDeleteCLogic(projectId, cLogic) {
+    onDeleteCLogic(val) {
+      const {cLogic} = val
       this.selectedCLogic = cLogic
       this.dialogDeleteCLogic = true;
     },
@@ -561,9 +483,10 @@ export default {
       }
 
     },
-    selectCLogic(cLogicItem, index) {
-      this.selectedCLogic = cLogicItem
-      this.selectedCLogicIndex = index
+    selectCLogic(val) {
+      const {cLogic, cLogicIndex} = val
+      this.selectedCLogic = cLogic
+      this.selectedCLogicIndex = cLogicIndex
       this.cLogicMode = 'edit';
       this.cLogicDialog = true
     },
