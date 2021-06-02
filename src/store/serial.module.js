@@ -51,12 +51,12 @@ const serial = {
 
         storeSingleConfig(context, data) {
             return new Promise((resolve, reject) => {
-                const { project_id, configure_id, alias, next_failure} = data
+                const { project_id, configure_id, alias, failure_response} = data
                 ApiService.init()
                 ApiService.post(`/api/v1/project/${project_id}/serial/config/new`, {
                     configure_id,
                     alias,
-                    next_failure
+                    failure_response
                 }).then(
                     response => {
                         context.commit("addConfig", response.data)
@@ -72,13 +72,13 @@ const serial = {
 
         updateSingleConfig(context, data) {
             return new Promise((resolve, reject) => {
-                const {project_id: project_id, id, configure_id, alias, next_failure} = data
+                const {project_id: project_id, id, configure_id, alias, failure_response} = data
                 ApiService.init()
                 ApiService.put(`/api/v1/project/${project_id}/serial/config`, {
                     id,
                     configure_id,
                     alias,
-                    next_failure
+                    failure_response
                 }).then(
                     response => {
                         context.commit('updateSpecificConfig', response.data)

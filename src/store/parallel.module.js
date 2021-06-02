@@ -4,7 +4,7 @@ const parallel = {
     namespaced: true,
     state: () => ({
         parallel: {
-            next_failure: {},
+            failure_response: {},
             configures: [],
             c_logics: [],
         }
@@ -128,7 +128,7 @@ const parallel = {
             })
         },
 
-        storeNextFailure(context, data) {
+        storeFailureResponse(context, data) {
             return new Promise((resolve, reject) => {
                 const {transform, status_code, adds, modifies, deletes, projectId} = data
                 ApiService.init()
@@ -184,7 +184,7 @@ const parallel = {
 
     mutations: {
         setParallel(state, data) {
-            state.parallel.next_failure = data.next_failure
+            state.parallel.failure_response = data.failure_response
             state.parallel.configures = data.configures
             state.parallel.c_logics = data.c_logics;
         },

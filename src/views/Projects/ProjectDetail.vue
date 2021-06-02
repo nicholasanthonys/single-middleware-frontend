@@ -278,7 +278,7 @@ export default {
         let cLogics = [];
         let configureId = conf.configure_id;
         let alias = conf.alias;
-        let nextFailure = conf.next_failure
+        let failureResponse = conf.failure_response
         conf.c_logics.forEach(cLogic => {
           let rule = cLogic.rule
           let data = cLogic.data
@@ -308,7 +308,7 @@ export default {
           })
         })
         configures.push({
-          configureId, alias, cLogics, nextFailure
+          configureId, alias, cLogics, failureResponse
         })
       })
       return configures
