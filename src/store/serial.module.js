@@ -3,8 +3,8 @@ import ApiService from "../services/common/api.service";
 const serial = {
     namespaced: true,
     state: () => ({
-        serial:  {
-            id : null,
+        serial: {
+            id: null,
         },
     }),
     getters: {
@@ -51,7 +51,7 @@ const serial = {
 
         storeSingleConfig(context, data) {
             return new Promise((resolve, reject) => {
-                const { project_id, configure_id, alias, failure_response} = data
+                const {project_id, configure_id, alias, failure_response} = data
                 ApiService.init()
                 ApiService.post(`/api/v1/project/${project_id}/serial/config/new`, {
                     configure_id,
@@ -93,16 +93,20 @@ const serial = {
 
         storeSingleCLogic(context, body) {
             return new Promise((resolve, reject) => {
-                const {projectId, configId, rule, data, next_success,response} = body
+                const {
+                    projectId, configId, rule, data, next_success, response, next_failure, failure_response
+                } = body
                 ApiService.init()
                 ApiService.post(`/api/v1/project/${projectId}/serial/config/${configId}/clogic/new`, {
                     rule,
                     data,
                     next_success,
-                    response
+                    response,
+                    next_failure,
+                    failure_response
                 }).then(
                     response => {
-                        context.commit('addSingleCLogicSerial', {configId, cLogic : response.data})
+                        context.commit('addSingleCLogicSerial', {configId, cLogic: response.data})
                         resolve(response)
                     },
                     error => {
@@ -112,7 +116,7 @@ const serial = {
             })
         },
 
-        deleteCLogic(context,data){
+        deleteCLogic(context, data) {
             return new Promise((resolve, reject) => {
                 const {projectId, configId, cLogicId} = data
                 ApiService.init()
@@ -147,17 +151,29 @@ const serial = {
 
         updateSingleCLogic(context, body) {
             return new Promise((resolve, reject) => {
-                const {projectId, configId, id, rule, data, next_success,response} = body
+                const {
+                    projectId,
+                    configId,
+                    id,
+                    rule,
+                    data,
+                    next_success,
+                    response,
+                    next_failure,
+                    failure_response
+                } = body
                 ApiService.init()
                 ApiService.put(`/api/v1/project/${projectId}/serial/config/${configId}/clogic`, {
                     id,
                     rule,
                     data,
                     next_success,
-                    response
+                    response,
+                    next_failure,
+                    failure_response
                 }).then(
                     response => {
-                        context.commit('updateSingleCLogicSerial', {configId, id, cLogic : response.data});
+                        context.commit('updateSingleCLogicSerial', {configId, id, cLogic: response.data});
                         resolve(response)
                     },
                     error => {
@@ -172,19 +188,19 @@ const serial = {
         setSerial(state, data) {
             state.serial = data
         },
-        addSingleCLogicSerial(state, data){
-            const { configId, cLogic} = data
-            let configIndex = state.serial.configures.findIndex(e => e.id === configId) ;
-            if(configIndex >= 0){
+        addSingleCLogicSerial(state, data) {
+            const {configId, cLogic} = data
+            let configIndex = state.serial.configures.findIndex(e => e.id === configId);
+            if (configIndex >= 0) {
                 state.serial.configures[configIndex].c_logics.push(cLogic);
             }
         },
         removeSpecificCLogic(state, data) {
             const {configId, cLogicId} = data
-            let configIndex = state.serial.configures.findIndex(e => e.id === configId) ;
+            let configIndex = state.serial.configures.findIndex(e => e.id === configId);
             console.log("config index is")
             console.log(configIndex)
-            if(configIndex >= 0){
+            if (configIndex >= 0) {
                 state.serial.configures[configIndex].c_logics = state.serial.configures[configIndex].c_logics.filter(c => c.id !== cLogicId)
             }
         },
@@ -193,14 +209,14 @@ const serial = {
             state.serial.configures = state.serial.configures.filter(c => c.id !== configFileId)
         },
 
-        updateSingleCLogicSerial(state,data){
-            const { configId, id, cLogic} = data
-            let configIndex = state.serial.configures.findIndex(e => e.id === configId) ;
-            if(configIndex >= 0){
+        updateSingleCLogicSerial(state, data) {
+            const {configId, id, cLogic} = data
+            let configIndex = state.serial.configures.findIndex(e => e.id === configId);
+            if (configIndex >= 0) {
 
                 let cLogicIndex = state.serial.configures[configIndex].c_logics.findIndex(c => c.id === id);
-                if(cLogicIndex >=0){
-                    let temp  = [...state.serial.configures];
+                if (cLogicIndex >= 0) {
+                    let temp = [...state.serial.configures];
                     temp[configIndex].c_logics[cLogicIndex] = cLogic
                     state.serial.configures = temp;
                 }
@@ -235,10 +251,10 @@ const serial = {
         },
         updateSingleCLogic(state, data) {
             const {configId, value} = data
-            let confIndex= state.serial.configures.findIndex(e => e.id === configId);
+            let confIndex = state.serial.configures.findIndex(e => e.id === configId);
             if (confIndex >= 0) {
                 let cLogicIndex = state.serial.configures[confIndex].c_logics.findIndex(e => e.id === value.id)
-                if(cLogicIndex >= 0){
+                if (cLogicIndex >= 0) {
                     let temp = [...state.serial.configures]
                     temp[confIndex].c_logics[cLogicIndex] = value;
                     state.serial.configures = temp;
