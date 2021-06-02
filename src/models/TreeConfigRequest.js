@@ -100,6 +100,11 @@ export default        {
                 // },
 
             ]
+        },
+        {
+            label: 'CLogics',
+            icon: 'alt_route',
+            selectable : true,
         }
     ]
 }
