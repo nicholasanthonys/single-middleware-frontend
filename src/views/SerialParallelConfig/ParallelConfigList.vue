@@ -313,8 +313,6 @@ export default {
       actionFetchConfigures: 'configures/fetchConfigures',
       storeSingleConfigParallel: 'parallel/storeSingleConfigParallel',
       updateSingleConfigParallel: 'parallel/updateSingleConfigParallel',
-      storeSingleCLogicParallel: 'parallel/storeSingleCLogicParallel',
-      updateSingleCLogicParallel: 'parallel/updateSingleCLogicParallel',
       storeFailureResponseParallel: 'parallel/storeFailureResponse',
       actionFetchParallel: 'parallel/fetchParallel',
       deleteCLogicParallel: 'parallel/deleteSpecificCLogic',
