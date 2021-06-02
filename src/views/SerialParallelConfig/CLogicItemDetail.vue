@@ -200,6 +200,7 @@ export default {
         data: this.data ? this.data : {},
         rule: this.rule ? this.rule : {},
         next_success: this.nextSuccess,
+        next_failure: this.nextFailure,
       }
 
 
@@ -223,7 +224,7 @@ export default {
       }
 
       if (this.enableFailureResponse) {
-        data.response = {
+        data.failure_response= {
           transform: this.editorDataFailureResponse.transform,
           status_code: this.editorDataFailureResponse.statusCode,
           adds: {
