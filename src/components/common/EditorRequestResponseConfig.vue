@@ -47,7 +47,6 @@
               </div>
 
 
-
               <div class="col-1" v-if="configType ==='request' ">
                 <q-input
                     ref="destinationURL"
@@ -134,11 +133,6 @@
                     @input="emitValue"/>
           </q-tab-panel>
 
-<!--          <q-tab-panel name="Adds.Param" v-if="configType === 'request' ">-->
-<!--            <div class="text-h4 q-mb-md">Add Param</div>-->
-<!--            <Editor v-model="data.codeAddParam" :event-name="'on-change-add-param'"-->
-<!--                    @input="emitValue"/>-->
-<!--          </q-tab-panel>-->
 
           <q-tab-panel name="Modifies.Header">
             <div class="text-h4 q-mb-md">Modify Header</div>
@@ -158,12 +152,6 @@
                     @input="emitValue"/>
           </q-tab-panel>
 
-<!--          <q-tab-panel name="Modifies.Param" v-if="configType === 'request' ">-->
-<!--            <div class="text-h4 q-mb-md">Modify Param</div>-->
-<!--            <Editor v-model="data.codeModifyParam" :event-name="'on-change-modify-param'"-->
-<!--                    @input="emitValue"/>-->
-<!--          </q-tab-panel>-->
-
           <q-tab-panel name="Deletes.Header">
             <div class="text-h4 q-mb-md">Delete Header</div>
             <Editor v-model="data.codeDeleteHeader" :event-name="'on-change-delete-header'"
@@ -182,11 +170,10 @@
                     @input="emitValue"/>
           </q-tab-panel>
 
-<!--          <q-tab-panel name="Deletes.Param" v-if="configType === 'request' ">-->
-<!--            <div class="text-h4 q-mb-md">Delete Param</div>-->
-<!--            <Editor v-model="data.codeDeleteParam" :event-name="'on-change-delete-param'"-->
-<!--                    @input="emitValue"/>-->
-<!--          </q-tab-panel>-->
+          <q-tab-panel name="CLogics" >
+            <div class="text-h4 q-mb-md">Request Logic</div>
+        <CLogicTable :c-logics="[]"/>
+          </q-tab-panel>
 
         </q-tab-panels>
       </template>
@@ -198,6 +185,7 @@
 import Editor from "./Editor";
 import TreeConfigCircularResponse from "../../models/TreeConfigResponse";
 import TreeConfigRequest from "../../models/TreeConfigRequest";
+import CLogicTable from "../CLogic/CLogicTable";
 
 export default {
   props: [
@@ -207,7 +195,7 @@ export default {
 
 
   ],
-  components: {Editor},
+  components: {CLogicTable, Editor},
 
   data() {
     return {
