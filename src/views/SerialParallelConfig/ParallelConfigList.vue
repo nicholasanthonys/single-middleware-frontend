@@ -172,7 +172,7 @@
           <q-card-section class="q-pt-none">
             <div class="text-h6">CLogic</div>
             <CLogicItemDetail :prop-c-logic="selectedCLogic" @on-clogic-save="onCLogicSave" :prop-mode="cLogicMode"
-                              :prop-index="selectedCLogicIndex" prop-request-type="parallel"/>
+                               prop-request-type="parallel"/>
           </q-card-section>
         </q-card>
       </q-dialog>
@@ -317,6 +317,9 @@ export default {
       actionFetchParallel: 'parallel/fetchParallel',
       deleteCLogicParallel: 'parallel/deleteSpecificCLogic',
       deleteConfigFileParallel: 'parallel/deleteSpecificConfigFile',
+      addCLogicParallel: 'parallel/storeSingleCLogicParallel',
+      updateCLogicParallel: 'parallel/updateSingleCLogicParallel',
+
     }),
     onDeleteConfig(projectId, config) {
       this.selectedConfigId = config.id
@@ -436,8 +439,28 @@ export default {
       this.cLogicMode = 'add',
           this.cLogicDialog = true
     },
-    async onCLogicSave() {
-      this.cLogicDialog = false
+    async onCLogicSave(data) {
+      if (this.cLogicMode === 'edit') {
+          await this.updateCLogicParallel(data)
+        this.$q.notify({
+          message: 'Update CLogic Success',
+          color: 'secondary'
+        })
+        this.cLogicDialog = false
+      } else {
+        try {
+            await this.addCLogicParallel(data)
+          this.$q.notify({
+            message: 'Add CLogic Success',
+            color: 'secondary'
+          })
+
+          this.cLogicDialog = false
+        } catch (err) {
+          console.log(err)
+        }
+      }
+
     },
     async onConfigFileSave() {
       this.validateInputConfig();

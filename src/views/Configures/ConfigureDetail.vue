@@ -40,11 +40,15 @@
                 </q-tab-panel>
                 <q-tab-panel name="request">
                   <div class="text-h4 q-mb-md">Request</div>
+                  {{request.cLogics}}
                   <EditorRequestResponseConfig
                       ref="editorRequest"
                       config-type="request"
                       :have-log="true"
                       :prop-enable-loop="true"
+                      :enable-c-logics="$route.name === 'Configures.Detail'"
+                      :configure-id="$route.params.id"
+                      :project-id="$route.params.projectId"
                       v-model="request"
                   />
                 </q-tab-panel>
@@ -139,6 +143,7 @@ export default {
 
       id: '',
       description: '',
+
       request: {
         loop: null,
         destinationUrl: '',
@@ -148,21 +153,20 @@ export default {
         codeAddHeader: {},
         codeAddBody: {},
         codeAddQuery: {},
-        // codeAddParam: {},
 
         codeModifyHeader: {},
         codeModifyBody: {},
         codeModifyQuery: {},
-        // codeModifyParam: {},
 
         codeDeleteHeader: [],
         codeDeleteBody: [],
         codeDeleteQuery: [],
-        // codeDeleteParam: [],
 
         transform: "ToJson",
         logBeforeModify: {},
         logAfterModify: {},
+
+        cLogics : [],
       },
       response: {
         statusCode: null,
@@ -273,13 +277,15 @@ export default {
 
       } catch (err) {
         console.log(err)
+        this.$q.notify({
+          message: err.response.data.message ?  err.response.data.message : 'Somethings Wrong',
+          color: 'negative'
+        })
       }
     },
     async onUpdateConfig() {
       try {
         let data = this.constructData();
-        console.log("data is ")
-        console.log(data)
         await this.updateConfigure(data)
         this.$q.notify({
           message: 'Update Success.',
@@ -287,6 +293,10 @@ export default {
         })
       } catch (err) {
         console.log(err)
+        this.$q.notify({
+          message: err.response.data.message ?  err.response.data.message : 'Somethings Wrong',
+          color: 'negative'
+        })
       }
     },
     async onStoreConfig() {
@@ -306,6 +316,10 @@ export default {
         })
       } catch (err) {
         console.log(err)
+        this.$q.notify({
+          message: err.response.data.message ?  err.response.data.message : 'Somethings Wrong',
+          color: 'negative'
+        })
       }
     },
     constructData() {
@@ -326,20 +340,18 @@ export default {
               header: this.request.codeAddHeader,
               body: this.request.codeAddBody,
               query: this.request.codeAddQuery,
-              // param: this.request.codeAddParam,
             },
             modifies: {
               header: this.request.codeModifyHeader,
               body: this.request.codeModifyBody,
               query: this.request.codeModifyQuery,
-              // param: this.request.codeModifyParam,
             },
             deletes: {
               header: this.request.codeDeleteHeader,
               body: this.request.codeDeleteBody,
               query: this.request.codeDeleteQuery,
-              // param: this.request.codeDeleteParam,
-            }
+            },
+            c_logics : this.request.cLogics
           },
           response: {
             status_code: this.response.statusCode,
@@ -374,6 +386,11 @@ export default {
         this.fillData(response.data)
       } catch (err) {
         console.log(err)
+        this.$q.notify({
+          message: err.response.data.message ?  err.response.data.message : 'Somethings Wrong',
+          color: 'negative'
+        })
+
       }
       this.isLoading = false
     },
@@ -385,8 +402,6 @@ export default {
 
     },
     fillRequest(request) {
-      console.log("fill request triggered, request is ")
-      console.log(request)
       const {
         loop,
         transform,
@@ -398,6 +413,7 @@ export default {
         deletes,
         log_before_modify,
         log_after_modify,
+          c_logics
       } = request
       return {
         loop,
@@ -410,15 +426,17 @@ export default {
         codeAddHeader: adds.header ? adds.header : {},
         codeAddBody: adds.body ? adds.body : {},
         codeAddQuery: adds.query ? adds.query : {},
-        // codeAddParam: adds.param ? adds.param : {},
+
         codeModifyHeader: modifies.head ? modifies.head : {},
         codeModifyBody: modifies.body ? modifies.body : {},
-        // codeModifyParam: modifies.param ? modifies.param : {},
+
         codeModifyQuery: modifies.query ? modifies.query : {},
         codeDeleteHeader: deletes.header ? deletes.header : [],
         codeDeleteBody: deletes.body ? deletes.body : [],
         codeDeleteQuery : deletes.query ? deletes.query : [],
-        // codeDeleteParam : deletes.param ? deletes.param : []
+
+        cLogics : c_logics ? c_logics : []
+
       }
     },
 

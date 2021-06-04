@@ -175,7 +175,7 @@
           <div class="text-h6">CLogic</div>
           <CLogicItemDetail :prop-c-logic=" propSerialConfig.c_logics[selectedIndex]"
                             @on-clogic-save="onCLogicSave" :prop-mode="mode"
-                            :prop-index="selectedIndex" :prop-config-id="propSerialConfig.id"
+                            :prop-config-id="propSerialConfig.id"
                             prop-request-type="serial"/>
         </q-card-section>
       </q-card>
@@ -317,6 +317,8 @@ export default {
   },
   methods: {
     ...mapActions({
+      addCLogicSerial: 'serial/storeSingleCLogic',
+      updateCLogicSerial: 'serial/updateSingleCLogic',
       actionFetchSerial: 'serial/fetchSerial',
       actionFetchConfigures: 'configures/fetchConfigures',
       actionStoreSerial: 'serial/storeSerial',
@@ -397,7 +399,7 @@ export default {
     },
     openDialogAddCLogic() {
       this.mode = 'add'
-      this.dialog = true
+      this.dialog= true
     },
     constructData() {
       return {
@@ -456,8 +458,28 @@ export default {
       }
     },
 
-    onCLogicSave() {
-      this.dialog = false
+    async onCLogicSave(data) {
+      if (this.mode === 'edit') {
+          await this.updateCLogicSerial(data)
+        this.$q.notify({
+          message: 'Update CLogic Success',
+          color: 'secondary'
+        })
+
+        this.dialog = false
+      } else {
+        try {
+            await this.addCLogicSerial(data)
+          this.$q.notify({
+            message: 'Add CLogic Success',
+            color: 'secondary'
+          })
+          this.$emit('on-clogic-save', data)
+        } catch (err) {
+          console.log(err)
+        }
+      }
+
     },
     selectCLogic(index) {
       this.selectedIndex = index

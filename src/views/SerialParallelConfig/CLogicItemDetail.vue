@@ -114,12 +114,10 @@
 <script>
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 import Editor from "../../components/common/Editor";
-import {mapActions} from "vuex";
 
 export default {
   props: {
     propCLogic: Object,
-    propIndex: Number,
     propMode: String,
     propConfigId: String,
     propRequestType: String,
@@ -130,7 +128,7 @@ export default {
   },
   watch: {
     propCLogic(val) {
-      this.filLData(val)
+      this.fillData(val)
     },
   },
   data() {
@@ -187,20 +185,17 @@ export default {
     }
   },
   methods: {
-    ...mapActions({
-      addCLogicSerial: 'serial/storeSingleCLogic',
-      updateCLogicSerial: 'serial/updateSingleCLogic',
-      addCLogicParallel: 'parallel/storeSingleCLogicParallel',
-      updateCLogicParallel: 'parallel/updateSingleCLogicParallel',
-    }),
     async onSaveClicked() {
       let data = {
+        id : null,
         projectId: this.$route.params.id,
         configId: this.propConfigId,
         data: this.data ? this.data : {},
         rule: this.rule ? this.rule : {},
         next_success: this.nextSuccess,
         next_failure: this.nextFailure,
+        response : null,
+        failure_response : null,
       }
 
 
@@ -244,41 +239,12 @@ export default {
 
       if (this.propMode === 'edit') {
         data.id = this.id
-        if (this.propRequestType === 'serial') {
-          await this.updateCLogicSerial(data)
-        } else {
-          await this.updateCLogicParallel(data)
-        }
-        this.$q.notify({
-          message: 'Update CLogic Success',
-          color: 'secondary'
-        })
-        this.$emit('on-clogic-save')
-      } else {
-        try {
-          if (this.propRequestType === 'serial') {
-            await this.addCLogicSerial(data)
-          } else {
-            await this.addCLogicParallel(data)
-          }
-          this.$q.notify({
-            message: 'Add CLogic Success',
-            color: 'secondary'
-          })
-
-          this.$emit('on-clogic-save')
-        } catch (err) {
-          console.log(err)
-        }
       }
 
-
-      // console.log("data is before emit")
-      // console.log(data)
-      // this.$emit('on-clogic-save', {mode : this.propMode, data : data, index : this.propIndex})
+      this.$emit('on-clogic-save',data)
     },
 
-    filLData(cLogicData) {
+    fillData(cLogicData) {
       const {
         id, data, next_success, response, rule, log_before_modify, log_after_modify, next_failure,
         failure_response
@@ -324,8 +290,7 @@ export default {
   },
   mounted() {
     if (this.propMode === 'edit') {
-
-      this.filLData(this.propCLogic)
+      this.fillData(this.propCLogic)
     }
   }
 }

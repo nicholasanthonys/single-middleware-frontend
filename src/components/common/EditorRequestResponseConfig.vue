@@ -170,14 +170,57 @@
                     @input="emitValue"/>
           </q-tab-panel>
 
-          <q-tab-panel name="CLogics" >
+          <q-tab-panel name="CLogics" v-if="enableCLogics">
             <div class="text-h4 q-mb-md">Request Logic</div>
-        <CLogicTable :c-logics="[]"/>
+            <div class="col-1">
+              configure id : {{configureId}}
+              project Id : {{projectId}}
+              <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
+            </div>
+            <CLogicTable :c-logics="data.cLogics" @on-select-clogic="onSelectCLogic"
+                         @on-delete-clogic="onDeleteCLogic"/>
           </q-tab-panel>
 
         </q-tab-panels>
       </template>
     </q-splitter>
+    <q-dialog
+        v-model="dialogCLogic"
+        persistent
+        :maximized="maximizedToggle"
+        transition-show="slide-up"
+        transition-hide="slide-down"
+    >
+      <q-card class="text-black">
+        <q-bar>
+          <q-space/>
+
+          <q-btn dense flat icon="minimize" @click="maximizedToggle = false" :disable="!maximizedToggle">
+            <q-tooltip v-if="maximizedToggle" content-class="bg-white text-primary">Minimize</q-tooltip>
+          </q-btn>
+          <q-btn dense flat icon="crop_square" @click="maximizedToggle = true" :disable="maximizedToggle">
+            <q-tooltip v-if="!maximizedToggle" content-class="bg-white text-primary">Maximize</q-tooltip>
+          </q-btn>
+          <q-btn dense flat icon="close" v-close-popup>
+            <q-tooltip content-class="bg-white text-primary">Close</q-tooltip>
+          </q-btn>
+        </q-bar>
+
+        <q-card-section class="q-pt-none">
+
+          <div class="text-h6">CLogic</div>
+          <CLogicItemDetail v-if="cLogicMode === 'add'"
+                            @on-clogic-save="onCLogicSave" :prop-mode="cLogicMode"
+                            :prop-index="selectedCLogicIndex"
+                            prop-request-type="serial"/>
+          <CLogicItemDetail v-if="cLogicMode === 'edit'"
+                            :prop-c-logic="data.cLogics[selectedCLogicIndex]"
+                            @on-clogic-save="onCLogicSave" :prop-mode="cLogicMode"
+                            :prop-index="selectedCLogicIndex"
+                            prop-request-type="serial"/>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </ValidationObserver>
 </template>
 
@@ -186,22 +229,29 @@ import Editor from "./Editor";
 import TreeConfigCircularResponse from "../../models/TreeConfigResponse";
 import TreeConfigRequest from "../../models/TreeConfigRequest";
 import CLogicTable from "../CLogic/CLogicTable";
+import CLogicItemDetail from "../../views/SerialParallelConfig/CLogicItemDetail";
+import {mapActions} from "vuex";
 
 export default {
   props: [
     'value',
     'configType',
     'haveLog',
-
-
+    'enableCLogics',
+    'configureId',
+    'projectId'
   ],
-  components: {CLogicTable, Editor},
+  components: {CLogicItemDetail, CLogicTable, Editor},
 
   data() {
     return {
       error: null,
       splitterModel: 20,
       selected: "General",
+      cLogicMode: 'add',
+      dialogCLogic: false,
+      maximizedToggle: true,
+      selectedCLogicIndex: -1,
 
       data: {
 
@@ -229,6 +279,7 @@ export default {
 
         codeDeleteQuery: this.value.codeDeleteQuery,
         // codeDeleteParam: this.value.codeDeleteParam,
+        cLogics: this.value.cLogics
       },
       simple: [
         this.configType === "request" ? TreeConfigRequest : TreeConfigCircularResponse
@@ -239,8 +290,87 @@ export default {
     }
   },
   methods: {
+    ...mapActions({
+      storeRequestCLogic: 'configures/storeConfigureCLogicRequest',
+      updateRequestCLogic: 'configures/updateConfigureCLogicRequest'
+    }),
     emitValue() {
       this.$emit('input', this.data)
+    },
+    async onCLogicSave(cLogic) {
+      let {id,data,rule,next_success,next_failure,response,failure_response} = cLogic
+      if(this.cLogicMode === 'add'){
+        try {
+          let res = await this.storeRequestCLogic({
+            project_id : this.projectId,
+            configure_id : this.configureId,
+            c_logic : {
+              data,rule,next_success,next_failure,response,failure_response
+            }
+          })
+          this.$q.notify({
+            message: 'Add CLogic Success.',
+            color: 'secondary'
+          })
+
+          this.data.cLogics.push(res.data)
+          this.$emit('input', this.data)
+          // this.$emit('on-clogic-save', res.data)
+        } catch (e) {
+          console.log(e)
+          this.$q.notify({
+            message: e.response.data.message ? e.response.data.message :  'Something Wrong',
+            color: 'negative'
+          })
+        }
+      }else{
+        try {
+          let res = await this.updateRequestCLogic({
+            project_id : this.projectId,
+            configure_id : this.configureId,
+            c_logic : {
+              id, data,rule,next_success,next_failure,response,failure_response
+            }
+          })
+          this.$q.notify({
+            message: 'Edit CLogic Success.',
+            color: 'secondary'
+          })
+
+          let index = this.data.cLogics.findIndex(e => e.id === id)
+          if (index >= 0){
+            let temp = [...this.data.cLogics]
+            temp[index] = res.data
+
+            this.data.cLogics= [...temp]
+          }
+          this.$emit('input', this.data)
+        } catch (e) {
+          console.log(e)
+          this.$q.notify({
+            message: e.response.data.message ? e.response.data.message :  'Something Wrong',
+            color: 'negative'
+          })
+        }
+      }
+      this.dialogCLogic = false
+    },
+    onSelectCLogic(value) {
+      const {cLogicIndex} = value
+      this.selectedCLogicIndex = cLogicIndex
+      this.cLogicMode = 'edit'
+      this.dialogCLogic = true
+    },
+    onDeleteCLogic(value) {
+      // make request to delete configure cLogic
+      const {index} = value
+      let temp = [...this.data.cLogics]
+      temp.splice(index, 1)
+      this.data.cLogics = [...temp]
+      this.emitValue()
+    },
+    openDialogAddCLogic() {
+      this.dialogCLogic = true
     },
 
   }

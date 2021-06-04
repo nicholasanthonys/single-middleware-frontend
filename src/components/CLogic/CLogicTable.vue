@@ -52,7 +52,7 @@
             />
 
             <q-btn color="negative" icon="delete" label="Delete" size="sm"
-                   @click="onDeleteCLogic( props.row)"
+                   @click="onDeleteCLogic( props.row, props.rowIndex)"
             />
 
           </div>
@@ -97,8 +97,8 @@ export default {
     selectCLogic(cLogic, cLogicIndex) {
       this.$emit('on-select-clogic', {cLogic, cLogicIndex})
     },
-    onDeleteCLogic(cLogic) {
-      this.$emit('on-delete-clogic', {cLogic})
+    onDeleteCLogic(cLogic, index) {
+      this.$emit('on-delete-clogic', {cLogic, index})
     }
   }
 }
