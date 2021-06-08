@@ -74,7 +74,7 @@
               <q-btn type="submit">Save</q-btn>
             </div>
             <div class="col-1" v-if="$route.name === 'Configures.Detail' ">
-              <q-btn @click="confirmDelete = true" type="negative">Delete</q-btn>
+              <q-btn @click="confirmDelete = true" >Delete</q-btn>
             </div>
           </div>
 
@@ -254,6 +254,7 @@ export default {
       this.validateInput()
       if (!this.validators.formHasError) {
         if (this.$route.name === 'Configures.Detail') {
+          console.log("on save clicked triggered")
           await this.onUpdateConfig()
         } else {
           await this.onStoreConfig()
@@ -349,8 +350,7 @@ export default {
               header: this.request.codeDeleteHeader,
               body: this.request.codeDeleteBody,
               query: this.request.codeDeleteQuery,
-            },
-            c_logics : this.request.cLogics
+            }
           },
           response: {
             status_code: this.response.statusCode,
