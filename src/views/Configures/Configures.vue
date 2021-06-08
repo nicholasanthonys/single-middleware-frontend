@@ -11,7 +11,7 @@
         <q-table
             style="height: 600px"
             title="Your Configures"
-            :data="configs"
+            :data="propConfigs"
             :columns="columns"
             row-key="index"
             virtual-scroll
@@ -108,7 +108,6 @@ export default {
 
   data() {
     return {
-      configs : this.propConfigs,
       selectedConfig : null,
       pagination: {
         rowsPerPage: 1000
