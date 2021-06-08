@@ -64,6 +64,7 @@
 
                 <q-tab-panel name="base">
                   <div class="text-h4 q-mb-md">Base Settings</div>
+                  <p class="text-h6"> Circular Response Setting</p>
                   <q-input
                       v-model.number="maxCircular"
                       label="Max Circular Limit*"
