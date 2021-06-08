@@ -173,8 +173,6 @@
           <q-tab-panel name="CLogics" v-if="enableCLogics">
             <div class="text-h4 q-mb-md">Request Logic</div>
             <div class="col-1">
-              configure id : {{configureId}}
-              project Id : {{projectId}}
               <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
             </div>
             <CLogicTable :c-logics="data.cLogics" @on-select-clogic="onSelectCLogic"
@@ -233,6 +231,7 @@ import CLogicItemDetail from "../../views/SerialParallelConfig/CLogicItemDetail"
 import {mapActions} from "vuex";
 
 export default {
+  name: "EditorRequestResponseConfig",
   props: [
     'value',
     'configType',
@@ -292,7 +291,8 @@ export default {
   methods: {
     ...mapActions({
       storeRequestCLogic: 'configures/storeConfigureCLogicRequest',
-      updateRequestCLogic: 'configures/updateConfigureCLogicRequest'
+      updateRequestCLogic: 'configures/updateConfigureCLogicRequest',
+      deleteRequestCLogic : 'configures/deleteConfigureCLogicRequest'
     }),
     emitValue() {
       this.$emit('input', this.data)
@@ -361,13 +361,33 @@ export default {
       this.cLogicMode = 'edit'
       this.dialogCLogic = true
     },
-    onDeleteCLogic(value) {
-      // make request to delete configure cLogic
-      const {index} = value
-      let temp = [...this.data.cLogics]
-      temp.splice(index, 1)
-      this.data.cLogics = [...temp]
-      this.emitValue()
+    async onDeleteCLogic(value) {
+      const {cLogic} = value
+      const{id} = cLogic
+      console.log("on deletecLogic triggered id : " +  id)
+      console.log(cLogic)
+      try {
+       await this.deleteRequestCLogic({
+         id,
+         project_id: this.projectId,
+         configure_id: this.configureId,
+       })
+        // make request to delete configure cLogic
+        // let temp = this.data.cLogics.filter(c => c.id !== id)
+        this.data.cLogics = this.data.cLogics.filter(c => c.id !== id)
+        this.$q.notify({
+          message: 'Delete Success.',
+          color: 'secondary'
+        })
+        this.emitValue()
+      }catch(err){
+        console.log(err)
+        this.$q.notify({
+          message: err.response.data.message ? err.response.data.message :  'Something Wrong',
+          color: 'negative'
+        })
+      }
+
     },
     openDialogAddCLogic() {
       this.dialogCLogic = true
