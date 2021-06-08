@@ -340,7 +340,7 @@
             <q-btn @click="onSaveClicked" type="primary">Save</q-btn>
           </div>
           <div class="col-1" v-if="$route.name === 'Containers.Detail' ">
-            <q-btn @click="dialogDelete= true" type="negative">Delete</q-btn>
+            <q-btn @click="dialogDelete= true" >Delete</q-btn>
           </div>
         </div>
 
