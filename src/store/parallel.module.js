@@ -223,10 +223,10 @@ const parallel = {
             }
         },
         addSingleConfigSerial(state, data) {
-            const {configure_id, alias, id} = data;
+            const {configure_id, alias, id,loop} = data;
             state.parallel.configures.push({
                 id,
-                configure_id, alias
+                configure_id, alias,loop
             })
         }
     },
