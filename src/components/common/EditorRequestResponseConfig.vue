@@ -226,6 +226,7 @@
 import Editor from "./Editor";
 import TreeConfigCircularResponse from "../../models/TreeConfigResponse";
 import TreeConfigRequest from "../../models/TreeConfigRequest";
+import TreeConfigRequestWithClogics from "../../models/TreeConfigRequestWithCLogic";
 import CLogicTable from "../CLogic/CLogicTable";
 import CLogicItemDetail from "../../views/SerialParallelConfig/CLogicItemDetail";
 import {mapActions} from "vuex";
@@ -241,6 +242,11 @@ export default {
     'projectId'
   ],
   components: {CLogicItemDetail, CLogicTable, Editor},
+  watch : {
+    enableCLogics(){
+      this.simple = [this.determineTreeMenu()]
+    }
+  },
 
   data() {
     return {
@@ -281,7 +287,7 @@ export default {
         cLogics: this.value.cLogics
       },
       simple: [
-        this.configType === "request" ? TreeConfigRequest : TreeConfigCircularResponse
+        this.determineTreeMenu()
       ],
 
       transformOptions: ['ToJson', 'ToXml'],
@@ -294,6 +300,16 @@ export default {
       updateRequestCLogic: 'configures/updateConfigureCLogicRequest',
       deleteRequestCLogic : 'configures/deleteConfigureCLogicRequest'
     }),
+    determineTreeMenu(){
+     if(this.configType === "request") {
+       if(this.enableCLogics){
+        return TreeConfigRequestWithClogics
+       }
+       return TreeConfigRequest
+     }
+     return TreeConfigCircularResponse
+
+    },
     emitValue() {
       this.$emit('input', this.data)
     },
