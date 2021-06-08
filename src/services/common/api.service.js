@@ -45,9 +45,10 @@ post(resource, body, ) {
         )
     },
 
-    delete(resource, params) {
+    delete(resource, params, data) {
         return axios.delete(resource, {
-             params
+             params,
+            data
         })
     },
 }
