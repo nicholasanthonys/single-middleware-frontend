@@ -112,10 +112,10 @@
 </template>
 
 <script>
-import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 import Editor from "../../components/common/Editor";
 
 export default {
+  name : "CLogicItemDetail",
   props: {
     propCLogic: Object,
     propMode: String,
@@ -124,7 +124,7 @@ export default {
   },
   components: {
     Editor,
-    EditorRequestResponseConfig
+    EditorRequestResponseConfig : () => import("../../components/common/EditorRequestResponseConfig")
   },
   watch: {
     propCLogic(val) {
