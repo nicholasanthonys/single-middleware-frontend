@@ -40,7 +40,6 @@
                 </q-tab-panel>
                 <q-tab-panel name="request">
                   <div class="text-h4 q-mb-md">Request</div>
-                  {{request.cLogics}}
                   <EditorRequestResponseConfig
                       ref="editorRequest"
                       config-type="request"
