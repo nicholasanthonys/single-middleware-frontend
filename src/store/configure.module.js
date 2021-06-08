@@ -97,6 +97,24 @@ const configures = {
             })
         },
 
+        deleteConfigureCLogicRequest(context, data){
+            return new Promise((resolve, reject) => {
+                const {project_id, configure_id, id} = data
+                ApiService.init()
+                ApiService.delete(`/api/v1/configure/${configure_id}/request/c-logic`, {},{
+                    id,
+                    project_id,
+                }).then(
+                    response => {
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
         updateConfigureCLogicRequest(context, value) {
             return new Promise((resolve, reject) => {
                 const {project_id, configure_id, c_logic} = value
