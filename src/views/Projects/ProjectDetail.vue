@@ -76,16 +76,16 @@
                   />
 
                   <br/>
-                    <EditorRequestResponseConfig ref="editor"
-                                                 config-type="response"
-                                                 :prop-enable-loop="false"
-                                                 :have-log="false"
-                                                v-model="editorData"
-                    />
+                  <EditorRequestResponseConfig ref="editor"
+                                               config-type="response"
+                                               :prop-enable-loop="false"
+                                               :have-log="false"
+                                               v-model="editorData"
+                  />
 
                 </q-tab-panel>
 
-                <q-tab-panel name="configures" style="height: 100%;"  v-if="$route.name === 'Projects.Detail'">
+                <q-tab-panel name="configures" style="height: 100%;" v-if="$route.name === 'Projects.Detail'">
                   <Configures :project-id="$route.params.id" :prop-configs="configs" v-if="!isLoadConfigures"/>
                   <div style="height: 100%;" v-else class="flex justify-center items-center">
                     <q-spinner
@@ -96,7 +96,7 @@
 
                 </q-tab-panel>
 
-                <q-tab-panel name="serial/parallel"  v-if="$route.name === 'Projects.Detail'">
+                <q-tab-panel name="serial/parallel" v-if="$route.name === 'Projects.Detail'">
                   <ConfigSerialList :prop-serial="serial" :prop-project-id="$route.params.id"
                                     @on-confirm-serial-config="onConfirmSerialConfig"/>
                   <br/>
@@ -117,7 +117,7 @@
               <q-btn type="submit">Save</q-btn>
             </div>
             <div class="col-1" v-if="$route.name === 'Projects.Detail' ">
-              <q-btn @click="confirmDelete = true" type="negative">Delete</q-btn>
+              <q-btn @click="confirmDelete = true" >Delete</q-btn>
             </div>
           </div>
 
@@ -176,6 +176,14 @@ export default {
       selectedProject: 'projects/selectedProject'
     })
   },
+  watch: {
+    '$route.name': {
+      async handler() {
+        await this.getProjectDetail()
+        await this.fetchConfigures(this.$route.params.id);
+      },
+    }
+  },
   data() {
     return {
       // validation provider error
@@ -193,7 +201,7 @@ export default {
       id: null,
 
       selected: 'Adds.Header',
-      editorData : {
+      editorData: {
         codeAddHeader: {},
         codeAddBody: {},
         codeModifyHeader: {},
@@ -207,7 +215,7 @@ export default {
 
       },
 
-     isLoading: false,
+      isLoading: false,
       isLoadConfigures: false,
       confirmDelete: false,
 
@@ -244,7 +252,7 @@ export default {
       validators: {
         nameErr: false,
         statusCodeErr: false,
-        maxCircularErr : false,
+        maxCircularErr: false,
         formHasError: false,
         errCount: 0
       },
@@ -261,6 +269,7 @@ export default {
       actionFetchConfigures: 'configures/fetchConfigures',
       storeSerial: 'serial/storeSerial'
     }),
+
 
     okClicked() {
       this.alertDialog = false;
@@ -405,7 +414,7 @@ export default {
       this.validators.nameErr = this.$refs.name.hasError
 
       this.$refs.maxCircular.validate();
-      this.validators.maxCircularErr =this.$refs.maxCircular.hasError
+      this.validators.maxCircularErr = this.$refs.maxCircular.hasError
 
       this.$refs.editor.$refs.statusCode.validate();
       this.validators.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
@@ -416,7 +425,7 @@ export default {
         this.globalErrors.push(this.$refs.name.innerErrorMessage)
       }
 
-      if(this.validators.maxCircularErr){
+      if (this.validators.maxCircularErr) {
         this.validators.errCount++;
         this.globalErrors.push(this.$refs.maxCircular.innerErrorMessage)
       }
@@ -522,7 +531,6 @@ export default {
       await this.getProjectDetail()
       await this.fetchConfigures(this.$route.params.id);
     }
-
     await this.visitTabs()
   }
 }
