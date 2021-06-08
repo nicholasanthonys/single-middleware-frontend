@@ -266,6 +266,12 @@ export default {
           align: 'left',
         },
         {
+          name: 'loop',
+          label: 'Loop',
+          field: 'loop',
+          align: 'left',
+        },
+        {
           name: 'action',
           required: true,
           label: 'Action',
@@ -565,9 +571,6 @@ export default {
         }
       }
     }
-  },
-  created() {
-
   },
   async mounted() {
     await this.loadParallel();
