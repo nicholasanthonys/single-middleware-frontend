@@ -32,7 +32,7 @@
                 <div class="text-h4 q-mb-md">General</div>
                 <p class="text-h7 q-mb-md"> Container Created : {{ container.container_id ? 'Yes' : 'No' }}</p>
                 <p class="text-h7 q-mb-md" > Docker Container Id : {{ container.container_id ? container.container_id : '-'  }}</p>
-                <p class="text-h7 q-mb-md" > Docker Container Name: {{ container.container_id ? container._id: '-'  }}</p>
+                <p class="text-h7 q-mb-md" > Docker Container Name: {{ container._id ? container._id: '-'  }}</p>
 
                 <div v-if="container.container_id">
                   <div v-if="!isToggling">
@@ -340,7 +340,7 @@
             <q-btn @click="onSaveClicked" type="primary">Save</q-btn>
           </div>
           <div class="col-1" v-if="$route.name === 'Containers.Detail' ">
-            <q-btn @click="dialogDelete= true" type="negative">Delete</q-btn>
+            <q-btn @click="dialogDelete= true" >Delete</q-btn>
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 <template>
+  <div>
   <q-table
       style="height: 400px"
       title="CLogic Parallel"
@@ -51,9 +52,13 @@
 
             />
 
+<!--            <q-btn color="negative" icon="delete" label="Delete" size="sm"-->
+<!--                   @click="onDeleteCLogic( props.row, props.rowIndex)"-->
+<!--            />-->
             <q-btn color="negative" icon="delete" label="Delete" size="sm"
-                   @click="onDeleteCLogic( props.row)"
+                   @click="openDialogDelete(props.row, props.rowIndex)"
             />
+
 
           </div>
 
@@ -62,10 +67,25 @@
       </q-tr>
     </template>
   </q-table>
+    <q-dialog v-model="dialogDelete" persistent v-if="selectedCLogic != null">
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="primary" text-color="white"/>
+          <span class="q-ml-sm">Are you sure want to delete CLogic with id {{selectedCLogic.id}}? </span>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="primary" v-close-popup/>
+          <q-btn flat label="Delete" color="primary" v-close-popup @click="onDeleteCLogic"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </div>
 </template>
 
 <script>
 export default {
+  name : "CLogicTable",
   props: {
     cLogics: Array,
 
@@ -73,6 +93,7 @@ export default {
   },
   data() {
     return {
+      dialogDelete : false,
       cLogicColumns: [
         {
           name: 'id',
@@ -91,14 +112,22 @@ export default {
       cLogicPagination: {
         rowsPerPage: 1000
       },
+      selectedCLogic : null,
+      selectedCLogicIndex : -1
     }
   },
   methods: {
+    openDialogDelete(cLogic, cLogicIndex){
+      this.selectedCLogic = cLogic
+      this.selectedCLogicIndex = cLogicIndex
+      this.dialogDelete = true;
+    },
     selectCLogic(cLogic, cLogicIndex) {
       this.$emit('on-select-clogic', {cLogic, cLogicIndex})
     },
-    onDeleteCLogic(cLogic) {
-      this.$emit('on-delete-clogic', {cLogic})
+    onDeleteCLogic() {
+      this.$emit('on-delete-clogic', {cLogic : this.selectedCLogic,
+        index : this.selectedCLogicIndex})
     }
   }
 }

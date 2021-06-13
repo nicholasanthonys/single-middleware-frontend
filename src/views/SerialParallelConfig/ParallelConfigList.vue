@@ -71,14 +71,14 @@
         <p class="text-h5">Parallel Next Failure Response</p>
         <div class="column" style="height: 700px">
           <div class="col-1">
-            <q-btn @click="onSaveNextFailure">Save Next Failure</q-btn>
+            <q-btn @click="onSaveFailureResponse">Save Next Failure</q-btn>
           </div>
           <div class="col">
             <EditorRequestResponseConfig ref="editor"
                                          config-type="response"
                                          :have-log="false"
 
-                                         v-model="nextFailure"
+                                         v-model="failureResponse"
             />
           </div>
         </div>
@@ -172,7 +172,7 @@
           <q-card-section class="q-pt-none">
             <div class="text-h6">CLogic</div>
             <CLogicItemDetail :prop-c-logic="selectedCLogic" @on-clogic-save="onCLogicSave" :prop-mode="cLogicMode"
-                              :prop-index="selectedCLogicIndex" prop-request-type="parallel"/>
+                               prop-request-type="parallel"/>
           </q-card-section>
         </q-card>
       </q-dialog>
@@ -229,7 +229,7 @@ export default {
   },
   data() {
     return {
-      nextFailure: {
+      failureResponse: {
         statusCode: '',
         transform: "ToJson",
         codeAddHeader: {},
@@ -266,6 +266,12 @@ export default {
           align: 'left',
         },
         {
+          name: 'loop',
+          label: 'Loop',
+          field: 'loop',
+          align: 'left',
+        },
+        {
           name: 'action',
           required: true,
           label: 'Action',
@@ -296,7 +302,7 @@ export default {
         formHasError: false,
       },
 
-      validatorNextFailure: {
+      validatorFailureResponse: {
         statusCodeErr: false,
         formHasError: false,
       },
@@ -313,12 +319,13 @@ export default {
       actionFetchConfigures: 'configures/fetchConfigures',
       storeSingleConfigParallel: 'parallel/storeSingleConfigParallel',
       updateSingleConfigParallel: 'parallel/updateSingleConfigParallel',
-      storeSingleCLogicParallel: 'parallel/storeSingleCLogicParallel',
-      updateSingleCLogicParallel: 'parallel/updateSingleCLogicParallel',
-      storeNextFailureParallel: 'parallel/storeNextFailure',
+      storeFailureResponseParallel: 'parallel/storeFailureResponse',
       actionFetchParallel: 'parallel/fetchParallel',
       deleteCLogicParallel: 'parallel/deleteSpecificCLogic',
       deleteConfigFileParallel: 'parallel/deleteSpecificConfigFile',
+      addCLogicParallel: 'parallel/storeSingleCLogicParallel',
+      updateCLogicParallel: 'parallel/updateSingleCLogicParallel',
+
     }),
     onDeleteConfig(projectId, config) {
       this.selectedConfigId = config.id
@@ -366,13 +373,13 @@ export default {
       this.isDeletingCLogic = false;
     },
 
-    validateInputNextFailure() {
-      this.validatorNextFailure.formHasError = false;
+    validateInputFailureResponse() {
+      this.validatorFailureResponse.formHasError = false;
       this.$refs.editor.$refs.statusCode.validate()
-      this.validatorNextFailure.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
+      this.validatorFailureResponse.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
 
-      if (this.validatorNextFailure.statusCodeErr) {
-        this.validatorNextFailure.formHasError = true
+      if (this.validatorFailureResponse.statusCodeErr) {
+        this.validatorFailureResponse.formHasError = true
       }
     },
 
@@ -396,32 +403,32 @@ export default {
       this.isLoading = true;
       try {
         await this.actionFetchParallel(this.$route.params.id)
-        this.fillDataNextFailure(this.parallel);
+        this.fillDataFailureResponse(this.parallel);
       } catch (e) {
         console.log(e)
       }
       this.isLoading = false;
     },
 
-    async onSaveNextFailure() {
-      this.validateInputNextFailure()
-      if (!this.validatorNextFailure.formHasError) {
+    async onSaveFailureResponse() {
+      this.validateInputFailureResponse()
+      if (!this.validatorFailureResponse.formHasError) {
         try {
-          await this.storeNextFailureParallel({
+          await this.storeFailureResponseParallel({
             projectId: this.$route.params.id,
-            status_code: this.nextFailure.statusCode,
-            transform: this.nextFailure.transform,
+            status_code: this.failureResponse.statusCode,
+            transform: this.failureResponse.transform,
             adds: {
-              header: this.nextFailure.codeAddHeader,
-              body: this.nextFailure.codeAddBody
+              header: this.failureResponse.codeAddHeader,
+              body: this.failureResponse.codeAddBody
             },
             modifies: {
-              header: this.nextFailure.codeModifyHeader,
-              body: this.nextFailure.codeModifyBody
+              header: this.failureResponse.codeModifyHeader,
+              body: this.failureResponse.codeModifyBody
             },
             deletes: {
-              header: this.nextFailure.codeDeleteHeader,
-              body: this.nextFailure.codeDeleteBody
+              header: this.failureResponse.codeDeleteHeader,
+              body: this.failureResponse.codeDeleteBody
             }
           })
           this.$q.notify({
@@ -438,8 +445,28 @@ export default {
       this.cLogicMode = 'add',
           this.cLogicDialog = true
     },
-    async onCLogicSave() {
-      this.cLogicDialog = false
+    async onCLogicSave(data) {
+      if (this.cLogicMode === 'edit') {
+          await this.updateCLogicParallel(data)
+        this.$q.notify({
+          message: 'Update CLogic Success',
+          color: 'secondary'
+        })
+        this.cLogicDialog = false
+      } else {
+        try {
+            await this.addCLogicParallel(data)
+          this.$q.notify({
+            message: 'Add CLogic Success',
+            color: 'secondary'
+          })
+
+          this.cLogicDialog = false
+        } catch (err) {
+          console.log(err)
+        }
+      }
+
     },
     async onConfigFileSave() {
       this.validateInputConfig();
@@ -526,12 +553,12 @@ export default {
       return options
     },
 
-    fillDataNextFailure(parallel) {
+    fillDataFailureResponse(parallel) {
       console.log("parallel is ")
       console.log(parallel)
-      if (parallel && parallel.next_failure) {
-        const {transform, adds, modifies, deletes, status_code} = parallel.next_failure
-        this.nextFailure = {
+      if (parallel && parallel.failure_response) {
+        const {transform, adds, modifies, deletes, status_code} = parallel.failure_response
+        this.failureResponse = {
           statusCode: status_code,
           transform: transform,
           codeAddHeader: adds.header ? adds.header : {},
@@ -544,9 +571,6 @@ export default {
         }
       }
     }
-  },
-  created() {
-
   },
   async mounted() {
     await this.loadParallel();

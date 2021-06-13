@@ -15,7 +15,7 @@
             >
               <q-tab name="general" icon="description" label="General"
                      :alert="validators.configIdErr|| validators.aliasErr? 'red': false"/>
-              <q-tab name="next_failure" icon="settings_application" label="Next Failure"
+              <q-tab name="failure_response" icon="settings_application" label="Next Failure"
                      :alert="validators.statusCodeErr? 'red': false"/>
               <q-tab name="c_logics" icon="settings_application" label="CLogics" v-if="propSerialConfig!= null"/>
             </q-tabs>
@@ -59,7 +59,7 @@
 
               </q-tab-panel>
 
-              <q-tab-panel name="next_failure">
+              <q-tab-panel name="failure_response">
                 <div class="text-h4 q-mb-md">Failure Response</div>
                 <EditorRequestResponseConfig
                     ref="editor"
@@ -175,7 +175,7 @@
           <div class="text-h6">CLogic</div>
           <CLogicItemDetail :prop-c-logic=" propSerialConfig.c_logics[selectedIndex]"
                             @on-clogic-save="onCLogicSave" :prop-mode="mode"
-                            :prop-index="selectedIndex" :prop-config-id="propSerialConfig.id"
+                            :prop-config-id="propSerialConfig.id"
                             prop-request-type="serial"/>
         </q-card-section>
       </q-card>
@@ -306,7 +306,7 @@ export default {
         errCount: 0
       },
 
-      tabNames: ["general", "next_failure", "c_logics"],
+      tabNames: ["general", "failure_response", "c_logics"],
       globalErrors: [],
       alertDialog: false,
 
@@ -317,6 +317,8 @@ export default {
   },
   methods: {
     ...mapActions({
+      addCLogicSerial: 'serial/storeSingleCLogic',
+      updateCLogicSerial: 'serial/updateSingleCLogic',
       actionFetchSerial: 'serial/fetchSerial',
       actionFetchConfigures: 'configures/fetchConfigures',
       actionStoreSerial: 'serial/storeSerial',
@@ -397,14 +399,14 @@ export default {
     },
     openDialogAddCLogic() {
       this.mode = 'add'
-      this.dialog = true
+      this.dialog= true
     },
     constructData() {
       return {
         project_id: this.$route.params.id,
         configure_id: this.selectedConfigId,
         alias: this.alias,
-        next_failure: {
+        failure_response: {
           status_code: this.editorData.statusCode,
           transform: this.editorData.transform,
           adds: {
@@ -456,8 +458,28 @@ export default {
       }
     },
 
-    onCLogicSave() {
-      this.dialog = false
+    async onCLogicSave(data) {
+      if (this.mode === 'edit') {
+          await this.updateCLogicSerial(data)
+        this.$q.notify({
+          message: 'Update CLogic Success',
+          color: 'secondary'
+        })
+
+        this.dialog = false
+      } else {
+        try {
+            await this.addCLogicSerial(data)
+          this.$q.notify({
+            message: 'Add CLogic Success',
+            color: 'secondary'
+          })
+          this.$emit('on-clogic-save', data)
+        } catch (err) {
+          console.log(err)
+        }
+      }
+
     },
     selectCLogic(index) {
       this.selectedIndex = index
@@ -485,13 +507,13 @@ export default {
     },
 
     fillDataFromProps(config) {
-      const {alias, configure_id, next_failure, id} = config
+      const {alias, configure_id, failure_response, id} = config
       this.id = id
       this.alias = alias
       this.selectedConfigId = configure_id
 
       /* Next Failure*/
-      const {status_code, transform, adds, modifies, deletes, log_before_modify, log_after_modify} = next_failure
+      const {status_code, transform, adds, modifies, deletes, log_before_modify, log_after_modify} = failure_response
       this.editorData.statusCode = status_code,
           this.editorData.transform = transform,
           this.editorData.codeAddHeader = adds.header,

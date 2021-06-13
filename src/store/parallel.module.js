@@ -4,7 +4,7 @@ const parallel = {
     namespaced: true,
     state: () => ({
         parallel: {
-            next_failure: {},
+            failure_response: {},
             configures: [],
             c_logics: [],
         }
@@ -56,13 +56,15 @@ const parallel = {
 
         storeSingleCLogicParallel(context, body) {
             return new Promise((resolve, reject) => {
-                const {projectId, data, rule, next_success, response,} = body
+                const {projectId, data, rule, next_success, response,next_failure,failure_response} = body
                 ApiService.init()
                 ApiService.post(`/api/v1/project/${projectId}/parallel/clogic/new`, {
                     data,
                     rule,
                     next_success,
-                    response
+                    response,
+                    next_failure,
+                    failure_response
                 }).then(
                     response => {
                         context.commit('addSingleCLogic', response.data)
@@ -128,11 +130,11 @@ const parallel = {
             })
         },
 
-        storeNextFailure(context, data) {
+        storeFailureResponse(context, data) {
             return new Promise((resolve, reject) => {
                 const {transform, status_code, adds, modifies, deletes, projectId} = data
                 ApiService.init()
-                ApiService.post(`/api/v1/project/${projectId}/parallel/next-failure`, {
+                ApiService.post(`/api/v1/project/${projectId}/parallel/failure-response`, {
                     transform, status_code, adds, modifies, deletes
                 }).then(
                     response => {
@@ -147,10 +149,10 @@ const parallel = {
 
         updateSingleCLogicParallel(context, body) {
             return new Promise((resolve, reject) => {
-                const {projectId, data, rule, next_success, response, id} = body
+                const {projectId, data, rule, next_success, response, id, next_failure, failure_response} = body
                 ApiService.init()
                 ApiService.put(`/api/v1/project/${projectId}/parallel/clogic`, {
-                    data, rule, next_success, response, id
+                    data, rule, next_success, response, id,next_failure,failure_response
                 }).then(
                     response => {
                         context.commit('updateSingleCLogicParallel', {id, cLogic: response.data})
@@ -184,7 +186,7 @@ const parallel = {
 
     mutations: {
         setParallel(state, data) {
-            state.parallel.next_failure = data.next_failure
+            state.parallel.failure_response = data.failure_response
             state.parallel.configures = data.configures
             state.parallel.c_logics = data.c_logics;
         },
@@ -221,10 +223,10 @@ const parallel = {
             }
         },
         addSingleConfigSerial(state, data) {
-            const {configure_id, alias, id} = data;
+            const {configure_id, alias, id,loop} = data;
             state.parallel.configures.push({
                 id,
-                configure_id, alias
+                configure_id, alias,loop
             })
         }
     },

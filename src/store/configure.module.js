@@ -51,7 +51,7 @@ const configures = {
         storeConfigure(context, data) {
             return new Promise((resolve, reject) => {
                 const {project_id, config} = data
-                const { request, response, description} = config
+                const {request, response, description} = config
                 ApiService.init()
                 ApiService.post('/api/v1/configure', {
                     project_id,
@@ -60,6 +60,77 @@ const configures = {
                         request,
                         response
                     },
+                }).then(
+                    response => {
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
+        storeConfigureCLogicRequest(context, value) {
+            return new Promise((resolve, reject) => {
+                const {project_id, configure_id, c_logic} = value
+                const {rule, data, next_success, response, next_failure, failure_response} = c_logic
+                ApiService.init()
+                ApiService.post(`/api/v1/configure/${configure_id}/request/c-logic`, {
+                    project_id,
+                    c_logic: {
+                        rule,
+                        data,
+                        next_success,
+                        response,
+                        next_failure,
+                        failure_response
+                    }
+                }).then(
+                    response => {
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
+        deleteConfigureCLogicRequest(context, data){
+            return new Promise((resolve, reject) => {
+                const {project_id, configure_id, id} = data
+                ApiService.init()
+                ApiService.delete(`/api/v1/configure/${configure_id}/request/c-logic`, {},{
+                    id,
+                    project_id,
+                }).then(
+                    response => {
+                        resolve(response)
+                    },
+                    error => {
+                        reject(error)
+                    }
+                )
+            })
+        },
+
+        updateConfigureCLogicRequest(context, value) {
+            return new Promise((resolve, reject) => {
+                const {project_id, configure_id, c_logic} = value
+                const {id, rule, data, next_success, response, next_failure, failure_response} = c_logic
+                ApiService.init()
+                ApiService.put(`/api/v1/configure/${configure_id}/request/c-logic`, {
+                    project_id,
+                    c_logic: {
+                        id,
+                        rule,
+                        data,
+                        next_success,
+                        response,
+                        next_failure,
+                        failure_response
+                    }
                 }).then(
                     response => {
                         resolve(response)
@@ -125,7 +196,7 @@ const configures = {
             state.description = data
         },
         deleteConfigure(state, id) {
-            if(state.configs){
+            if (state.configs) {
                 state.configs = state.configs.filter(e => e.id !== id)
             }
         }
