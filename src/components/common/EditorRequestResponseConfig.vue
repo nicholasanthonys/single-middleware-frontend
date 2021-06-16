@@ -1,5 +1,18 @@
 <template>
   <ValidationObserver>
+    <div class="q-pa-md q-gutter-sm" v-if="!hideErrorBanner">
+      <q-banner rounded class="text-white bg-red"
+                v-if="!isObjEmpty(resultValidationObj)">
+        <ul>
+          <li v-for="(value, name) in resultValidationObj" :key="name">
+            <p>
+              <b>{{ name }}</b>: {{ value }}
+            </p>
+          </li>
+        </ul>
+      </q-banner>
+    </div>
+
     <q-splitter
         v-model="splitterModel"
         style="height: 600px"
@@ -25,7 +38,6 @@
             transition-next="jump-up"
             keep-alive
         >
-
           <q-tab-panel name="General">
             <div class="text-h4 q-mb-md">General</div>
 
@@ -78,7 +90,8 @@
               <div class="col-1" v-if="configType ==='request' ">
                 <q-select
                     ref="requestMethod"
-                    outlined v-model="data.requestMethod" :options="methodOptions" label="Request Method"
+                    outlined v-model="data.requestMethod"
+                    :options="methodOptions" label="Request Method"
                     hint="Request Method'"
                     @input="emitValue"
                     :rules="[ val => val && val.length > 0 || 'Please fill Request Method']"
@@ -90,7 +103,8 @@
               <div class="col-1">
                 <q-select
 
-                    outlined v-model="data.transform" :options="transformOptions" label="Transform"
+                    outlined v-model="data.transform"
+                    :options="transformOptions" label="Transform"
                     :hint="configType === 'request' ? 'Request Transform' : 'Response Transform'  "
                     @input="emitValue"
                     style="max-width: 200px"/>
@@ -100,13 +114,15 @@
                 <div class="row">
                   <div class="col-12 col-lg-6">
                     <p class="text-h5">Log Before Modify</p>
-                    <Editor v-model="data.logBeforeModify" event-name="on-change-log-before-modify"
-                            @input="emitValue"/>
+                    <Editor v-model="data.logBeforeModify"
+                            event-name="on-change-log-before-modify"
+                            @input="emitValue" ref="logBeforeModify"/>
                   </div>
                   <div class="col-12 col-lg-6">
                     <p class="text-h5">Log After Modify</p>
-                    <Editor v-model="data.logAfterModify" event-name="on-change-log-after-modify"
-                            @input="emitValue"/>
+                    <Editor v-model="data.logAfterModify"
+                            event-name="on-change-log-after-modify"
+                            @input="emitValue" ref="logAfterModify"/>
                   </div>
                 </div>
               </div>
@@ -118,55 +134,65 @@
 
           <q-tab-panel name="Adds.Header">
             <div class="text-h4 q-mb-md">Add Header</div>
-            <Editor v-model="data.codeAddHeader" :event-name="'on-change-add-header'"
-                    @input="emitValue"/>
+            <Editor v-model="data.codeAddHeader"
+                    :event-name="'on-change-add-header'"
+                    @input="emitValue" ref="codeAddHeader"/>
           </q-tab-panel>
 
           <q-tab-panel name="Adds.Body">
             <div class="text-h4 q-mb-md">Add Body</div>
-            <Editor v-model="data.codeAddBody" :event-name="'on-change-add-body'" @input="emitValue"/>
+            <Editor v-model="data.codeAddBody"
+                    :event-name="'on-change-add-body'" @input="emitValue"
+                    ref="codeAddBody"/>
           </q-tab-panel>
 
           <q-tab-panel name="Adds.Query" v-if="configType === 'request' ">
             <div class="text-h4 q-mb-md">Add Query</div>
-            <Editor v-model="data.codeAddQuery" :event-name="'on-change-add-query'"
-                    @input="emitValue"/>
+            <Editor v-model="data.codeAddQuery"
+                    :event-name="'on-change-add-query'"
+                    @input="emitValue" ref="codeAddQuery"/>
           </q-tab-panel>
 
 
           <q-tab-panel name="Modifies.Header">
             <div class="text-h4 q-mb-md">Modify Header</div>
-            <Editor v-model="data.codeModifyHeader" :event-name="'on-change-modify-header'"
+            <Editor v-model="data.codeModifyHeader"
+                    :event-name="'on-change-modify-header'"
                     @input="emitValue"/>
           </q-tab-panel>
 
           <q-tab-panel name="Modifies.Body">
             <div class="text-h4 q-mb-md">Modify Body</div>
-            <Editor v-model="data.codeModifyBody" :event-name="'on-change-modify-body'"
+            <Editor v-model="data.codeModifyBody"
+                    :event-name="'on-change-modify-body'"
                     @input="emitValue"/>
           </q-tab-panel>
 
           <q-tab-panel name="Modifies.Query" v-if="configType === 'request' ">
             <div class="text-h4 q-mb-md">Modify Query</div>
-            <Editor v-model="data.codeModifyQuery" :event-name="'on-change-modify-query'"
+            <Editor v-model="data.codeModifyQuery"
+                    :event-name="'on-change-modify-query'"
                     @input="emitValue"/>
           </q-tab-panel>
 
           <q-tab-panel name="Deletes.Header">
             <div class="text-h4 q-mb-md">Delete Header</div>
-            <Editor v-model="data.codeDeleteHeader" :event-name="'on-change-delete-header'"
+            <Editor v-model="data.codeDeleteHeader"
+                    :event-name="'on-change-delete-header'"
                     @input="emitValue"/>
           </q-tab-panel>
 
           <q-tab-panel name="Deletes.Body">
             <div class="text-h4 q-mb-md">Delete Body</div>
-            <Editor v-model="data.codeDeleteBody" :event-name="'on-change-delete-body'"
+            <Editor v-model="data.codeDeleteBody"
+                    :event-name="'on-change-delete-body'"
                     @input="emitValue"/>
           </q-tab-panel>
 
           <q-tab-panel name="Deletes.Query" v-if="configType === 'request' ">
             <div class="text-h4 q-mb-md">Delete Query</div>
-            <Editor v-model="data.codeDeleteQuery" :event-name="'on-change-delete-query'"
+            <Editor v-model="data.codeDeleteQuery"
+                    :event-name="'on-change-delete-query'"
                     @input="emitValue"/>
           </q-tab-panel>
 
@@ -175,7 +201,8 @@
             <div class="col-1">
               <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
             </div>
-            <CLogicTable :c-logics="data.cLogics" @on-select-clogic="onSelectCLogic"
+            <CLogicTable :c-logics="data.cLogics"
+                         @on-select-clogic="onSelectCLogic"
                          @on-delete-clogic="onDeleteCLogic"/>
           </q-tab-panel>
 
@@ -193,11 +220,17 @@
         <q-bar>
           <q-space/>
 
-          <q-btn dense flat icon="minimize" @click="maximizedToggle = false" :disable="!maximizedToggle">
-            <q-tooltip v-if="maximizedToggle" content-class="bg-white text-primary">Minimize</q-tooltip>
+          <q-btn dense flat icon="minimize" @click="maximizedToggle = false"
+                 :disable="!maximizedToggle">
+            <q-tooltip v-if="maximizedToggle"
+                       content-class="bg-white text-primary">Minimize
+            </q-tooltip>
           </q-btn>
-          <q-btn dense flat icon="crop_square" @click="maximizedToggle = true" :disable="maximizedToggle">
-            <q-tooltip v-if="!maximizedToggle" content-class="bg-white text-primary">Maximize</q-tooltip>
+          <q-btn dense flat icon="crop_square" @click="maximizedToggle = true"
+                 :disable="maximizedToggle">
+            <q-tooltip v-if="!maximizedToggle"
+                       content-class="bg-white text-primary">Maximize
+            </q-tooltip>
           </q-btn>
           <q-btn dense flat icon="close" v-close-popup>
             <q-tooltip content-class="bg-white text-primary">Close</q-tooltip>
@@ -208,12 +241,14 @@
 
           <div class="text-h6">CLogic</div>
           <CLogicItemDetail v-if="cLogicMode === 'add'"
-                            @on-clogic-save="onCLogicSave" :prop-mode="cLogicMode"
+                            @on-clogic-save="onCLogicSave"
+                            :prop-mode="cLogicMode"
                             :prop-index="selectedCLogicIndex"
                             prop-request-type="serial"/>
           <CLogicItemDetail v-if="cLogicMode === 'edit'"
                             :prop-c-logic="data.cLogics[selectedCLogicIndex]"
-                            @on-clogic-save="onCLogicSave" :prop-mode="cLogicMode"
+                            @on-clogic-save="onCLogicSave"
+                            :prop-mode="cLogicMode"
                             :prop-index="selectedCLogicIndex"
                             prop-request-type="serial"/>
         </q-card-section>
@@ -226,10 +261,13 @@
 import Editor from "./Editor";
 import TreeConfigCircularResponse from "../../models/TreeConfigResponse";
 import TreeConfigRequest from "../../models/TreeConfigRequest";
-import TreeConfigRequestWithClogics from "../../models/TreeConfigRequestWithCLogic";
+import TreeConfigRequestWithClogics
+  from "../../models/TreeConfigRequestWithCLogic";
 import CLogicTable from "../CLogic/CLogicTable";
-import CLogicItemDetail from "../../views/SerialParallelConfig/CLogicItemDetail";
+import CLogicItemDetail
+  from "../../views/SerialParallelConfig/CLogicItemDetail";
 import {mapActions} from "vuex";
+import {isObjectEmpty, traverseObj} from "../../util/syntaxchecker";
 
 export default {
   name: "EditorRequestResponseConfig",
@@ -239,17 +277,20 @@ export default {
     'haveLog',
     'enableCLogics',
     'configureId',
-    'projectId'
+    'projectId',
+    'hideErrorBanner',
+    'noValidate'
   ],
   components: {CLogicItemDetail, CLogicTable, Editor},
-  watch : {
-    enableCLogics(){
+  watch: {
+    enableCLogics() {
       this.simple = [this.determineTreeMenu()]
-    }
+    },
   },
 
   data() {
     return {
+      resultValidationObj: {},
       error: null,
       splitterModel: 20,
       selected: "General",
@@ -272,18 +313,16 @@ export default {
         codeAddHeader: this.value.codeAddHeader,
         codeAddBody: this.value.codeAddBody,
         codeAddQuery: this.value.codeAddQuery,
-        // codeAddParam: this.value.codeAddParam,
 
         codeModifyHeader: this.value.codeModifyHeader,
         codeModifyBody: this.value.codeModifyBody,
         codeModifyQuery: this.value.codeModifyQuery,
-        // codeModifyParam: this.value.codeModifyParam,
 
         codeDeleteHeader: this.value.codeDeleteHeader,
         codeDeleteBody: this.value.codeDeleteBody,
 
         codeDeleteQuery: this.value.codeDeleteQuery,
-        // codeDeleteParam: this.value.codeDeleteParam,
+
         cLogics: this.value.cLogics
       },
       simple: [
@@ -298,30 +337,87 @@ export default {
     ...mapActions({
       storeRequestCLogic: 'configures/storeConfigureCLogicRequest',
       updateRequestCLogic: 'configures/updateConfigureCLogicRequest',
-      deleteRequestCLogic : 'configures/deleteConfigureCLogicRequest'
+      deleteRequestCLogic: 'configures/deleteConfigureCLogicRequest'
     }),
-    determineTreeMenu(){
-     if(this.configType === "request") {
-       if(this.enableCLogics){
-        return TreeConfigRequestWithClogics
-       }
-       return TreeConfigRequest
-     }
-     return TreeConfigCircularResponse
+    determineTreeMenu() {
+      if (this.configType === "request") {
+        if (this.enableCLogics) {
+          return TreeConfigRequestWithClogics
+        }
+        return TreeConfigRequest
+      }
+      return TreeConfigCircularResponse
+
+    },
+    isObjEmpty(obj) {
+      console.log("is object empty for object : ")
+      console.log(obj)
+      console.log("is object null ? ")
+      console.log(obj === null)
+      return isObjectEmpty(obj)
+    },
+    constructObjToTraverse() {
+      if (this.configType === 'request') {
+        return {
+          logBeforeModify: this.data.logBeforeModify,
+          logAfterModify: this.data.logAfterModify,
+
+          codeAddHeader: this.data.codeAddHeader,
+          codeAddBody: this.data.codeAddBody,
+          codeAddQuery: this.data.codeAddQuery,
+
+          codeModifyHeader: this.data.codeModifyHeader,
+          codeModifyBody: this.data.codeModifyBody,
+          codeModifyQuery: this.data.codeModifyQuery,
+
+          codeDeleteHeader: this.data.codeDeleteHeader,
+          codeDeleteBody: this.data.codeDeleteBody,
+
+          codeDeleteQuery: this.data.codeDeleteQuery,
+        }
+      } else {
+        return {
+          logBeforeModify: this.data.logBeforeModify,
+          logAfterModify: this.data.logAfterModify,
+
+          codeAddHeader: this.data.codeAddHeader,
+          codeAddBody: this.data.codeAddBody,
+
+          codeModifyHeader: this.data.codeModifyHeader,
+          codeModifyBody: this.data.codeModifyBody,
+
+          codeDeleteHeader: this.data.codeDeleteHeader,
+          codeDeleteBody: this.data.codeDeleteBody,
+        }
+      }
 
     },
     emitValue() {
+      this.resultValidationObj = traverseObj(this.constructObjToTraverse())
+      if (!this.isObjEmpty(this.resultValidationObj)) {
+        this.$emit("on-validate-result", this.resultValidationObj)
+      }
+      this.$emit("on-validate-result", {})
+
       this.$emit('input', this.data)
     },
     async onCLogicSave(cLogic) {
-      let {id,data,rule,next_success,next_failure,response,failure_response} = cLogic
-      if(this.cLogicMode === 'add'){
+      let {
+        id,
+        data,
+        rule,
+        next_success,
+        next_failure,
+        response,
+        failure_response
+      } = cLogic
+      if (this.cLogicMode === 'add') {
         try {
           let res = await this.storeRequestCLogic({
-            project_id : this.projectId,
-            configure_id : this.configureId,
-            c_logic : {
-              data,rule,next_success,next_failure,response,failure_response
+            project_id: this.projectId,
+            configure_id: this.configureId,
+            c_logic: {
+              data, rule, next_success, next_failure, response, failure_response
             }
           })
           this.$q.notify({
@@ -331,21 +427,26 @@ export default {
 
           this.data.cLogics.push(res.data)
           this.$emit('input', this.data)
-          // this.$emit('on-clogic-save', res.data)
         } catch (e) {
           console.log(e)
           this.$q.notify({
-            message: e.response.data.message ? e.response.data.message :  'Something Wrong',
+            message: e.response.data.message ? e.response.data.message : 'Something Wrong',
             color: 'negative'
           })
         }
-      }else{
+      } else {
         try {
           let res = await this.updateRequestCLogic({
-            project_id : this.projectId,
-            configure_id : this.configureId,
-            c_logic : {
-              id, data,rule,next_success,next_failure,response,failure_response
+            project_id: this.projectId,
+            configure_id: this.configureId,
+            c_logic: {
+              id,
+              data,
+              rule,
+              next_success,
+              next_failure,
+              response,
+              failure_response
             }
           })
           this.$q.notify({
@@ -354,17 +455,17 @@ export default {
           })
 
           let index = this.data.cLogics.findIndex(e => e.id === id)
-          if (index >= 0){
+          if (index >= 0) {
             let temp = [...this.data.cLogics]
             temp[index] = res.data
 
-            this.data.cLogics= [...temp]
+            this.data.cLogics = [...temp]
           }
           this.$emit('input', this.data)
         } catch (e) {
           console.log(e)
           this.$q.notify({
-            message: e.response.data.message ? e.response.data.message :  'Something Wrong',
+            message: e.response.data.message ? e.response.data.message : 'Something Wrong',
             color: 'negative'
           })
         }
@@ -379,15 +480,15 @@ export default {
     },
     async onDeleteCLogic(value) {
       const {cLogic} = value
-      const{id} = cLogic
-      console.log("on deletecLogic triggered id : " +  id)
+      const {id} = cLogic
+      console.log("on deletecLogic triggered id : " + id)
       console.log(cLogic)
       try {
-       await this.deleteRequestCLogic({
-         id,
-         project_id: this.projectId,
-         configure_id: this.configureId,
-       })
+        await this.deleteRequestCLogic({
+          id,
+          project_id: this.projectId,
+          configure_id: this.configureId,
+        })
         // make request to delete configure cLogic
         // let temp = this.data.cLogics.filter(c => c.id !== id)
         this.data.cLogics = this.data.cLogics.filter(c => c.id !== id)
@@ -396,10 +497,10 @@ export default {
           color: 'secondary'
         })
         this.emitValue()
-      }catch(err){
+      } catch (err) {
         console.log(err)
         this.$q.notify({
-          message: err.response.data.message ? err.response.data.message :  'Something Wrong',
+          message: err.response.data.message ? err.response.data.message : 'Something Wrong',
           color: 'negative'
         })
       }

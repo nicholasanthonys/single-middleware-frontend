@@ -13,14 +13,18 @@
                 vertical
                 class="text-teal"
             >
-              <q-tab name="general" icon="description" label="General"/>
-              <q-tab name="projects" icon="folder" label="Project"/>
-              <q-tab name="router" icon="alt_route" label="Router"/>
+              <q-tab name="general" icon="description" label="General"
+                     :alert="validators.containerNameErr ? 'red' : false"/>
+              <q-tab name="projects" icon="folder" label="Project"
+                     :alert="validators.assignedProjectIdsErr? 'red' : false" />
+              <q-tab name="router" icon="alt_route" label="Router"
+                     :alert="validators.routerErr? 'red' : false"/>
             </q-tabs>
           </template>
 
           <template v-slot:after>
             <q-tab-panels
+                keep-alive
                 v-model="tab"
                 animated
                 swipeable
@@ -30,9 +34,13 @@
             >
               <q-tab-panel name="general">
                 <div class="text-h4 q-mb-md">General</div>
-                <p class="text-h7 q-mb-md"> Container Created : {{ container.container_id ? 'Yes' : 'No' }}</p>
-                <p class="text-h7 q-mb-md" > Docker Container Id : {{ container.container_id ? container.container_id : '-'  }}</p>
-                <p class="text-h7 q-mb-md" > Docker Container Name: {{ container._id ? container._id: '-'  }}</p>
+                <p class="text-h7 q-mb-md"> Container Created :
+                  {{ container.container_id ? 'Yes' : 'No' }}</p>
+                <p class="text-h7 q-mb-md"> Docker Container Id : {{
+                    container.container_id ? container.container_id : '-'
+                  }}</p>
+                <p class="text-h7 q-mb-md"> Docker Container Name:
+                  {{ container._id ? container._id : '-' }}</p>
 
                 <div v-if="container.container_id">
                   <div v-if="!isToggling">
@@ -72,14 +80,16 @@
                   </div>
                 </div>
 
-                <q-btn @click="createDockerContainer" v-if="!isCreatingDockerContainer">
-                  {{ container.container_id ? "Recreate" : "Create" }} Docker Container
+                <q-btn @click="createDockerContainer"
+                       v-if="!isCreatingDockerContainer">
+                  {{ container.container_id ? "Recreate" : "Create" }} Docker
+                  Container
                 </q-btn>
                 <q-spinner-hourglass color="light-green" v-else size="3em"
                                      :thickness="2"/>
                 <br/> <br/>
                 <q-input
-
+                    ref="containerName"
                     filled
                     type="text"
                     v-model="container.name"
@@ -179,10 +189,12 @@
                           :props="props"
                       >
 
-                        <p v-if="col.name !=='description' && col.name !== 'action' ">{{ col.value }}</p>
+                        <p v-if="col.name !=='description' && col.name !== 'action' ">
+                          {{ col.value }}</p>
                         <div v-if="col.name === 'description'">
                           <p>{{ col.value }}
-                            <q-tooltip anchor="bottom middle" self="top middle" :offset="[10, 10]">
+                            <q-tooltip anchor="bottom middle" self="top middle"
+                                       :offset="[10, 10]">
                               {{ props.row.description }}
                             </q-tooltip>
                           </p>
@@ -307,13 +319,16 @@
                           :rules="[ val => val && val.length > 0 || 'Please type something']"
                       />
 
-                      <q-select v-model="dataInputRoute.type" :options="type" label="Select request type"
+                      <q-select v-model="dataInputRoute.type" :options="type"
+                                label="Select request type"
                                 style="max-width: 300px"/>
 
-                      <q-select v-model="dataInputRoute.method" :options="method" label="Select REST Method"
+                      <q-select v-model="dataInputRoute.method"
+                                :options="method" label="Select REST Method"
                                 style="max-width: 300px"/>
 
-                      <q-select v-model="dataInputRoute.project_id" :options="container.project_ids"
+                      <q-select v-model="dataInputRoute.project_id"
+                                :options="container.project_ids"
                                 label="Select Project Id"
                                 style="max-width: 300px"/>
                       <br/>
@@ -321,8 +336,10 @@
                     </q-card-section>
 
                     <q-card-actions align="right" class="bg-white text-teal">
-                      <q-btn flat label="Add" v-close-popup @click="addRoute" v-if="formModeRoute  === 'add' "/>
-                      <q-btn flat label="Edit" v-close-popup @click="editRoute" v-else/>
+                      <q-btn flat label="Add" v-close-popup @click="addRoute"
+                             v-if="formModeRoute  === 'add' "/>
+                      <q-btn flat label="Edit" v-close-popup @click="editRoute"
+                             v-else/>
                     </q-card-actions>
                   </q-card>
                 </q-dialog>
@@ -340,7 +357,7 @@
             <q-btn @click="onSaveClicked" type="primary">Save</q-btn>
           </div>
           <div class="col-1" v-if="$route.name === 'Containers.Detail' ">
-            <q-btn @click="dialogDelete= true" >Delete</q-btn>
+            <q-btn @click="dialogDelete= true">Delete</q-btn>
           </div>
         </div>
 
@@ -350,15 +367,39 @@
       <q-card>
         <q-card-section class="row items-center">
           <q-avatar icon="delete" color="primary" text-color="white"/>
-          <span class="q-ml-sm">Are you sure want to delete this container ? </span>
+          <span
+              class="q-ml-sm">Are you sure want to delete this container ? </span>
         </q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="primary" v-close-popup/>
-          <q-btn flat label="Delete" color="primary" v-close-popup @click="onDeleteClicked"/>
+          <q-btn flat label="Delete" color="primary" v-close-popup
+                 @click="onDeleteClicked"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="alertDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Form Validation Error</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <ul>
+            <li v-for="(error,index) in globalErrors" :key="index">
+              {{ error }}
+            </li>
+          </ul>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup
+                 @click="alertDialog = false"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </div>
 </template>
 
@@ -384,8 +425,18 @@ export default {
       containerName: '',
       description: '',
 
+      alertDialog : false,
+      globalErrors: [],
+      validators: {
+        containerNameErr: false,
+        assignedProjectIdsErr : false,
+        routerErr : false,
+        formHasError: false,
+        errCount: 0
+      },
+
       container: {
-        _id : null,
+        _id: null,
         container_id: null,
         name: '',
         description: '',
@@ -526,7 +577,10 @@ export default {
         let response = await this.actionCreateDockerContainer({
           dbContainerId: this.$route.params.id
         })
+        console.log("response data is")
+        console.log(response.data)
         this.container.container_id = response.data.container_id;
+        this.container.name = this.$route.params.id
         this.container.running = false
         this.$q.notify({
           message: 'Create Docker Container Success.',
@@ -561,13 +615,56 @@ export default {
         console.log(e)
       }
     },
-    async onSaveClicked() {
-      if (this.$route.name === 'Containers.Detail') {
-        await this.onUpdateContainer()
-
-      } else {
-        await this.onStoreContainer()
+    resetValidation() {
+      this.globalErrors = []
+      this.validators= {
+        containerNameErr: false,
+        assignedProjectIdsErr : false,
+        formHasError: false,
+        errCount: 0
       }
+    },
+    validateInput() {
+      this.resetValidation()
+      console.log("ref container name is ")
+      console.log(this.$refs.containerName)
+      this.$refs.containerName.validate();
+      this.validators.containerNameErr = this.$refs.containerName.hasError
+
+      if (this.validators.containerNameErr) {
+        this.validators.formHasError = true;
+        this.validators.errCount++;
+        this.globalErrors.push(this.$refs.containerName.innerErrorMessage)
+      }
+
+      if(this.container.project_ids.length === 0){
+        this.validators.assignedProjectIdsErr = true
+        this.validators.formHasError = true;
+        this.validators.errCount++;
+        this.globalErrors.push("Please assign at least 1 created projects")
+      }
+
+      if(this.container.routers.length === 0){
+        this.validators.routerErr= true
+        this.validators.formHasError = true;
+        this.validators.errCount++;
+        this.globalErrors.push("Please assign at least 1 router for assigned project")
+      }
+
+    },
+    async onSaveClicked() {
+      this.validateInput()
+      if(!this.validators.formHasError){
+        if (this.$route.name === 'Containers.Detail') {
+          await this.onUpdateContainer()
+
+        } else {
+          await this.onStoreContainer()
+        }
+      }else{
+        this.alertDialog = true;
+      }
+
     },
     async onStoreContainer() {
       try {
@@ -688,7 +785,7 @@ export default {
     },
     fillContainerData(data) {
       this.container = {
-        _id:  data._id,
+        _id: data._id,
         name: data.name,
         container_id: data.container_id,
         description: data.description,

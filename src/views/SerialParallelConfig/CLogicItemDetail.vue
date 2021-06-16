@@ -1,5 +1,29 @@
 <template>
   <div>
+    <div class="q-pa-md q-gutter-sm">
+      <q-banner rounded class="text-white bg-red"
+                v-if="!(isObjEmpty({rule : resultValidator.resultRuleObj}.rule)
+                 &&
+                isObjEmpty({data : resultValidator.resultDataObj}.data) &&
+                isObjEmpty(
+                    {response : resultValidator.resultResponseObj}.response)
+                &&
+                isObjEmpty({failureResponse :
+                resultValidator.resultFailureResponseObj}.failureResponse))">
+        <ul>
+          <li v-for="(value, name) in traverse({
+                rule : resultValidator.resultRuleObj,
+                data : resultValidator.resultDataObj,
+                response : resultValidator.resultResponseObj,
+                failureResponse : resultValidator.resultFailureResponseObj,
+                })" :key="name">
+            <p>
+              <b>{{ name }}</b>: {{ value }}
+            </p>
+          </li>
+        </ul>
+      </q-banner>
+    </div>
     <q-tabs
         v-model="tab"
         inline-label
@@ -7,12 +31,21 @@
         mobile-arrows
         class="text-teal"
     >
-      <q-tab name="data" icon="mail" label="Data"/>
-      <q-tab name="rule" icon="alarm" label="Rule"/>
+      <q-tab name="data" icon="mail" label="Data" :alert="validators.dataEditorErr?
+      'red': false"/>
+      <q-tab name="rule" icon="alarm" label="Rule"
+             :alert="validators.ruleEditorErr ?
+      'red': false"/>
       <q-tab name="next_success" icon="photo" label="NextSuccess"/>
-      <q-tab name="response" icon="slow_motion_video" label="Response"/>
+      <q-tab name="response" icon="slow_motion_video" label="Response"
+             :alert=" validators.responseStatusCodeErr ||
+             validators.responseEditorErr?
+             'red': false"/>
       <q-tab name="next_failure" icon="slow_motion_video" label="NextFailure"/>
-      <q-tab name="failure_response" icon="slow_motion_video" label="FailureResponse"/>
+      <q-tab name="failure_response" icon="slow_motion_video"
+             label="FailureResponse"   :alert=" validators.failureResponseStatusCodeErr||
+             validators.failureResponseEditorErr?
+             'red': false"/>
     </q-tabs>
 
     <q-separator/>
@@ -24,12 +57,12 @@
     >
       <q-tab-panel name="data">
         <div class="text-h6">JSON logic data</div>
-        <Editor v-model="data" event-name="on-change-code-data"/>
+        <Editor v-model="data" event-name="on-change-code-data" @input="validateInput"/>
       </q-tab-panel>
 
       <q-tab-panel name="rule">
         <div class="text-h6">JSON logic Rule</div>
-        <Editor v-model="rule" event-name="on-change-code-rule"/>
+        <Editor v-model="rule" event-name="on-change-code-rule" @input="validateInput"/>
       </q-tab-panel>
 
       <q-tab-panel name="next_success">
@@ -50,11 +83,13 @@
             label="Enable Response"
         />
         <EditorRequestResponseConfig v-if="enableResponse"
-                                     ref="editor"
+                                     ref="responseEditor"
                                      :have-log="false"
                                      :prop-enable-loop="false"
                                      config-type="response"
-                                     v-model="editorDataResponse"
+                                     v-model="editorResponse"
+                                     :hide-error-banner="true"
+                                     @input="validateInput"
         />
 
       </q-tab-panel>
@@ -77,11 +112,13 @@
             label="Enable Response"
         />
         <EditorRequestResponseConfig v-if="enableFailureResponse"
-                                     ref="editor"
+                                     ref="failureResponseEditor"
                                      :have-log="false"
                                      :prop-enable-loop="false"
                                      config-type="response"
-                                     v-model="editorDataFailureResponse"
+                                     v-model="editorFailureResponse"
+                                     :hide-error-banner="true"
+                                     @input="validateInput"
         />
 
       </q-tab-panel>
@@ -104,7 +141,8 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="OK" color="primary" v-close-popup/>
+          <q-btn flat label="OK" color="primary" v-close-popup
+                 @click="okClicked"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -113,9 +151,15 @@
 
 <script>
 import Editor from "../../components/common/Editor";
+import {isObjectEmpty, traverseObj} from "../../util/syntaxchecker";
+import {
+  INVALID_FAILURE_RESPONSE_EDITOR_SYNTAX,
+  INVALID_RESPONSE_EDITOR_SYNTAX,
+  INVALID_RULE_EDITOR_SYNTAX
+} from "../../models/const";
 
 export default {
-  name : "CLogicItemDetail",
+  name: "CLogicItemDetail",
   props: {
     propCLogic: Object,
     propMode: String,
@@ -124,7 +168,7 @@ export default {
   },
   components: {
     Editor,
-    EditorRequestResponseConfig : () => import("../../components/common/EditorRequestResponseConfig")
+    EditorRequestResponseConfig: () => import("../../components/common/EditorRequestResponseConfig")
   },
   watch: {
     propCLogic(val) {
@@ -141,7 +185,7 @@ export default {
       data: {},
       rule: {},
 
-      editorDataResponse: {
+      editorResponse: {
 
         /* response */
         codeAddHeader: {},
@@ -158,7 +202,7 @@ export default {
 
       enableFailureResponse: false,
       nextFailure: null,
-      editorDataFailureResponse: {
+      editorFailureResponse: {
 
         /* response */
         codeAddHeader: {},
@@ -175,78 +219,206 @@ export default {
       validators: {
         nextSuccess: false,
         nextFailure: false,
-        statusCodeErr: false,
+        responseStatusCodeErr: false,
+        failureResponseStatusCodeErr: false,
+        failureResponseEditorErr: false,
+        responseEditorErr: false,
+        ruleEditorErr: false,
+        dataEditorErr: false,
         formHasError: false,
         errCount: 0
       },
-      tabNames: ["data", "rule", "next_success", "response"],
+      resultValidator: {
+        resultFailureResponseObj: {},
+        resultResponseObj: {},
+        resultRuleObj: {},
+        resultDataObj: {},
+      },
+      tabNames: ["data", "rule", "next_success", "response", "next_failure",
+        "failure_response"],
       globalErrors: [],
       alertDialog: false,
     }
   },
   methods: {
+    okClicked() {
+      this.alertDialog = false;
+
+    },
+    isObjEmpty(obj) {
+      return isObjectEmpty(obj)
+    },
+    traverse(obj){
+      return traverseObj(obj)
+    },
+    formatObjError(obj){
+      let result = {}
+      for ( let[key, value] of Object.entries(obj)) {
+        if ( !isObjectEmpty(obj[key])){
+          result[key]= value
+        }
+      }
+      return result
+    },
+    resetValidator() {
+      this.globalErrors = []
+      this.validators = {
+        nextSuccess: false,
+        nextFailure: false,
+        responseStatusCodeErr: false,
+        failureResponseStatusCodeErr: false,
+        failureResponseEditorErr: false,
+        responseEditorErr: false,
+        ruleEditorErr: false,
+        dataEditorErr: false,
+        formHasError: false,
+        errCount: 0
+      }
+    },
+    validateInput() {
+      this.resetValidator()
+
+        // validate rule syntax
+        this.resultValidator.resultRuleObj =
+            traverseObj(this.rule)
+        if (!isObjectEmpty(this.resultValidator.resultRuleObj)) {
+          this.validators.ruleEditorErr = true
+          this.validators.errCount++
+          this.validators.formHasError = true;
+          this.globalErrors.push(INVALID_RULE_EDITOR_SYNTAX)
+        }
+
+        // validate data syntax
+        this.resultValidator.resultDataObj =
+            traverseObj(this.data)
+        if (!isObjectEmpty(this.resultValidator.resultDataObj)) {
+          this.validators.dataEditorErr= true
+          this.validators.errCount++
+          this.validators.formHasError = true;
+          this.globalErrors.push(INVALID_RULE_EDITOR_SYNTAX)
+        }
+
+
+        // if failure response enabled
+        if (this.enableFailureResponse) {
+          this.$refs.failureResponseEditor.$refs.statusCode.validate();
+          this.validators.failureResponseStatusCodeErr =
+              this.$refs.failureResponseEditor.$refs.statusCode.hasError
+
+          if (this.validators.failureResponseStatusCodeErr) {
+            this.validators.errCount++
+            this.validators.formHasError = true;
+            this.globalErrors.push(this.$refs.failureResponseEditor.$refs.statusCode.innerErrorMessage)
+          }
+
+
+          this.resultValidator.resultFailureResponseObj =
+              traverseObj(this.editorFailureResponse)
+          if (!isObjectEmpty(this.resultValidator.resultFailureResponseObj)) {
+            this.validators.failureResponseEditorErr = true
+            this.validators.errCount++
+            this.validators.formHasError = true;
+            this.globalErrors.push(INVALID_FAILURE_RESPONSE_EDITOR_SYNTAX)
+          }
+        }
+
+        // if response enabled
+        if (this.enableResponse) {
+          this.$refs.responseEditor.$refs.statusCode.validate();
+          this.validators.responseStatusCodeErr =
+              this.$refs.responseEditor.$refs.statusCode.hasError
+
+          if (this.validators.responseStatusCodeErr) {
+            this.validators.errCount++
+            this.validators.formHasError = true;
+            this.globalErrors.push( this.$refs.responseEditor.$refs.statusCode.innerErrorMessage)
+          }
+
+            this.resultValidator.resultResponseObj = traverseObj(this.editorResponse)
+          if (!isObjectEmpty(this.resultValidator.resultResponseObj)) {
+            this.validators.responseEditorErr = true
+            this.validators.errCount++
+            this.validators.formHasError = true;
+            this.globalErrors.push(INVALID_RESPONSE_EDITOR_SYNTAX)
+          }
+        }
+
+    },
     async onSaveClicked() {
-      let data = {
-        id : null,
-        projectId: this.$route.params.id,
-        configId: this.propConfigId,
-        data: this.data ? this.data : {},
-        rule: this.rule ? this.rule : {},
-        next_success: this.nextSuccess,
-        next_failure: this.nextFailure,
-        response : null,
-        failure_response : null,
-      }
+      this.validateInput()
+      if(!this.validators.formHasError) {
+
+        let data = {
+          id: null,
+          projectId: this.$route.params.id,
+          configId: this.propConfigId,
+          data: this.data ? this.data : {},
+          rule: this.rule ? this.rule : {},
+          next_success: this.nextSuccess,
+          next_failure: this.nextFailure,
+          response: null,
+          failure_response: null,
+        }
 
 
-      if (this.enableResponse) {
-        data.response = {
-          transform: this.editorDataResponse.transform,
-          status_code: this.editorDataResponse.statusCode,
-          adds: {
-            header: this.editorDataResponse.codeAddHeader ? this.editorDataResponse.codeAddHeader : {},
-            body: this.editorDataResponse.codeAddBody ? this.editorDataResponse.codeAddBody : {},
-          },
-          modifies: {
-            header: this.editorDataResponse.codeModifyHeader ? this.editorDataResponse.codeModifyHeader : {},
-            body: this.editorDataResponse.codeModifyBody ? this.editorDataResponse.codeModifyBody : {}
-          },
-          deletes: {
-            header: this.editorDataResponse.codeDeleteHeader ? this.editorDataResponse.codeDeleteHeader : [],
-            body: this.editorDataResponse.codeDeleteBody ? this.editorDataResponse.codeDeleteBody : []
+        if (this.enableResponse) {
+          data.response = {
+            transform: this.editorResponse.transform,
+            status_code: this.editorResponse.statusCode,
+            adds: {
+              header: this.editorResponse.codeAddHeader ? this.editorResponse.codeAddHeader : {},
+              body: this.editorResponse.codeAddBody ? this.editorResponse.codeAddBody : {},
+            },
+            modifies: {
+              header: this.editorResponse.codeModifyHeader ? this.editorResponse.codeModifyHeader : {},
+              body: this.editorResponse.codeModifyBody ? this.editorResponse.codeModifyBody : {}
+            },
+            deletes: {
+              header: this.editorResponse.codeDeleteHeader ? this.editorResponse.codeDeleteHeader : [],
+              body: this.editorResponse.codeDeleteBody ? this.editorResponse.codeDeleteBody : []
+            }
           }
         }
-      }
 
-      if (this.enableFailureResponse) {
-        data.failure_response= {
-          transform: this.editorDataFailureResponse.transform,
-          status_code: this.editorDataFailureResponse.statusCode,
-          adds: {
-            header: this.editorDataFailureResponse.codeAddHeader ? this.editorDataFailureResponse.codeAddHeader : {},
-            body: this.editorDataFailureResponse.codeAddBody ? this.editorDataFailureResponse.codeAddBody : {},
-          },
-          modifies: {
-            header: this.editorDataFailureResponse.codeModifyHeader ? this.editorDataFailureResponse.codeModifyHeader : {},
-            body: this.editorDataFailureResponse.codeModifyBody ? this.editorDataFailureResponse.codeModifyBody : {}
-          },
-          deletes: {
-            header: this.editorDataFailureResponse.codeDeleteHeader ? this.editorDataFailureResponse.codeDeleteHeader : [],
-            body: this.editorDataFailureResponse.codeDeleteBody ? this.editorDataFailureResponse.codeDeleteBody : []
+        if (this.enableFailureResponse) {
+          data.failure_response = {
+            transform: this.editorFailureResponse.transform,
+            status_code: this.editorFailureResponse.statusCode,
+            adds: {
+              header: this.editorFailureResponse.codeAddHeader ? this.editorFailureResponse.codeAddHeader : {},
+              body: this.editorFailureResponse.codeAddBody ? this.editorFailureResponse.codeAddBody : {},
+            },
+            modifies: {
+              header: this.editorFailureResponse.codeModifyHeader ? this.editorFailureResponse.codeModifyHeader : {},
+              body: this.editorFailureResponse.codeModifyBody ? this.editorFailureResponse.codeModifyBody : {}
+            },
+            deletes: {
+              header: this.editorFailureResponse.codeDeleteHeader ? this.editorFailureResponse.codeDeleteHeader : [],
+              body: this.editorFailureResponse.codeDeleteBody ? this.editorFailureResponse.codeDeleteBody : []
+            }
           }
         }
-      }
 
-      if (this.propMode === 'edit') {
-        data.id = this.id
-      }
+        if (this.propMode === 'edit') {
+          data.id = this.id
+        }
 
-      this.$emit('on-clogic-save',data)
+        this.$emit('on-clogic-save', data)
+      }else{
+       this.alertDialog = true
+      }
     },
 
     fillData(cLogicData) {
       const {
-        id, data, next_success, response, rule, log_before_modify, log_after_modify, next_failure,
+        id,
+        data,
+        next_success,
+        response,
+        rule,
+        log_before_modify,
+        log_after_modify,
+        next_failure,
         failure_response
       } = cLogicData
       this.id = id
@@ -257,41 +429,58 @@ export default {
       if (response) {
         this.enableResponse = true
         const {adds, modifies, deletes, transform, status_code} = response
-        this.editorDataResponse.statusCode = status_code
-        this.editorDataResponse.transform = transform
-        this.editorDataResponse.codeAddBody = adds.body ? adds.body : {},
-            this.editorDataResponse.codeAddHeader = adds.header ? adds.header : {},
-            this.editorDataResponse.codeModifyHeader = modifies.header ? modifies.header : {}
-        this.editorDataResponse.codeModifyBody = modifies.body ? modifies.body : {},
-            this.editorDataResponse.codeDeleteHeader = deletes.header ? deletes.header : [],
-            this.editorDataResponse.codeDeleteBody = deletes.body ? deletes.body : [],
+        this.editorResponse.statusCode = status_code
+        this.editorResponse.transform = transform
+        this.editorResponse.codeAddBody = adds.body ? adds.body : {},
+            this.editorResponse.codeAddHeader = adds.header ? adds.header : {},
+            this.editorResponse.codeModifyHeader = modifies.header ? modifies.header : {}
+        this.editorResponse.codeModifyBody = modifies.body ? modifies.body : {},
+            this.editorResponse.codeDeleteHeader = deletes.header ? deletes.header : [],
+            this.editorResponse.codeDeleteBody = deletes.body ? deletes.body : [],
 
-            this.editorDataResponse.logBeforeModify = log_before_modify
-        this.editorDataResponse.logAfterModify = log_after_modify
+            this.editorResponse.logBeforeModify = log_before_modify
+        this.editorResponse.logAfterModify = log_after_modify
       }
 
       if (failure_response) {
         this.enableFailureResponse = true
         const {adds, modifies, deletes, transform, status_code} = response
-        this.editorDataFailureResponse.statusCode = status_code
-        this.editorDataFailureResponse.transform = transform
-        this.editorDataFailureResponse.codeAddBody = adds.body ? adds.body : {},
-            this.editorDataFailureResponse.codeAddHeader = adds.header ? adds.header : {},
-            this.editorDataFailureResponse.codeModifyHeader = modifies.header ? modifies.header : {}
-        this.editorDataFailureResponse.codeModifyBody = modifies.body ? modifies.body : {},
-            this.editorDataFailureResponse.codeDeleteHeader = deletes.header ? deletes.header : [],
-            this.editorDataFailureResponse.codeDeleteBody = deletes.body ? deletes.body : [],
+        this.editorFailureResponse.statusCode = status_code
+        this.editorFailureResponse.transform = transform
+        this.editorFailureResponse.codeAddBody = adds.body ? adds.body : {},
+            this.editorFailureResponse.codeAddHeader = adds.header ? adds.header : {},
+            this.editorFailureResponse.codeModifyHeader = modifies.header ? modifies.header : {}
+        this.editorFailureResponse.codeModifyBody = modifies.body ? modifies.body : {},
+            this.editorFailureResponse.codeDeleteHeader = deletes.header ? deletes.header : [],
+            this.editorFailureResponse.codeDeleteBody = deletes.body ? deletes.body : [],
 
-            this.editorDataFailureResponse.logBeforeModify = log_before_modify
-        this.editorDataFailureResponse.logAfterModify = log_after_modify
+            this.editorFailureResponse.logBeforeModify = log_before_modify
+        this.editorFailureResponse.logAfterModify = log_after_modify
       }
 
     },
+    visitTabs() {
+      let traversal = this.tabNames.reduce((promiseChain, item) => {
+        return promiseChain.then(() => new Promise(resolve => {
+              console.log("done with", item)
+              resolve()
+              this.$refs.tabs.goTo(item)
+            })
+        )
+      }, Promise.resolve())
+
+
+      traversal.then(() => {
+        this.$refs.tabs.goTo('data')
+      })
+    },
   },
+
   mounted() {
     if (this.propMode === 'edit') {
       this.fillData(this.propCLogic)
     }
+    this.visitTabs()
   }
 }
 </script>

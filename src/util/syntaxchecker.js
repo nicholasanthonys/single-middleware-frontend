@@ -17,34 +17,37 @@ export function validateConfigReferenceSyntax(str) {
  *https://stackoverflow.com/questions/15690706/recursively-looping-through-an-object-to-build-a-property-list
  * function to traverse key and value of object/array
  */
-function propertiesToArray(obj) {
-    const isObject = val =>
-        typeof val === 'object' && !Array.isArray(val);
+// export function propertiesToArray(obj) {
+//     const isObject = val =>
+//         typeof val === 'object' && !Array.isArray(val);
+//
+//
+//     const addDelimiter = (a, b) =>
+//         a ? `${a}.${b}` : b;
+//
+//     const paths = (obj = {}, head = '') => {
+//         return Object.entries(obj)
+//             .reduce((product, [key, value]) => {
+//                 console.log("key " + key + " value is : " + value)
+//                 // validate value
+//                 if(validateConfigReferenceSyntax(value)){
+//
+//                 }
+//                 let fullPath = addDelimiter(head, key)
+//                 console.log("fullPath is " + fullPath  + " value : " + value)
+//                 return isObject(value) ?
+//                     product.concat(paths(value, fullPath))
+//                     : product.concat(fullPath)
+//             }, []);
+//     }
+//
+//     return paths(obj);
+// }
 
+export function traverseObj(val, listKey = [], resultObj = {}){
+    console.log("val traverseObj is ")
+    console.log(val)
 
-    const addDelimiter = (a, b) =>
-        a ? `${a}.${b}` : b;
-
-    const paths = (obj = {}, head = '') => {
-        return Object.entries(obj)
-            .reduce((product, [key, value]) => {
-                console.log("key " + key + " value is : " + value)
-                // validate value
-                if(validateConfigReferenceSyntax(value)){
-
-                }
-                let fullPath = addDelimiter(head, key)
-                console.log("fullPath is " + fullPath  + " value : " + value)
-                return isObject(value) ?
-                    product.concat(paths(value, fullPath))
-                    : product.concat(fullPath)
-            }, []);
-    }
-
-    return paths(obj);
-}
-
-function traverseObj(val, listKey = [], resultObj = {}){
     if(typeof  val == 'object'){
         if(Array.isArray(val)){
             for (let i = 0; i < val.length; i++){
@@ -83,7 +86,7 @@ function traverseObj(val, listKey = [], resultObj = {}){
     return resultObj
 }
 
-function constructArrayOfKeyToString(listKey){
+export function constructArrayOfKeyToString(listKey){
     let result = ""
    for (let i = 0; i < listKey.length; i++) {
        if(i > 0){
@@ -92,4 +95,14 @@ function constructArrayOfKeyToString(listKey){
        result += listKey[i]
    }
    return result
+}
+
+
+/* https://eslint.org/docs/rules/no-prototype-builtins */
+export function isObjectEmpty(obj) {
+    for(let key in obj) {
+        if(Object.prototype.hasOwnProperty.call(obj,key))
+            return false;
+    }
+    return true;
 }
