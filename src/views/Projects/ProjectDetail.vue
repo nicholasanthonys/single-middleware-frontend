@@ -17,12 +17,16 @@
 
 
               >
-                <q-tab name="general" icon="description" label="General" :alert="validators.nameErr ? 'red': false"/>
-                <q-tab name="base" icon="settings_application" label="Base Settings"
+                <q-tab name="general" icon="description" label="General"
+                       :alert="validators.nameErr ? 'red': false"/>
+                <q-tab name="base" icon="settings_application"
+                       label="Base Settings"
                        :alert="validators.statusCodeErr? 'red': false"/>
-                <q-tab name="configures" icon="settings_application" label="Configures"
+                <q-tab name="configures" icon="settings_application"
+                       label="Configures"
                        v-if="$route.name ==='Projects.Detail' "/>
-                <q-tab name="serial/parallel" icon="settings_application" label="Serial/Parallel"
+                <q-tab name="serial/parallel" icon="settings_application"
+                       label="Serial/Parallel"
                        v-if="$route.name === 'Projects.Detail' "/>
               </q-tabs>
             </template>
@@ -81,13 +85,17 @@
                                                :prop-enable-loop="false"
                                                :have-log="false"
                                                v-model="editorData"
+                                               @validate-result="onValidateEditorResult"
                   />
 
                 </q-tab-panel>
 
-                <q-tab-panel name="configures" style="height: 100%;" v-if="$route.name === 'Projects.Detail'">
-                  <Configures :project-id="$route.params.id" :prop-configs="configs" v-if="!isLoadConfigures"/>
-                  <div style="height: 100%;" v-else class="flex justify-center items-center">
+                <q-tab-panel name="configures" style="height: 100%;"
+                             v-if="$route.name === 'Projects.Detail'">
+                  <Configures :project-id="$route.params.id"
+                              :prop-configs="configs" v-if="!isLoadConfigures"/>
+                  <div style="height: 100%;" v-else
+                       class="flex justify-center items-center">
                     <q-spinner
                         color="primary"
                         size="3em"
@@ -96,8 +104,10 @@
 
                 </q-tab-panel>
 
-                <q-tab-panel name="serial/parallel" v-if="$route.name === 'Projects.Detail'">
-                  <ConfigSerialList :prop-serial="serial" :prop-project-id="$route.params.id"
+                <q-tab-panel name="serial/parallel"
+                             v-if="$route.name === 'Projects.Detail'">
+                  <ConfigSerialList :prop-serial="serial"
+                                    :prop-project-id="$route.params.id"
                                     @on-confirm-serial-config="onConfirmSerialConfig"/>
                   <br/>
 
@@ -117,7 +127,7 @@
               <q-btn type="submit">Save</q-btn>
             </div>
             <div class="col-1" v-if="$route.name === 'Projects.Detail' ">
-              <q-btn @click="confirmDelete = true" >Delete</q-btn>
+              <q-btn @click="confirmDelete = true">Delete</q-btn>
             </div>
           </div>
 
@@ -129,12 +139,14 @@
         <q-card>
           <q-card-section class="row items-center">
             <q-avatar icon="delete" color="primary" text-color="white"/>
-            <span class="q-ml-sm">Are you sure want to delete this project ? </span>
+            <span
+                class="q-ml-sm">Are you sure want to delete this project ? </span>
           </q-card-section>
 
           <q-card-actions align="right">
             <q-btn flat label="Cancel" color="primary" v-close-popup/>
-            <q-btn flat label="Delete" color="primary" v-close-popup @click="onDeleteClicked"/>
+            <q-btn flat label="Delete" color="primary" v-close-popup
+                   @click="onDeleteClicked"/>
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -153,7 +165,8 @@
           </q-card-section>
 
           <q-card-actions align="right">
-            <q-btn flat label="OK" color="primary" v-close-popup @click="okClicked"/>
+            <q-btn flat label="OK" color="primary" v-close-popup
+                   @click="okClicked"/>
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -162,14 +175,22 @@
 </template>
 
 <script>
-import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
+import EditorRequestResponseConfig
+  from "../../components/common/EditorRequestResponseConfig";
 import {mapActions, mapGetters} from "vuex";
 import Configures from '../Configures/Configures'
 import ConfigSerialList from "../SerialParallelConfig/SerialConfiglList";
 import ParallelConfigList from "../SerialParallelConfig/ParallelConfigList";
+import {isObjectEmpty, traverseObj} from "../../util/syntaxchecker";
+import {INVALID_BASE_EDITOR_SYNTAX} from "../../models/const";
 
 export default {
-  components: {ConfigSerialList, EditorRequestResponseConfig, Configures, ParallelConfigList},
+  components: {
+    ConfigSerialList,
+    EditorRequestResponseConfig,
+    Configures,
+    ParallelConfigList
+  },
   computed: {
     ...mapGetters({
       configs: 'configures/getConfigures',
@@ -252,6 +273,7 @@ export default {
       validators: {
         nameErr: false,
         statusCodeErr: false,
+        baseEditorErr: false,
         maxCircularErr: false,
         formHasError: false,
         errCount: 0
@@ -270,7 +292,11 @@ export default {
       storeSerial: 'serial/storeSerial'
     }),
 
-
+    onValidateEditorResult(validationResult) {
+      if (!validationResult) {
+        this.validators.formHasError = false
+      }
+    },
     okClicked() {
       this.alertDialog = false;
       this.globalErrors = [];
@@ -386,7 +412,15 @@ export default {
       const {project_max_circular, circular_response} = base
       this.maxCircular = project_max_circular
 
-      const {adds, modifies, deletes, log_before_modify, log_after_modify, status_code, transform} = circular_response
+      const {
+        adds,
+        modifies,
+        deletes,
+        log_before_modify,
+        log_after_modify,
+        status_code,
+        transform
+      } = circular_response
       this.editorData.statusCode = status_code
       this.editorData.transform = transform
       this.editorData.logBeforeModify = log_before_modify
@@ -406,10 +440,20 @@ export default {
       this.serial = data.serial
       this.parallel = data.parallel
     },
-    validateInput() {
-      this.validators.errCount = 0
+    resetValidator() {
       this.globalErrors = []
-      this.validators.formHasError = false;
+      this.validators = {
+        containerNameErr: false,
+        statusCodeErr: false,
+        baseEditorErr: false,
+        maxCircularErr: false,
+        formHasError: false,
+        errCount: 0
+      }
+    },
+    validateInput() {
+      this.resetValidator()
+
       this.$refs.name.validate();
       this.validators.nameErr = this.$refs.name.hasError
 
@@ -421,16 +465,19 @@ export default {
 
 
       if (this.validators.nameErr) {
+        this.validators.formHasError = true;
         this.validators.errCount++;
         this.globalErrors.push(this.$refs.name.innerErrorMessage)
       }
 
       if (this.validators.maxCircularErr) {
+        this.validators.formHasError = true;
         this.validators.errCount++;
         this.globalErrors.push(this.$refs.maxCircular.innerErrorMessage)
       }
 
       if (this.validators.statusCodeErr) {
+        this.validators.formHasError = true;
         this.validators.errCount++
         this.globalErrors.push(this.$refs.editor.$refs.statusCode.innerErrorMessage)
       }
@@ -438,7 +485,14 @@ export default {
       if (this.validators.errCount > 0) {
         this.validators.formHasError = true
         this.alertDialog = true;
+      }
 
+      const validateEditorData = traverseObj(this.editorData)
+      if (!isObjectEmpty(validateEditorData)) {
+        this.validators.baseEditorErr = true;
+        this.validators.errCount++
+        this.validators.formHasError = true;
+        this.globalErrors.push(INVALID_BASE_EDITOR_SYNTAX)
       }
     },
     visitTabs() {
@@ -476,7 +530,10 @@ export default {
         })
         this.id = response.data.id
         // push to project detail
-        await this.$router.replace({name: 'Projects.Detail', params: {id: this.id}})
+        await this.$router.replace({
+          name: 'Projects.Detail',
+          params: {id: this.id}
+        })
       } catch (err) {
         console.log(err)
         // inside of a Vue file

@@ -15,8 +15,12 @@
                   class="text-teal"
               >
                 <q-tab name="general" icon="description" label="General"/>
-                <q-tab name="request" icon="list" label="Request" :alert="validators.destinationURLErr? 'red': false"/>
-                <q-tab name="response" icon="list" label="Response" :alert="validators.statusCodeErr? 'red': false"/>
+                <q-tab name="request" icon="list" label="Request"
+                       :alert="validators.destinationURLErr ||
+                       validators.requestEditorErr? 'red': false"/>
+                <q-tab name="response" icon="list" label="Response"
+                       :alert="validators.statusCodeErr || validators.responseEditorErr?
+                       'red': false"/>
               </q-tabs>
             </template>
 
@@ -34,9 +38,11 @@
 
                 <q-tab-panel name="general">
                   <div class="text-h4 q-mb-md">General</div>
-                  <q-input v-model="id" filled hint="Config Id" label="Id" v-if="mode === 'edit' "/>
+                  <q-input v-model="id" filled hint="Config Id" label="Id"
+                           v-if="mode === 'edit' "/>
 
-                  <q-input v-model="description" type="textarea" filled hint="Config Description" label="Description"/>
+                  <q-input v-model="description" type="textarea" filled
+                           hint="Config Description" label="Description"/>
                 </q-tab-panel>
                 <q-tab-panel name="request">
                   <div class="text-h4 q-mb-md">Request</div>
@@ -49,6 +55,7 @@
                       :configure-id="$route.params.id"
                       :project-id="$route.params.projectId"
                       v-model="request"
+                      @on-validate-result="validateRequest"
                   />
                 </q-tab-panel>
 
@@ -60,6 +67,7 @@
                       :prop-enable-loop="false"
                       :have-log="true"
                       v-model="response"
+                      @on-validate-result="validateResponse"
                   />
                 </q-tab-panel>
 
@@ -74,7 +82,7 @@
               <q-btn type="submit">Save</q-btn>
             </div>
             <div class="col-1" v-if="$route.name === 'Configures.Detail' ">
-              <q-btn @click="confirmDelete = true" >Delete</q-btn>
+              <q-btn @click="confirmDelete = true">Delete</q-btn>
             </div>
           </div>
 
@@ -87,12 +95,14 @@
       <q-card>
         <q-card-section class="row items-center">
           <q-avatar icon="delete" color="primary" text-color="white"/>
-          <span class="q-ml-sm">Are you sure want to delete this configure ? </span>
+          <span
+              class="q-ml-sm">Are you sure want to delete this configure ? </span>
         </q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="primary" v-close-popup/>
-          <q-btn flat label="Delete" color="primary" v-close-popup @click="onDeleteClicked"/>
+          <q-btn flat label="Delete" color="primary" v-close-popup
+                 @click="onDeleteClicked"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -121,8 +131,13 @@
 </template>
 
 <script>
-import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
+import EditorRequestResponseConfig
+  from "../../components/common/EditorRequestResponseConfig";
 import {mapActions} from "vuex";
+import {isObjectEmpty } from "../../util/syntaxchecker";
+import {
+  INVALID_REQUEST_EDITOR_SYNTAX, INVALID_RESPONSE_EDITOR_SYNTAX,
+} from "../../models/const";
 
 export default {
   props: {
@@ -144,7 +159,7 @@ export default {
       description: '',
 
       request: {
-        loop: null,
+        loop: '',
         destinationUrl: '',
         destinationPath: '',
         requestMethod: 'POST',
@@ -165,10 +180,10 @@ export default {
         logBeforeModify: {},
         logAfterModify: {},
 
-        cLogics : [],
+        cLogics: [],
       },
       response: {
-        statusCode: null,
+        statusCode: '',
         transform: "ToJson",
         logBeforeModify: {},
         logAfterModify: {},
@@ -182,10 +197,16 @@ export default {
       },
       validators: {
         destinationURLErr: false,
-        requestMethodErr :  false,
+        requestMethodErr: false,
+        requestEditorErr: false,
+        responseEditorErr: false,
         statusCodeErr: false,
         formHasError: false,
         errCount: 0
+      },
+      resultValidation : {
+       request : {},
+       response : {},
       },
       tabNames: ["general", "request", "response"],
       globalErrors: [],
@@ -200,6 +221,25 @@ export default {
       updateConfigure: 'configures/updateConfigure',
       deleteConfigure: 'configures/deleteConfigure'
     }),
+    validateRequest(val){
+      // validate request
+      this.resultValidation.request = val
+      if (!isObjectEmpty(this.resultValidation.request)) {
+        this.validators.requestEditorErr= true;
+        this.validators.errCount++
+        this.validators.formHasError = true;
+        this.globalErrors.push(INVALID_REQUEST_EDITOR_SYNTAX)
+      }
+    },
+    validateResponse(val){
+      this.resultValidation.response=  val
+      if (!isObjectEmpty(this.resultValidation.response)) {
+        this.validators.responseEditorErr= true;
+        this.validators.errCount++
+        this.validators.formHasError = true;
+        this.globalErrors.push(INVALID_RESPONSE_EDITOR_SYNTAX)
+      }
+    },
     visitTabs() {
       let traversal = this.tabNames.reduce((promiseChain, item) => {
         return promiseChain.then(() => new Promise(resolve => {
@@ -215,16 +255,26 @@ export default {
         this.$refs.tabs.goTo('general')
       })
     },
-    validateInput() {
-      this.validators.errCount = 0
+    resetValidator() {
       this.globalErrors = []
-      this.validators.formHasError = false;
+      this.validators = {
+        destinationURLErr: false,
+        requestMethodErr: false,
+        requestEditorErr: false,
+        responseEditorErr: false,
+        statusCodeErr: false,
+        formHasError: false,
+        errCount: 0
+      }
+    },
+    validateInput() {
+      this.resetValidator()
 
       this.$refs.editorRequest.$refs.destinationURL.validate();
       this.validators.destinationURLErr = this.$refs.editorRequest.$refs.destinationURL.hasError
 
       this.$refs.editorRequest.$refs.requestMethod.validate();
-      this.validators.requestMethodErr= this.$refs.editorRequest.$refs.requestMethod.hasError
+      this.validators.requestMethodErr = this.$refs.editorRequest.$refs.requestMethod.hasError
 
 
       this.$refs.editorResponse.$refs.statusCode.validate();
@@ -247,8 +297,8 @@ export default {
       if (this.validators.errCount > 0) {
         this.validators.formHasError = true
         this.alertDialog = true;
-
       }
+
     },
     async onSaveClicked() {
       this.validateInput()
@@ -273,12 +323,15 @@ export default {
           message: 'Delete Success.',
           color: 'secondary'
         })
-        await this.$router.replace({name: 'Projects.Detail', params: {id: this.$route.params.projectId}})
+        await this.$router.replace({
+          name: 'Projects.Detail',
+          params: {id: this.$route.params.projectId}
+        })
 
       } catch (err) {
         console.log(err)
         this.$q.notify({
-          message: err.response.data.message ?  err.response.data.message : 'Somethings Wrong',
+          message: err.response.data.message ? err.response.data.message : 'Somethings Wrong',
           color: 'negative'
         })
       }
@@ -294,7 +347,7 @@ export default {
       } catch (err) {
         console.log(err)
         this.$q.notify({
-          message: err.response.data.message ?  err.response.data.message : 'Somethings Wrong',
+          message: err.response.data.message ? err.response.data.message : 'Somethings Wrong',
           color: 'negative'
         })
       }
@@ -317,7 +370,7 @@ export default {
       } catch (err) {
         console.log(err)
         this.$q.notify({
-          message: err.response.data.message ?  err.response.data.message : 'Somethings Wrong',
+          message: err.response.data.message ? err.response.data.message : 'Somethings Wrong',
           color: 'negative'
         })
       }
@@ -386,7 +439,7 @@ export default {
       } catch (err) {
         console.log(err)
         this.$q.notify({
-          message: err.response.data.message ?  err.response.data.message : 'Somethings Wrong',
+          message: err.response.data.message ? err.response.data.message : 'Somethings Wrong',
           color: 'negative'
         })
 
@@ -412,13 +465,13 @@ export default {
         deletes,
         log_before_modify,
         log_after_modify,
-          c_logics
+        c_logics
       } = request
       return {
         loop,
         destinationUrl: destination_url,
         destinationPath: destination_path,
-        requestMethod : method,
+        requestMethod: method,
         transform,
         logBeforeModify: log_before_modify,
         logAfterModify: log_after_modify,
@@ -432,15 +485,23 @@ export default {
         codeModifyQuery: modifies.query ? modifies.query : {},
         codeDeleteHeader: deletes.header ? deletes.header : [],
         codeDeleteBody: deletes.body ? deletes.body : [],
-        codeDeleteQuery : deletes.query ? deletes.query : [],
+        codeDeleteQuery: deletes.query ? deletes.query : [],
 
-        cLogics : c_logics ? c_logics : []
+        cLogics: c_logics ? c_logics : []
 
       }
     },
 
     fillResponse(response) {
-      const {adds, modifies, deletes, log_before_modify, log_after_modify, status_code, transform} = response
+      const {
+        adds,
+        modifies,
+        deletes,
+        log_before_modify,
+        log_after_modify,
+        status_code,
+        transform
+      } = response
 
       return {
         statusCode: status_code,
