@@ -16,7 +16,7 @@
               <q-tab name="general" icon="description" label="General"
                      :alert="validators.containerNameErr ? 'red' : false"/>
               <q-tab name="projects" icon="folder" label="Project"
-                     :alert="validators.assignedProjectIdsErr? 'red' : false" />
+                     :alert="validators.assignedProjectIdsErr? 'red' : false"/>
               <q-tab name="router" icon="alt_route" label="Router"
                      :alert="validators.routerErr? 'red' : false"/>
             </q-tabs>
@@ -272,7 +272,8 @@
                             <q-icon
                                 size="xs"
                                 name="edit"
-                                @click="openEditRouteDialog(props.row)"
+                                @click="openEditRouteDialog(props.row,
+                                props.rowIndex)"
                             />
                           </div>
                           <div class="col">
@@ -308,39 +309,57 @@
                       <div class="text-h6">Router</div>
                     </q-card-section>
 
-                    <q-card-section class="q-pt-none">
-                      <q-input
 
-                          filled
-                          type="text"
-                          v-model="dataInputRoute.path"
-                          label="Route Path*"
-                          hint="Route Path"
-                          :rules="[ val => val && val.length > 0 || 'Please type something']"
-                      />
+                    <q-form
+                        @submit=" formModeRoute  === 'add' ? addRoute() :
+                        editRoute()"
+                        class="q-gutter-md"
+                    >
+                      <q-card-section class="q-pt-none">
 
-                      <q-select v-model="dataInputRoute.type" :options="type"
-                                label="Select request type"
-                                style="max-width: 300px"/>
+                        <q-input
 
-                      <q-select v-model="dataInputRoute.method"
-                                :options="method" label="Select REST Method"
-                                style="max-width: 300px"/>
+                            filled
+                            type="text"
+                            v-model="dataInputRoute.path"
+                            label="Route Path*"
+                            hint="Route Path"
+                            :rules="[ val => val && val.length > 0 || 'Please type something']"
+                        />
 
-                      <q-select v-model="dataInputRoute.project_id"
-                                :options="container.project_ids"
-                                label="Select Project Id"
-                                style="max-width: 300px"/>
-                      <br/>
+                        <q-select v-model="dataInputRoute.type" :options="type"
+                                  label="Select request type"
+                                  :rules="[ val => val && val.length > 0 ||
+                                'Please select something']"
+                                  style="max-width: 300px"
+                        />
 
-                    </q-card-section>
+                        <q-select v-model="dataInputRoute.method"
+                                  :options="method" label="Select REST Method"
+                                  style="max-width: 300px"
+                                  :rules="[ val => val && val.length > 0 ||
+                                'Please select something']"
+                        />
 
-                    <q-card-actions align="right" class="bg-white text-teal">
-                      <q-btn flat label="Add" v-close-popup @click="addRoute"
-                             v-if="formModeRoute  === 'add' "/>
-                      <q-btn flat label="Edit" v-close-popup @click="editRoute"
-                             v-else/>
-                    </q-card-actions>
+                        <q-select v-model="dataInputRoute.project_id"
+                                  :options="container.project_ids"
+                                  label="Select Project Id"
+                                  style="max-width: 300px"
+                                  :rules="[ val => val && val.length > 0 ||
+                                'Please select something']"
+                        />
+                        <br/>
+
+
+                      </q-card-section>
+
+                      <q-card-actions align="right" class="bg-white text-teal">
+                        <q-btn flat :label="formModeRoute === 'add' ? 'Add' :
+                      'Edit'" type="submit"
+                        />
+
+                      </q-card-actions>
+                    </q-form>
                   </q-card>
                 </q-dialog>
               </q-tab-panel>
@@ -425,12 +444,12 @@ export default {
       containerName: '',
       description: '',
 
-      alertDialog : false,
+      alertDialog: false,
       globalErrors: [],
       validators: {
         containerNameErr: false,
-        assignedProjectIdsErr : false,
-        routerErr : false,
+        assignedProjectIdsErr: false,
+        routerErr: false,
         formHasError: false,
         errCount: 0
       },
@@ -509,6 +528,7 @@ export default {
       type: ['serial', 'parallel'],
       routerDialog: false,
       dataInputRoute: {
+        index: -1,
         id: null,
         path: '',
         type: '',
@@ -580,7 +600,8 @@ export default {
         console.log("response data is")
         console.log(response.data)
         this.container.container_id = response.data.container_id;
-        this.container.name = this.$route.params.id
+        this.container._id = this.$route.params.id
+        this.container.name = this.container._id
         this.container.running = false
         this.$q.notify({
           message: 'Create Docker Container Success.',
@@ -617,9 +638,9 @@ export default {
     },
     resetValidation() {
       this.globalErrors = []
-      this.validators= {
+      this.validators = {
         containerNameErr: false,
-        assignedProjectIdsErr : false,
+        assignedProjectIdsErr: false,
         formHasError: false,
         errCount: 0
       }
@@ -637,15 +658,15 @@ export default {
         this.globalErrors.push(this.$refs.containerName.innerErrorMessage)
       }
 
-      if(this.container.project_ids.length === 0){
+      if (this.container.project_ids.length === 0) {
         this.validators.assignedProjectIdsErr = true
         this.validators.formHasError = true;
         this.validators.errCount++;
         this.globalErrors.push("Please assign at least 1 created projects")
       }
 
-      if(this.container.routers.length === 0){
-        this.validators.routerErr= true
+      if (this.container.routers.length === 0) {
+        this.validators.routerErr = true
         this.validators.formHasError = true;
         this.validators.errCount++;
         this.globalErrors.push("Please assign at least 1 router for assigned project")
@@ -654,14 +675,14 @@ export default {
     },
     async onSaveClicked() {
       this.validateInput()
-      if(!this.validators.formHasError){
+      if (!this.validators.formHasError) {
         if (this.$route.name === 'Containers.Detail') {
           await this.onUpdateContainer()
 
         } else {
           await this.onStoreContainer()
         }
-      }else{
+      } else {
         this.alertDialog = true;
       }
 
@@ -709,21 +730,26 @@ export default {
         type: this.dataInputRoute.type,
         project_id: this.dataInputRoute.project_id
       })
+      this.routerDialog = false;
       this.clearDataInputRoute()
+
     },
     editRoute() {
-      let index = this.container.routers.findIndex(e => e.id === this.dataInputRoute.id);
-      if (index >= 0) {
-        let temp = [...this.container.routers]
-        temp[index] = {
-          id: this.dataInputRoute.id,
-          path: this.dataInputRoute.path,
-          method: this.dataInputRoute.method,
-          type: this.dataInputRoute.type,
-          project_id: this.dataInputRoute.project_id
-        }
-        this.container.routers = temp;
+      console.log("data input route is ")
+      console.log(this.dataInputRoute)
+      let temp = [...this.container.routers]
+      console.log("temp is")
+      console.log(temp)
+      temp[this.dataInputRoute.index] = {
+        id: this.dataInputRoute.id,
+        path: this.dataInputRoute.path,
+        method: this.dataInputRoute.method,
+        type: this.dataInputRoute.type,
+        project_id: this.dataInputRoute.project_id
       }
+      this.container.routers = temp;
+      this.routerDialog = false;
+      this.clearDataInputRoute()
     },
     clearDataInputRoute() {
       this.dataInputRoute = {
@@ -738,11 +764,12 @@ export default {
       this.formModeRoute = 'add'
       this.routerDialog = true;
     },
-    openEditRouteDialog(route) {
+    openEditRouteDialog(route, index) {
       this.formModeRoute = 'edit';
       this.dataInputRoute = {
+        index,
         id: route.id,
-        requestMethod: route.method,
+        method: route.method,
         project_id: route.project_id,
         type: route.type,
         path: route.path,
