@@ -149,7 +149,7 @@
     </div>
     <q-dialog
         v-if="propSerialConfig "
-        v-model="dialog"
+        v-model="dialogCLogicDetail"
         persistent
         :maximized="maximizedToggle"
         transition-show="slide-up"
@@ -295,7 +295,7 @@ export default {
       selectedCLogic: null,
       mode: 'add',
       selectedIndex: -1,
-      dialog: false,
+      dialogCLogicDetail: false,
       maximizedToggle: true,
 
       validators: {
@@ -399,7 +399,7 @@ export default {
     },
     openDialogAddCLogic() {
       this.mode = 'add'
-      this.dialog= true
+      this.dialogCLogicDetail= true
     },
     constructData() {
       return {
@@ -466,7 +466,7 @@ export default {
           color: 'secondary'
         })
 
-        this.dialog = false
+        this.dialogCLogicDetail = false
       } else {
         try {
             await this.addCLogicSerial(data)
@@ -474,6 +474,7 @@ export default {
             message: 'Add CLogic Success',
             color: 'secondary'
           })
+          this.dialogCLogicDetail = false;
           this.$emit('on-clogic-save', data)
         } catch (err) {
           console.log(err)
@@ -484,7 +485,7 @@ export default {
     selectCLogic(index) {
       this.selectedIndex = index
       this.mode = 'edit';
-      this.dialog = true
+      this.dialogCLogicDetail = true
     },
     async loadConfigures(projectId) {
       this.isLoadConfigures = true;
