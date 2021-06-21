@@ -186,6 +186,13 @@ export default {
           format: val => `${val ? val.substring(0, 30) + '...' : '-'}`,
         },
         {
+          name: 'configureId',
+          required: false,
+          label: 'Configure Id',
+          align: 'left',
+          field: row => row.configure_id,
+        },
+        {
           name: 'action',
           required: true,
           label: 'Action',
