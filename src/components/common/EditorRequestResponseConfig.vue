@@ -51,7 +51,8 @@
                     hint="Response Status Code"
                     filled
                     style="max-width: 200px"
-                    :rules="[ val => val && val >= 0 || `Please fill response status code`]"
+                    :rules="[ val => val >= 0 ||
+                    `Please fill response status code`]"
                     @input="emitValue"
 
                 />
@@ -305,7 +306,7 @@ export default {
         destinationUrl: this.value.destinationUrl,
         destinationPath: this.value.destinationPath,
 
-        statusCode: this.value.statusCode,
+        statusCode: this.value.statusCode ? this.value.statusCode : 0,
         transform: this.value.transform,
         logBeforeModify: this.value.logBeforeModify,
         logAfterModify: this.value.logAfterModify,
