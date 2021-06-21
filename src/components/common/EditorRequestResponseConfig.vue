@@ -51,7 +51,7 @@
                     hint="Response Status Code"
                     filled
                     style="max-width: 200px"
-                    :rules="[ val => val >= 0 ||
+                    :rules="[ val => val != null && val >= 0 ||
                     `Please fill response status code`]"
                     @input="emitValue"
 
