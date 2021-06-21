@@ -422,8 +422,8 @@ export default {
         failure_response
       } = cLogicData
       this.id = id
-      this.rule = rule
-      this.data = data
+      this.rule = rule ? rule : {}
+      this.data = data ? data : {}
       this.nextSuccess = next_success
       this.nextFailure = next_failure
       if (response) {
