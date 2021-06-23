@@ -9,7 +9,7 @@
 
       <div class="card-content" >
 
-        <CardLoginRegister :mode="mode"/>
+        <CardLoginRegister :mode="mode" @on-register-success="mode='login' "/>
 
       </div>
       <footer class="card-footer">

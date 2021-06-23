@@ -50,7 +50,7 @@ const auth = {
             router.push({name: redirect})
         },
         register(context, credentials) {
-            const {name, email, password, redirect} = credentials
+            const {name, email, password } = credentials
             return new Promise((resolve, reject) => {
                 ApiService.init()
                 ApiService.post('/api/v1/auth/register', {
@@ -59,7 +59,6 @@ const auth = {
                     password
                 }).then(
                     response => {
-                        router.push({path: redirect})
                         resolve(response)
                     },
                     error => {

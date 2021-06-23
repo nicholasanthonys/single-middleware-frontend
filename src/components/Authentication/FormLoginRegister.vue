@@ -11,6 +11,8 @@
           label="Name *"
           hint="Name and surname"
           v-if="mode!=='login' "
+          :rules="[val => val && val.length > 0||
+          'Please type something']"
       />
 
       <q-input
@@ -19,7 +21,7 @@
           v-model="email"
           label="Email *"
           hint="Your Email"
-          :rules="[ val => val && val.length > 0 || 'Please type something']"
+          :rules="[val => !!val || 'Email is missing', isValidEmail]"
       />
 
       <q-input
@@ -27,13 +29,24 @@
           filled
           v-model="password"
           label="Your Password "
+          :rules="[val =>val &&  val.length >= 8||
+          'Password should at least 8 characters' ]"
+      />
 
+      <q-input
+          v-if="mode==='register'"
+          type="password"
+          filled
+          v-model="confirmPassword"
+          label="Confirm Password "
+          :rules="[val => !!val  || 'Confirm your password'
+          ,isConfirmPasswordMatch ]"
       />
 
 
       <div>
         <q-btn label="Submit" type="submit" color="primary"/>
-        <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" />
+        <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm"/>
       </div>
     </q-form>
   </div>
@@ -54,13 +67,20 @@ export default {
   data() {
     return {
       name: null,
-      email: "test123@mailinator.com",
-      password: "nicho1234",
+      email: null,
+      password: null,
       confirmPassword: null,
-      isLoading  : false,
+      isLoading: false,
     }
   },
   methods: {
+    isValidEmail(val) {
+      const emailPattern = /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/;
+      return emailPattern.test(val) || 'Invalid email';
+    },
+    isConfirmPasswordMatch(val) {
+      return val === this.password || 'Password not match';
+    },
     resetForm() {
       this.name = null
       this.email = null
@@ -93,8 +113,16 @@ export default {
         await this.$store.dispatch('auth/login', credential)
 
         this.$emit('authenticated')
+        this.$q.notify({
+          message: 'Login Success.',
+          color: 'secondary'
+        })
 
       } catch (err) {
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         this.message = 'Login Failed'
       }
       this.isLoading = false
@@ -105,11 +133,19 @@ export default {
           name: this.name,
           email: this.email,
           password: this.password,
-          redirect : '/login'
+        })
+        this.$emit('on-register-success');
+        this.$q.notify({
+          message: 'Register Success.',
+          color: 'secondary'
         })
 
       } catch (err) {
         this.message = 'Register Failed'
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         console.log(err)
       }
     }
