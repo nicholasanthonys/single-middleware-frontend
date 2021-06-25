@@ -120,7 +120,7 @@ const parallel = {
                     loop
                 }).then(
                     response => {
-                        context.commit('updateSingleConfigParallel', {id, configure_id, alias})
+                        context.commit('updateSingleConfigParallel', {id, configure_id, alias, loop})
                         resolve(response)
                     },
                     error => {
@@ -213,12 +213,13 @@ const parallel = {
             state.parallel.configures = state.parallel.configures.filter(c => c.id !== configFileId)
         },
         updateSingleConfigParallel(state, data) {
-            const {id, configure_id, alias} = data;
+            const {id, configure_id, alias, loop} = data;
             let confIndex = state.parallel.configures.findIndex(e => e.id === id);
             if (confIndex >= 0) {
                 let temp = [...state.parallel.configures];
                 temp[confIndex].configure_id = configure_id;
                 temp[confIndex].alias = alias;
+                temp[confIndex].loop= loop;
                 state.parallel.configures = temp;
             }
         },
