@@ -2,96 +2,107 @@
   <div>
     <div class="column" style="height: 600px">
       <div class="col">
-        <q-splitter
-            v-model="splitterModel"
-            v-if="!isLoading"
-        >
-
+        <q-splitter v-model="splitterModel" v-if="!isLoading">
           <template v-slot:before>
-            <q-tabs
-                v-model="tab"
-                vertical
-                class="text-teal"
-            >
-              <q-tab name="general" icon="description" label="General"
-                     :alert="validators.configIdErr|| validators.aliasErr? 'red': false"/>
-              <q-tab name="failure_response" icon="settings_application" label="Next Failure"
-                     :alert="validators.statusCodeErr? 'red': false"/>
-              <q-tab name="c_logics" icon="settings_application" label="CLogics" v-if="propSerialConfig!= null"/>
+            <q-tabs v-model="tab" vertical class="text-teal">
+              <q-tab
+                name="general"
+                icon="description"
+                label="General"
+                :alert="
+                  validators.configIdErr || validators.aliasErr ? 'red' : false
+                "
+              />
+              <q-tab
+                name="failure_response"
+                icon="settings_application"
+                label="Next Failure"
+                :alert="validators.statusCodeErr ? 'red' : false"
+              />
+              <q-tab
+                name="c_logics"
+                icon="settings_application"
+                label="CLogics"
+                v-if="propSerialConfig != null"
+              />
             </q-tabs>
           </template>
 
           <template v-slot:after>
             <q-tab-panels
-                v-model="tab"
-                animated
-                swipeable
-                vertical
-                transition-prev="jump-up"
-                transition-next="jump-up"
-                style="height: 100%"
-                keep-alive
-                ref="tabs"
-
+              v-model="tab"
+              animated
+              swipeable
+              vertical
+              transition-prev="jump-up"
+              transition-next="jump-up"
+              style="height: 100%"
+              keep-alive
+              ref="tabs"
             >
               <q-tab-panel name="general">
                 <div class="text-h4 q-mb-md">General</div>
-                <div class="column" style="height: 500px" >
-                 <div class="col-2">
-                   <q-select v-model="selectedConfigId" :options="configureOptions" label="Select Configuration Id"
-                             style="max-width: 300px"
-                             ref="configId"
-                             :rules="[ val => val && val.length > 0 || 'Please Select Configuration Id']"
-
-                   />
-                 </div>
+                <div class="column" style="height: 500px">
+                  <div class="col-2">
+                    <q-select
+                      v-model="selectedConfigId"
+                      :options="configureOptions"
+                      label="Select Configuration Id"
+                      style="max-width: 300px"
+                      ref="configId"
+                      :rules="[
+                        (val) =>
+                          (val && val.length > 0) ||
+                          'Please Select Configuration Id',
+                      ]"
+                    />
+                  </div>
                   <div class="col-1">
                     <q-input
-                        ref="alias"
-                        filled
-                        v-model="alias"
-                        label="Alias *"
-                        hint="Config Alias"
-                        :rules="[ val => val && val.length > 0 || 'Please type alias']"
+                      ref="alias"
+                      filled
+                      v-model="alias"
+                      label="Alias *"
+                      hint="Config Alias"
+                      :rules="[
+                        (val) => (val && val.length > 0) || 'Please type alias',
+                      ]"
                     />
                   </div>
                 </div>
-
               </q-tab-panel>
 
               <q-tab-panel name="failure_response">
                 <div class="text-h4 q-mb-md">Failure Response</div>
                 <EditorRequestResponseConfig
-                    ref="editor"
-                    config-type="response"
-                    v-model="editorData"
+                  ref="editor"
+                  config-type="response"
+                  v-model="editorData"
                 />
-
               </q-tab-panel>
 
-              <q-tab-panel name="c_logics" v-if="propSerialConfig!= null">
-                <div class="column" style="height: 500px" >
+              <q-tab-panel name="c_logics" v-if="propSerialConfig != null">
+                <div class="column" style="height: 500px">
                   <div class="col-1">
                     <q-btn @click="openDialogAddCLogic"> Add CLogic</q-btn>
                   </div>
                   <div class="col">
                     <q-table
-                        style="height: 400px"
-                        title="CLogic List"
-                        :data="propSerialConfig? propSerialConfig.c_logics : [] "
-                        :columns="cLogicTableColumns"
-                        row-key="index"
-                        virtual-scroll
-                        :pagination.sync="pagination"
-                        :rows-per-page-options="[0]"
+                      style="height: 400px"
+                      title="CLogic List"
+                      :data="propSerialConfig ? propSerialConfig.c_logics : []"
+                      :columns="cLogicTableColumns"
+                      row-key="index"
+                      virtual-scroll
+                      :pagination.sync="pagination"
+                      :rows-per-page-options="[0]"
                     >
-
                       <template v-slot:header="props">
                         <q-tr :props="props">
                           <q-th
-                              v-for="col in props.cols"
-                              :key="col.name"
-                              :props="props"
+                            v-for="col in props.cols"
+                            :key="col.name"
+                            :props="props"
                           >
                             {{ col.label }}
                           </q-th>
@@ -99,71 +110,86 @@
                       </template>
                       <template v-slot:body="props">
                         <q-tr :props="props">
-
                           <q-td
-                              v-for="col in props.cols"
-                              :key="col.name"
-                              :props="props"
+                            v-for="col in props.cols"
+                            :key="col.name"
+                            :props="props"
                           >
+                            <p>
+                              {{
+                                propSerialConfig.c_logics[props.rowIndex][
+                                  col.name
+                                ]
+                              }}
+                            </p>
 
-                            <p>{{ propSerialConfig.c_logics[props.rowIndex][col.name] }} </p>
-
-                            <div
-                                v-if="col.name==='action'"
-                            >
+                            <div v-if="col.name === 'action'">
                               <q-btn
-                                  class="q-mr-sm"
-                                  icon="edit"
-                                  size="sm"
-                                  label="Edit"
-                                  color="primary"
-                                  @click="selectCLogic( props.rowIndex)"
+                                class="q-mr-sm"
+                                icon="edit"
+                                size="sm"
+                                label="Edit"
+                                color="primary"
+                                @click="selectCLogic(props.rowIndex)"
                               />
 
                               <q-btn
-                                  icon="delete"
-                                  size="sm"
-                                  label="Delete"
-                                  color="negative"
-                                  @click="onDeleteCLogicSerial(props.row)"
+                                icon="delete"
+                                size="sm"
+                                label="Delete"
+                                color="negative"
+                                @click="onDeleteCLogicSerial(props.row)"
                               />
-
                             </div>
-
-
                           </q-td>
                         </q-tr>
                       </template>
                     </q-table>
                   </div>
                 </div>
-
               </q-tab-panel>
-
-
             </q-tab-panels>
           </template>
-
         </q-splitter>
       </div>
     </div>
     <q-dialog
-        v-if="propSerialConfig "
-        v-model="dialogCLogicDetail"
-        persistent
-        :maximized="maximizedToggle"
-        transition-show="slide-up"
-        transition-hide="slide-down"
+      v-if="propSerialConfig"
+      v-model="dialogCLogicDetail"
+      persistent
+      :maximized="maximizedToggle"
+      transition-show="slide-up"
+      transition-hide="slide-down"
     >
       <q-card class="text-black">
         <q-bar>
-          <q-space/>
+          <q-space />
 
-          <q-btn dense flat icon="minimize" @click="maximizedToggle = false" :disable="!maximizedToggle">
-            <q-tooltip v-if="maximizedToggle" content-class="bg-white text-primary">Minimize</q-tooltip>
+          <q-btn
+            dense
+            flat
+            icon="minimize"
+            @click="maximizedToggle = false"
+            :disable="!maximizedToggle"
+          >
+            <q-tooltip
+              v-if="maximizedToggle"
+              content-class="bg-white text-primary"
+              >Minimize</q-tooltip
+            >
           </q-btn>
-          <q-btn dense flat icon="crop_square" @click="maximizedToggle = true" :disable="maximizedToggle">
-            <q-tooltip v-if="!maximizedToggle" content-class="bg-white text-primary">Maximize</q-tooltip>
+          <q-btn
+            dense
+            flat
+            icon="crop_square"
+            @click="maximizedToggle = true"
+            :disable="maximizedToggle"
+          >
+            <q-tooltip
+              v-if="!maximizedToggle"
+              content-class="bg-white text-primary"
+              >Maximize</q-tooltip
+            >
           </q-btn>
           <q-btn dense flat icon="close" v-close-popup>
             <q-tooltip content-class="bg-white text-primary">Close</q-tooltip>
@@ -171,12 +197,14 @@
         </q-bar>
 
         <q-card-section class="q-pt-none">
-
           <div class="text-h6">CLogic</div>
-          <CLogicItemDetail :prop-c-logic=" propSerialConfig.c_logics[selectedIndex]"
-                            @on-clogic-save="onCLogicSave" :prop-mode="mode"
-                            :prop-config-id="propSerialConfig.id"
-                            prop-request-type="serial"/>
+          <CLogicItemDetail
+            :prop-c-logic="propSerialConfig.c_logics[selectedIndex]"
+            @on-clogic-save="onCLogicSave"
+            :prop-mode="mode"
+            :prop-config-id="propSerialConfig.id"
+            prop-request-type="serial"
+          />
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -189,7 +217,7 @@
 
         <q-card-section class="q-pt-none">
           <ul>
-            <li v-for="(error,index) in globalErrors" :key="index">
+            <li v-for="(error, index) in globalErrors" :key="index">
               {{ error }}
             </li>
           </ul>
@@ -205,26 +233,39 @@
       <q-card>
         <q-card-section class="row items-center">
           <q-avatar icon="delete" color="negative" text-color="white" />
-          <span class="q-ml-sm">Are you sure want to delete cLogic with id {{selectedCLogic.id}} ? </span>
+          <span class="q-ml-sm"
+            >Are you sure want to delete cLogic with id
+            {{ selectedCLogic.id }} ?
+          </span>
         </q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="primary" v-close-popup />
-          <q-btn flat label="Delete" color="primary" :loading="isDeletingCLogic" @click="deleteCLogicSerial($route.params.id, propSerialConfig.id,selectedCLogic.id)"/>
+          <q-btn
+            flat
+            label="Delete"
+            color="primary"
+            :loading="isDeletingCLogic"
+            @click="
+              deleteCLogicSerial(
+                $route.params.id,
+                propSerialConfig.id,
+                selectedCLogic.id
+              )
+            "
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
-
     <q-btn @click="onSaveClick">Confirm</q-btn>
-
   </div>
 </template>
 
 <script>
 import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
 
-import {mapActions, mapGetters} from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import CLogicItemDetail from "./CLogicItemDetail";
 
 export default {
@@ -237,18 +278,18 @@ export default {
   },
   components: {
     CLogicItemDetail,
-    EditorRequestResponseConfig
+    EditorRequestResponseConfig,
   },
   computed: {
     ...mapGetters({
-      serial: 'serial/getSerial'
-    })
+      serial: "serial/getSerial",
+    }),
   },
 
   data() {
     return {
       splitterModel: 10,
-      tab: 'general',
+      tab: "general",
       isLoading: false,
       isLoadConfigures: false,
 
@@ -257,7 +298,7 @@ export default {
       options: [],
 
       id: null,
-      editorData : {
+      editorData: {
         /* Next Failure*/
         codeAddHeader: {},
         codeAddBody: {},
@@ -274,26 +315,26 @@ export default {
       /* C Logics */
       cLogicTableColumns: [
         {
-          name: 'id',
-          label: 'Id',
-          field: row => row.id,
-          align: 'left',
+          name: "id",
+          label: "Id",
+          field: (row) => row.id,
+          align: "left",
         },
 
         {
-          name: 'action',
+          name: "action",
           required: true,
-          label: 'Action',
-        }
+          label: "Action",
+        },
       ],
 
       pagination: {
-        rowsPerPage: 1000
+        rowsPerPage: 1000,
       },
 
       /* for dialog */
       selectedCLogic: null,
-      mode: 'add',
+      mode: "add",
       selectedIndex: -1,
       dialogCLogicDetail: false,
       maximizedToggle: true,
@@ -303,103 +344,104 @@ export default {
         aliasErr: false,
         statusCodeErr: false,
         formHasError: false,
-        errCount: 0
+        errCount: 0,
       },
 
       tabNames: ["general", "failure_response", "c_logics"],
       globalErrors: [],
       alertDialog: false,
 
-      dialogDeleteCLogic : false,
-      isDeletingCLogic : false,
-
-    }
+      dialogDeleteCLogic: false,
+      isDeletingCLogic: false,
+    };
   },
   methods: {
     ...mapActions({
-      addCLogicSerial: 'serial/storeSingleCLogic',
-      updateCLogicSerial: 'serial/updateSingleCLogic',
-      actionFetchSerial: 'serial/fetchSerial',
-      actionFetchConfigures: 'configures/fetchConfigures',
-      actionStoreSerial: 'serial/storeSerial',
-      storeSingleConfig: 'serial/storeSingleConfig',
-      updateSpecificConfig: 'serial/updateSingleConfig',
-      actionDeleteCLogicSerial : 'serial/deleteCLogic'
+      addCLogicSerial: "serial/storeSingleCLogic",
+      updateCLogicSerial: "serial/updateSingleCLogic",
+      actionFetchSerial: "serial/fetchSerial",
+      actionFetchConfigures: "configures/fetchConfigures",
+      actionStoreSerial: "serial/storeSerial",
+      storeSingleConfig: "serial/storeSingleConfig",
+      updateSpecificConfig: "serial/updateSingleConfig",
+      actionDeleteCLogicSerial: "serial/deleteCLogic",
     }),
-    onDeleteCLogicSerial(cLogic){
-      this.selectedCLogic = cLogic
-     this.dialogDeleteCLogic = true;
+    onDeleteCLogicSerial(cLogic) {
+      this.selectedCLogic = cLogic;
+      this.dialogDeleteCLogic = true;
     },
-    async deleteCLogicSerial(projectId, configId, cLogicId){
+    async deleteCLogicSerial(projectId, configId, cLogicId) {
       this.isDeletingCLogic = true;
-     try {
-       await this.actionDeleteCLogicSerial({projectId,configId,cLogicId})
-       this.$q.notify({
-         message: 'Delete Success.',
-         color: 'secondary'
-       })
-       this.dialogDeleteCLogic = false;
-     } catch (err) {
-       this.$q.notify({
-         message: 'Somethings wrong when deleting c logic serial.',
-         color: 'negative'
-       })
-       console.log(err)
-     }
-     this.isDeletingCLogic = false;
+      try {
+        await this.actionDeleteCLogicSerial({ projectId, configId, cLogicId });
+        this.$q.notify({
+          message: "Delete Success.",
+          color: "secondary",
+        });
+        this.dialogDeleteCLogic = false;
+      } catch (err) {
+        this.$q.notify({
+          message: "Somethings wrong when deleting c logic serial.",
+          color: "negative",
+        });
+        console.log(err);
+      }
+      this.isDeletingCLogic = false;
     },
     validateInput() {
-      this.validators.errCount = 0
-      this.globalErrors = []
+      this.validators.errCount = 0;
+      this.globalErrors = [];
       this.validators.formHasError = false;
       this.$refs.configId.validate();
-      this.validators.configIdErr = this.$refs.configId.hasError
+      this.validators.configIdErr = this.$refs.configId.hasError;
 
       this.$refs.alias.validate();
-      this.validators.aliasErr = this.$refs.alias.hasError
+      this.validators.aliasErr = this.$refs.alias.hasError;
 
       this.$refs.editor.$refs.statusCode.validate();
 
-      this.validators.statusCodeErr = this.$refs.editor.$refs.statusCode.hasError
+      this.validators.statusCodeErr =
+        this.$refs.editor.$refs.statusCode.hasError;
 
       if (this.validators.configIdErr) {
         this.validators.errCount++;
-        this.globalErrors.push(this.$refs.configId.innerErrorMessage)
-
+        this.globalErrors.push(this.$refs.configId.innerErrorMessage);
       }
       if (this.validators.aliasErr) {
         this.validators.errCount++;
-        this.globalErrors.push(this.$refs.alias.innerErrorMessage)
+        this.globalErrors.push(this.$refs.alias.innerErrorMessage);
       }
 
       if (this.validators.statusCodeErr) {
-        this.validators.errCount++
-        this.globalErrors.push(this.$refs.editor.$refs.statusCode.innerErrorMessage)
+        this.validators.errCount++;
+        this.globalErrors.push(
+          this.$refs.editor.$refs.statusCode.innerErrorMessage
+        );
       }
       if (this.validators.errCount > 0) {
-        this.validators.formHasError = true
+        this.validators.formHasError = true;
         this.alertDialog = true;
-
       }
     },
     visitTabs() {
       let traversal = this.tabNames.reduce((promiseChain, item) => {
-        return promiseChain.then(() => new Promise(resolve => {
-              console.log("done with", item)
-              resolve()
-              this.$refs.tabs.goTo(item)
+        return promiseChain.then(
+          () =>
+            new Promise((resolve) => {
+              console.log("done with", item);
+              resolve();
+              this.$refs.tabs.goTo(item);
             })
-        )
-      }, Promise.resolve())
-
+        );
+      }, Promise.resolve());
 
       traversal.then(() => {
-        this.$refs.tabs.goTo('general')
-      })
+        this.$refs.tabs.goTo("general");
+      });
     },
     openDialogAddCLogic() {
-      this.mode = 'add'
-      this.dialogCLogicDetail= true
+      this.mode = "add";
+      this.dialogCLogicDetail = true;
     },
     constructData() {
       return {
@@ -411,153 +453,152 @@ export default {
           transform: this.editorData.transform,
           adds: {
             header: this.editorData.codeAddHeader,
-            body: this.editorData.codeAddBody
+            body: this.editorData.codeAddBody,
           },
           modifies: {
             header: this.editorData.codeModifyHeader,
-            body: this.editorData.codeModifyBody
+            body: this.editorData.codeModifyBody,
           },
           deletes: {
             header: this.editorData.codeDeleteHeader,
-            body: this.editorData.codeDeleteBody
-          }
+            body: this.editorData.codeDeleteBody,
+          },
         },
         mode: this.propMode,
-      }
+      };
     },
     async onSaveClick() {
-      this.validateInput()
+      this.validateInput();
       if (!this.validators.formHasError) {
-        let data = this.constructData()
-        if (this.propMode === 'edit') {
+        let data = this.constructData();
+        if (this.propMode === "edit") {
           /* add id */
           try {
             data.id = this.id;
             await this.updateSpecificConfig(data);
             this.$q.notify({
-              message: 'Update Config Serial Success.',
-              color: 'secondary'
-            })
+              message: "Update Config Serial Success.",
+              color: "secondary",
+            });
 
-            this.$emit('on-confirm-clicked')
+            this.$emit("on-confirm-clicked");
           } catch (e) {
             this.$q.notify({
               message: e.response.data.message,
-              color: 'negative'
-            })
-            console.log(e)
+              color: "negative",
+            });
+            console.log(e);
           }
         } else {
           try {
-            await this.storeSingleConfig(data)
+            await this.storeSingleConfig(data);
             this.$q.notify({
-              message: 'Store Config Serial Success.',
-              color: 'secondary'
-            })
-            this.$emit('on-confirm-clicked')
+              message: "Store Config Serial Success.",
+              color: "secondary",
+            });
+            this.$emit("on-confirm-clicked");
           } catch (e) {
             this.$q.notify({
               message: e.response.data.message,
-              color: 'negative'
-            })
-            console.log(e)
+              color: "negative",
+            });
+            console.log(e);
           }
         }
       }
     },
 
     async onCLogicSave(data) {
-      if (this.mode === 'edit') {
-          await this.updateCLogicSerial(data)
+      if (this.mode === "edit") {
+        await this.updateCLogicSerial(data);
         this.$q.notify({
-          message: 'Update CLogic Success',
-          color: 'secondary'
-        })
+          message: "Update CLogic Success",
+          color: "secondary",
+        });
 
-        this.dialogCLogicDetail = false
+        this.dialogCLogicDetail = false;
       } else {
         try {
-            await this.addCLogicSerial(data)
+          await this.addCLogicSerial(data);
           this.$q.notify({
-            message: 'Add CLogic Success',
-            color: 'secondary'
-          })
+            message: "Add CLogic Success",
+            color: "secondary",
+          });
           this.dialogCLogicDetail = false;
-          this.$emit('on-clogic-save', data)
+          this.$emit("on-clogic-save", data);
         } catch (err) {
           this.$q.notify({
             message: err.response.data.message,
-            color: 'negative'
-          })
-          console.log(err)
+            color: "negative",
+          });
+          console.log(err);
         }
       }
-
     },
     selectCLogic(index) {
-      this.selectedIndex = index
-      this.mode = 'edit';
-      this.dialogCLogicDetail = true
+      this.selectedIndex = index;
+      this.mode = "edit";
+      this.dialogCLogicDetail = true;
     },
     async loadConfigures(projectId) {
       this.isLoadConfigures = true;
       try {
-        await this.actionFetchConfigures(projectId)
-        this.options = this.constructOptionsConfigId(this.configs)
+        await this.actionFetchConfigures(projectId);
+        this.options = this.constructOptionsConfigId(this.configs);
       } catch (e) {
         this.$q.notify({
           message: e.response.data.message,
-          color: 'negative'
-        })
-        console.log(e)
+          color: "negative",
+        });
+        console.log(e);
       }
       this.isLoadConfigures = false;
     },
     constructOptionsConfigId(configures) {
-      let options = []
-      configures.forEach(e => {
-        options.push(
-            e.id,
-        )
+      let options = [];
+      configures.forEach((e) => {
+        options.push(e.id);
       });
-      return options
+      return options;
     },
 
     fillDataFromProps(config) {
-      const {alias, configure_id, failure_response, id} = config
-      this.id = id
-      this.alias = alias
-      this.selectedConfigId = configure_id
+      const { alias, configure_id, failure_response, id } = config;
+      this.id = id;
+      this.alias = alias;
+      this.selectedConfigId = configure_id;
 
       /* Next Failure*/
-      const {status_code, transform, adds, modifies, deletes, log_before_modify, log_after_modify} = failure_response
-      this.editorData.statusCode = status_code,
-          this.editorData.transform = transform,
-          this.editorData.codeAddHeader = adds.header,
-          this.editorData.codeAddBody = adds.body,
-          this.editorData.codeModifyHeader = modifies.header
-      this.editorData.codeModifyBody = modifies.body,
-          this.editorData.codeDeleteHeader = deletes.header,
-          this.editorData.codeDeleteBody = deletes.body,
-
-          this.editorData.logBeforeModify = log_before_modify,
-          this.editorData.logAfterModify = log_after_modify
-
-    }
+      const {
+        status_code,
+        transform,
+        adds,
+        modifies,
+        deletes,
+        log_before_modify,
+        log_after_modify,
+      } = failure_response;
+      (this.editorData.statusCode = status_code),
+        (this.editorData.transform = transform),
+        (this.editorData.codeAddHeader = adds.header),
+        (this.editorData.codeAddBody = adds.body),
+        (this.editorData.codeModifyHeader = modifies.header);
+      (this.editorData.codeModifyBody = modifies.body),
+        (this.editorData.codeDeleteHeader = deletes.header),
+        (this.editorData.codeDeleteBody = deletes.body),
+        (this.editorData.logBeforeModify = log_before_modify),
+        (this.editorData.logAfterModify = log_after_modify);
+    },
   },
   async mounted() {
-
-    if (this.propMode === 'edit') {
-      this.fillDataFromProps(this.propSerialConfig)
+    if (this.propMode === "edit") {
+      this.fillDataFromProps(this.propSerialConfig);
     }
   },
   created() {
-
-    this.visitTabs()
-  }
-}
+    this.visitTabs();
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

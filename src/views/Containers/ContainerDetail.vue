@@ -2,133 +2,142 @@
   <div class="full-height">
     <div class="column" style="height: 100%">
       <div class="col">
-        <q-splitter
-            v-model="splitterModel"
-            class="full-height"
-        >
-
+        <q-splitter v-model="splitterModel" class="full-height">
           <template v-slot:before>
-            <q-tabs
-                v-model="tab"
-                vertical
-                class="text-teal"
-            >
-              <q-tab name="general" icon="description" label="General"
-                     :alert="validators.containerNameErr ? 'red' : false"/>
-              <q-tab name="projects" icon="folder" label="Project"
-                     :alert="validators.assignedProjectIdsErr? 'red' : false"/>
-              <q-tab name="router" icon="alt_route" label="Router"
-                     :alert="validators.routerErr? 'red' : false"/>
+            <q-tabs v-model="tab" vertical class="text-teal">
+              <q-tab
+                name="general"
+                icon="description"
+                label="General"
+                :alert="validators.containerNameErr ? 'red' : false"
+              />
+              <q-tab
+                name="projects"
+                icon="folder"
+                label="Project"
+                :alert="validators.assignedProjectIdsErr ? 'red' : false"
+              />
+              <q-tab
+                name="router"
+                icon="alt_route"
+                label="Router"
+                :alert="validators.routerErr ? 'red' : false"
+              />
             </q-tabs>
           </template>
 
           <template v-slot:after>
             <q-tab-panels
-                keep-alive
-                v-model="tab"
-                animated
-                swipeable
-                vertical
-                transition-prev="jump-up"
-                transition-next="jump-up"
+              keep-alive
+              v-model="tab"
+              animated
+              swipeable
+              vertical
+              transition-prev="jump-up"
+              transition-next="jump-up"
             >
               <q-tab-panel name="general">
                 <div class="text-h4 q-mb-md">General</div>
-                <p class="text-h7 q-mb-md"> Container Created :
-                  {{ container.container_id ? 'Yes' : 'No' }}</p>
-                <p class="text-h7 q-mb-md"> Docker Container Id : {{
-                    container.container_id ? container.container_id : '-'
-                  }}</p>
-                <p class="text-h7 q-mb-md"> Docker Container Name:
-                  {{ container._id ? container._id : '-' }}</p>
+                <p class="text-h7 q-mb-md">
+                  Container Created :
+                  {{ container.container_id ? "Yes" : "No" }}
+                </p>
+                <p class="text-h7 q-mb-md">
+                  Docker Container Id :
+                  {{ container.container_id ? container.container_id : "-" }}
+                </p>
+                <p class="text-h7 q-mb-md">
+                  Docker Container Name:
+                  {{ container._id ? container._id : "-" }}
+                </p>
 
                 <div v-if="container.container_id">
                   <div v-if="!isToggling">
                     <q-icon
-                        class="icon-toggle"
-                        v-if="!container.running"
-                        size="md"
-                        name="play_arrow"
-                        style="color:#2F612F "
-                        @click="toggleContainer"
+                      class="icon-toggle"
+                      v-if="!container.running"
+                      size="md"
+                      name="play_arrow"
+                      style="color: #2f612f"
+                      @click="toggleContainer"
                     >
-                      <q-tooltip>
-                        Start Docker Container
-                      </q-tooltip>
+                      <q-tooltip> Start Docker Container </q-tooltip>
                     </q-icon>
 
                     <q-icon
-                        class="icon-toggle"
-                        v-if="container.running"
-                        size="md"
-                        name="pause"
-                        style="color :#E84B1E"
-                        @click="toggleContainer"
+                      class="icon-toggle"
+                      v-if="container.running"
+                      size="md"
+                      name="pause"
+                      style="color: #e84b1e"
+                      @click="toggleContainer"
                     >
-                      <q-tooltip>
-                        Stop Docker Container
-                      </q-tooltip>
+                      <q-tooltip> Stop Docker Container </q-tooltip>
                     </q-icon>
                   </div>
 
                   <div v-else>
-                    <q-spinner
-                        color="primary"
-                        size="3em"
-                        :thickness="2"
-                    />
+                    <q-spinner color="primary" size="3em" :thickness="2" />
                   </div>
                 </div>
 
-                <q-btn @click="createDockerContainer"
-                       v-if="!isCreatingDockerContainer">
+                <q-btn
+                  @click="createDockerContainer"
+                  v-if="!isCreatingDockerContainer"
+                >
                   {{ container.container_id ? "Recreate" : "Create" }} Docker
                   Container
                 </q-btn>
-                <q-spinner-hourglass color="light-green" v-else size="3em"
-                                     :thickness="2"/>
-                <br/> <br/>
-                <q-input
-                    ref="containerName"
-                    filled
-                    type="text"
-                    v-model="container.name"
-                    label="Container Name*"
-                    hint="Container Name"
-                    :rules="[ val => val && val.length > 0 || 'Please type something']"
+                <q-spinner-hourglass
+                  color="light-green"
+                  v-else
+                  size="3em"
+                  :thickness="2"
                 />
-                <br/>
+                <br />
+                <br />
+                <q-input
+                  ref="containerName"
+                  filled
+                  type="text"
+                  v-model="container.name"
+                  label="Container Name*"
+                  hint="Container Name"
+                  :rules="[
+                    (val) => (val && val.length > 0) || 'Please type something',
+                  ]"
+                />
+                <br />
 
                 <q-input
-                    v-model="container.description"
-                    type="textarea"
-                    filled hint="Container Description"
-                    label="Description"/>
+                  v-model="container.description"
+                  type="textarea"
+                  filled
+                  hint="Container Description"
+                  label="Description"
+                />
 
-                <br/>
-
-
+                <br />
               </q-tab-panel>
 
               <q-tab-panel name="projects">
                 <div class="text-h4 q-mb-md">Assign Projects</div>
 
                 <q-table
-                    style="height: 400px"
-                    title="Assigned Projects"
-                    :data="container.project_ids"
-                    :columns="projectAssignedColumns"
-                    row-key="index"
-                    virtual-scroll
-                    :rows-per-page-options="[0]"
+                  style="height: 400px"
+                  title="Assigned Projects"
+                  :data="container.project_ids"
+                  :columns="projectAssignedColumns"
+                  row-key="index"
+                  virtual-scroll
+                  :rows-per-page-options="[0]"
                 >
-
                   <template v-slot:header="props">
                     <q-tr :props="props">
                       <q-th
-                          v-for="col in props.cols"
-                          :key="col.name"
-                          :props="props"
+                        v-for="col in props.cols"
+                        :key="col.name"
+                        :props="props"
                       >
                         {{ col.label }}
                       </q-th>
@@ -136,45 +145,42 @@
                   </template>
                   <template v-slot:body="props">
                     <q-tr :props="props">
-
                       <q-td
-                          v-for="col in props.cols"
-                          :key="col.name"
-                          :props="props"
+                        v-for="col in props.cols"
+                        :key="col.name"
+                        :props="props"
                       >
-
-                        <p v-if="col.name !== 'action' ">{{ col.value }}</p>
+                        <p v-if="col.name !== 'action'">{{ col.value }}</p>
                         <q-icon
-                            v-if="col.name==='action'"
-                            size="xs"
-                            name="delete"
-                            @click="removeAssignedProject(props.row)"
+                          v-if="col.name === 'action'"
+                          size="xs"
+                          name="delete"
+                          @click="removeAssignedProject(props.row)"
                         />
-
                       </q-td>
                     </q-tr>
                   </template>
                 </q-table>
 
-                <br/> <br/>
+                <br />
+                <br />
 
                 <q-table
-                    style="height: 400px"
-                    title="Your Projects"
-                    :data="filteredProject"
-                    :columns="projectColumns"
-                    row-key="index"
-                    virtual-scroll
-                    :pagination.sync="projectPagination"
-                    :rows-per-page-options="[0]"
+                  style="height: 400px"
+                  title="Your Projects"
+                  :data="filteredProject"
+                  :columns="projectColumns"
+                  row-key="index"
+                  virtual-scroll
+                  :pagination.sync="projectPagination"
+                  :rows-per-page-options="[0]"
                 >
-
                   <template v-slot:header="props">
                     <q-tr :props="props">
                       <q-th
-                          v-for="col in props.cols"
-                          :key="col.name"
-                          :props="props"
+                        v-for="col in props.cols"
+                        :key="col.name"
+                        :props="props"
                       >
                         {{ col.label }}
                       </q-th>
@@ -182,30 +188,36 @@
                   </template>
                   <template v-slot:body="props">
                     <q-tr :props="props">
-
                       <q-td
-                          v-for="col in props.cols"
-                          :key="col.name"
-                          :props="props"
+                        v-for="col in props.cols"
+                        :key="col.name"
+                        :props="props"
                       >
-
-                        <p v-if="col.name !=='description' && col.name !== 'action' ">
-                          {{ col.value }}</p>
+                        <p
+                          v-if="
+                            col.name !== 'description' && col.name !== 'action'
+                          "
+                        >
+                          {{ col.value }}
+                        </p>
                         <div v-if="col.name === 'description'">
-                          <p>{{ col.value }}
-                            <q-tooltip anchor="bottom middle" self="top middle"
-                                       :offset="[10, 10]">
+                          <p>
+                            {{ col.value }}
+                            <q-tooltip
+                              anchor="bottom middle"
+                              self="top middle"
+                              :offset="[10, 10]"
+                            >
                               {{ props.row.description }}
                             </q-tooltip>
                           </p>
                         </div>
                         <q-icon
-                            v-if="col.name==='action'"
-                            size="xs"
-                            name="add"
-                            @click="addProject(props.row)"
+                          v-if="col.name === 'action'"
+                          size="xs"
+                          name="add"
+                          @click="addProject(props.row)"
                         />
-
                       </q-td>
                     </q-tr>
                   </template>
@@ -222,7 +234,7 @@
                     </q-card-section>
 
                     <q-card-actions align="right">
-                      <q-btn flat label="OK" color="primary" v-close-popup/>
+                      <q-btn flat label="OK" color="primary" v-close-popup />
                     </q-card-actions>
                   </q-card>
                 </q-dialog>
@@ -231,23 +243,23 @@
               <q-tab-panel name="router">
                 <div class="text-h4 q-mb-md">Define Router</div>
                 <q-btn @click="openAddRouteDialog">Add route</q-btn>
-                <br/> <br/>
+                <br />
+                <br />
                 <q-table
-                    style="height: 400px"
-                    title="Router"
-                    :data="container.routers"
-                    :columns="routerColumns"
-                    row-key="index"
-                    virtual-scroll
-                    :rows-per-page-options="[0]"
+                  style="height: 400px"
+                  title="Router"
+                  :data="container.routers"
+                  :columns="routerColumns"
+                  row-key="index"
+                  virtual-scroll
+                  :rows-per-page-options="[0]"
                 >
-
                   <template v-slot:header="props">
                     <q-tr :props="props">
                       <q-th
-                          v-for="col in props.cols"
-                          :key="col.name"
-                          :props="props"
+                        v-for="col in props.cols"
+                        :key="col.name"
+                        :props="props"
                       >
                         {{ col.label }}
                       </q-th>
@@ -255,51 +267,40 @@
                   </template>
                   <template v-slot:body="props">
                     <q-tr :props="props">
-
                       <q-td
-                          v-for="col in props.cols"
-                          :key="col.name"
-                          :props="props"
+                        v-for="col in props.cols"
+                        :key="col.name"
+                        :props="props"
                       >
+                        <p v-if="col.name !== 'action'">{{ col.value }}</p>
 
-                        <p v-if=" col.name !== 'action' ">{{ col.value }}</p>
-
-                        <div
-                            v-if="col.name==='action'"
-                            class="row"
-                        >
+                        <div v-if="col.name === 'action'" class="row">
                           <div class="col">
                             <q-icon
-                                size="xs"
-                                name="edit"
-                                @click="openEditRouteDialog(props.row,
-                                props.rowIndex)"
+                              size="xs"
+                              name="edit"
+                              @click="
+                                openEditRouteDialog(props.row, props.rowIndex)
+                              "
                             />
                           </div>
                           <div class="col">
                             <q-icon
-                                size="xs"
-                                name="delete"
-                                @click="removeRouter(props.rowIndex)"
+                              size="xs"
+                              name="delete"
+                              @click="removeRouter(props.rowIndex)"
                             />
                           </div>
-
-
                         </div>
-
-
                       </q-td>
                     </q-tr>
                   </template>
                 </q-table>
 
-                <q-dialog
-                    v-model="routerDialog"
-                >
-                  <q-card style="width: 700px; max-width: 80vw;">
-
+                <q-dialog v-model="routerDialog">
+                  <q-card style="width: 700px; max-width: 80vw">
                     <q-bar>
-                      <q-space/>
+                      <q-space />
                       <q-btn dense flat icon="close" v-close-popup>
                         <q-tooltip>Close</q-tooltip>
                       </q-btn>
@@ -309,55 +310,70 @@
                       <div class="text-h6">Router</div>
                     </q-card-section>
 
-
                     <q-form
-                        @submit=" formModeRoute  === 'add' ? addRoute() :
-                        editRoute()"
-                        class="q-gutter-md"
+                      @submit="
+                        formModeRoute === 'add' ? addRoute() : editRoute()
+                      "
+                      class="q-gutter-md"
                     >
                       <q-card-section class="q-pt-none">
-
                         <q-input
-
-                            filled
-                            type="text"
-                            v-model="dataInputRoute.path"
-                            label="Route Path*"
-                            hint="Route Path"
-                            :rules="[ val => val && val.length > 0 || 'Please type something']"
+                          filled
+                          type="text"
+                          v-model="dataInputRoute.path"
+                          label="Route Path*"
+                          hint="Route Path"
+                          :rules="[
+                            (val) =>
+                              (val && val.length > 0) ||
+                              'Please type something',
+                          ]"
                         />
 
-                        <q-select v-model="dataInputRoute.type" :options="type"
-                                  label="Select request type"
-                                  :rules="[ val => val && val.length > 0 ||
-                                'Please select something']"
-                                  style="max-width: 300px"
+                        <q-select
+                          v-model="dataInputRoute.type"
+                          :options="type"
+                          label="Select request type"
+                          :rules="[
+                            (val) =>
+                              (val && val.length > 0) ||
+                              'Please select something',
+                          ]"
+                          style="max-width: 300px"
                         />
 
-                        <q-select v-model="dataInputRoute.method"
-                                  :options="method" label="Select REST Method"
-                                  style="max-width: 300px"
-                                  :rules="[ val => val && val.length > 0 ||
-                                'Please select something']"
+                        <q-select
+                          v-model="dataInputRoute.method"
+                          :options="method"
+                          label="Select REST Method"
+                          style="max-width: 300px"
+                          :rules="[
+                            (val) =>
+                              (val && val.length > 0) ||
+                              'Please select something',
+                          ]"
                         />
 
-                        <q-select v-model="dataInputRoute.project_id"
-                                  :options="container.project_ids"
-                                  label="Select Project Id"
-                                  style="max-width: 300px"
-                                  :rules="[ val => val && val.length > 0 ||
-                                'Please select something']"
+                        <q-select
+                          v-model="dataInputRoute.project_id"
+                          :options="container.project_ids"
+                          label="Select Project Id"
+                          style="max-width: 300px"
+                          :rules="[
+                            (val) =>
+                              (val && val.length > 0) ||
+                              'Please select something',
+                          ]"
                         />
-                        <br/>
-
-
+                        <br />
                       </q-card-section>
 
                       <q-card-actions align="right" class="bg-white text-teal">
-                        <q-btn flat :label="formModeRoute === 'add' ? 'Add' :
-                      'Edit'" type="submit"
+                        <q-btn
+                          flat
+                          :label="formModeRoute === 'add' ? 'Add' : 'Edit'"
+                          type="submit"
                         />
-
                       </q-card-actions>
                     </q-form>
                   </q-card>
@@ -365,9 +381,7 @@
               </q-tab-panel>
             </q-tab-panels>
           </template>
-
         </q-splitter>
-
       </div>
 
       <div class="col-1">
@@ -375,25 +389,30 @@
           <div class="col-1 text-center">
             <q-btn @click="onSaveClicked" type="primary">Save</q-btn>
           </div>
-          <div class="col-1" v-if="$route.name === 'Containers.Detail' ">
-            <q-btn @click="dialogDelete= true">Delete</q-btn>
+          <div class="col-1" v-if="$route.name === 'Containers.Detail'">
+            <q-btn @click="dialogDelete = true">Delete</q-btn>
           </div>
         </div>
-
       </div>
     </div>
     <q-dialog v-model="dialogDelete" persistent>
       <q-card>
         <q-card-section class="row items-center">
-          <q-avatar icon="delete" color="primary" text-color="white"/>
-          <span
-              class="q-ml-sm">Are you sure want to delete this container ? </span>
+          <q-avatar icon="delete" color="primary" text-color="white" />
+          <span class="q-ml-sm"
+            >Are you sure want to delete this container ?
+          </span>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="primary" v-close-popup/>
-          <q-btn flat label="Delete" color="primary" v-close-popup
-                 @click="onDeleteClicked"/>
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn
+            flat
+            label="Delete"
+            color="primary"
+            v-close-popup
+            @click="onDeleteClicked"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -406,43 +425,47 @@
 
         <q-card-section class="q-pt-none">
           <ul>
-            <li v-for="(error,index) in globalErrors" :key="index">
+            <li v-for="(error, index) in globalErrors" :key="index">
               {{ error }}
             </li>
           </ul>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="OK" color="primary" v-close-popup
-                 @click="alertDialog = false"/>
+          <q-btn
+            flat
+            label="OK"
+            color="primary"
+            v-close-popup
+            @click="alertDialog = false"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
-
   </div>
 </template>
 
 <script>
-import {mapActions,} from "vuex";
+import { mapActions } from "vuex";
 
 export default {
   computed: {
     filteredProject: function () {
       let projectNotAssigned = [];
-      this.projects.forEach(e => {
+      this.projects.forEach((e) => {
         if (!this.container.project_ids.includes(e.id)) {
           projectNotAssigned.push(e);
         }
-      })
-      return projectNotAssigned
-    }
+      });
+      return projectNotAssigned;
+    },
   },
   data() {
     return {
-      tab: 'general',
+      tab: "general",
       splitterModel: 10,
-      containerName: '',
-      description: '',
+      containerName: "",
+      description: "",
 
       alertDialog: false,
       globalErrors: [],
@@ -451,14 +474,14 @@ export default {
         assignedProjectIdsErr: false,
         routerErr: false,
         formHasError: false,
-        errCount: 0
+        errCount: 0,
       },
 
       container: {
         _id: null,
         container_id: null,
-        name: '',
-        description: '',
+        name: "",
+        description: "",
         project_ids: [],
         routers: [],
         running: false,
@@ -467,106 +490,105 @@ export default {
       /* for table projects */
       projects: [],
       projectPagination: {
-        rowsPerPage: 1000
+        rowsPerPage: 1000,
       },
       projectColumns: [
         {
-          name: 'index',
-          label: '#',
-          field: 'index',
-          align: 'left',
+          name: "index",
+          label: "#",
+          field: "index",
+          align: "left",
         },
         {
-          name: 'projectId',
-          label: 'Project id',
-          field: row => row.id,
-          align: 'left',
+          name: "projectId",
+          label: "Project id",
+          field: (row) => row.id,
+          align: "left",
         },
         {
-          name: 'name',
+          name: "name",
           required: true,
-          label: 'Name',
-          align: 'left',
-          field: row => row.name,
+          label: "Name",
+          align: "left",
+          field: (row) => row.name,
         },
         {
-          name: 'description',
+          name: "description",
           required: false,
-          label: 'Description',
-          align: 'left',
-          field: row => row.description,
-          format: val => `${val ? val.substring(0, 30) + '...' : '-'}`,
+          label: "Description",
+          align: "left",
+          field: (row) => row.description,
+          format: (val) => `${val ? val.substring(0, 30) + "..." : "-"}`,
         },
         {
-          name: 'action',
+          name: "action",
           required: true,
-          label: 'Action',
-          align: 'left',
-        }
+          label: "Action",
+          align: "left",
+        },
       ],
 
       /* for table project_ids */
       projectAssignedColumns: [
         {
-          name: 'projectId',
-          label: 'Assigned Project id',
-          field: row => row,
-          align: 'left',
+          name: "projectId",
+          label: "Assigned Project id",
+          field: (row) => row,
+          align: "left",
         },
         {
-          name: 'action',
+          name: "action",
           required: true,
-          label: 'Action',
-          align: 'left',
-        }
+          label: "Action",
+          align: "left",
+        },
       ],
 
       /* for alert dialog */
       alert: false,
 
       /* routers table */
-      type: ['serial', 'parallel'],
+      type: ["serial", "parallel"],
       routerDialog: false,
       dataInputRoute: {
         index: -1,
         id: null,
-        path: '',
-        type: '',
-        method: '',
-        project_id: ''
-
+        path: "",
+        type: "",
+        method: "",
+        project_id: "",
       },
-      method: ['POST', 'GET', 'PUT', 'DELETE'],
+      method: ["POST", "GET", "PUT", "DELETE"],
       routerColumns: [
         {
-          name: 'path',
-          label: 'Path',
-          field: row => row.path,
-          align: 'left',
+          name: "path",
+          label: "Path",
+          field: (row) => row.path,
+          align: "left",
         },
         {
-          name: 'type',
-          label: 'Type',
-          align: 'left',
-          field: row => row.type,
+          name: "type",
+          label: "Type",
+          align: "left",
+          field: (row) => row.type,
         },
         {
-          name: 'method',
-          label: 'Method',
-          align: 'left',
-          field: row => row.method,
+          name: "method",
+          label: "Method",
+          align: "left",
+          field: (row) => row.method,
         },
         {
-          name: 'project_id',
-          label: 'Project id',
-          field: row => row.project_id,
+          name: "project_id",
+          label: "Project id",
+          field: (row) => row.project_id,
         },
         {
-          name: 'action',
+          name: "action",
           required: true,
-          label: 'Action',
-          align: 'left',
-        }
+          label: "Action",
+          align: "left",
+        },
       ],
 
       dialogDelete: false,
@@ -578,41 +600,39 @@ export default {
       isCreatingDockerContainer: false,
 
       /* form model for route */
-      formModeRoute: 'add'
-    }
+      formModeRoute: "add",
+    };
   },
   methods: {
     ...mapActions({
-      getSpecificContainer: 'containers/getContainerById',
-      actionFetchProjects: 'projects/fetchProjects',
-      storeContainer: 'containers/storeContainer',
-      updateContainer: 'containers/updateContainer',
-      deleteContainer: 'containers/deleteContainer',
-      actionToggleContainer: 'containers/toggleStartStopContainer',
-      actionCreateDockerContainer: 'containers/createDockerContainer',
+      getSpecificContainer: "containers/getContainerById",
+      actionFetchProjects: "projects/fetchProjects",
+      storeContainer: "containers/storeContainer",
+      updateContainer: "containers/updateContainer",
+      deleteContainer: "containers/deleteContainer",
+      actionToggleContainer: "containers/toggleStartStopContainer",
+      actionCreateDockerContainer: "containers/createDockerContainer",
     }),
     async createDockerContainer() {
       this.isCreatingDockerContainer = true;
       try {
         let response = await this.actionCreateDockerContainer({
-          dbContainerId: this.$route.params.id
-        })
-        console.log("response data is")
-        console.log(response.data)
+          dbContainerId: this.$route.params.id,
+        });
         this.container.container_id = response.data.container_id;
-        this.container._id = this.$route.params.id
-        this.container.name = this.container._id
-        this.container.running = false
+        this.container._id = this.$route.params.id;
+        this.container.name = this.container._id;
+        this.container.running = false;
         this.$q.notify({
-          message: 'Create Docker Container Success.',
-          color: 'secondary'
-        })
+          message: "Create Docker Container Success.",
+          color: "secondary",
+        });
       } catch (err) {
         this.$q.notify({
           message: err.response.data.message,
-          color: 'negative'
-        })
-        console.log(err)
+          color: "negative",
+        });
+        console.log(err);
       }
       this.isCreatingDockerContainer = false;
     },
@@ -621,14 +641,14 @@ export default {
       try {
         let response = await this.actionToggleContainer({
           dbContainerId: this.$route.params.id,
-        })
-        this.container.running = response.data.running
+        });
+        this.container.running = response.data.running;
       } catch (e) {
         this.$q.notify({
           message: e.response.data.message,
-          color: 'negative'
-        })
-        console.log(e)
+          color: "negative",
+        });
+        console.log(e);
       }
       this.isToggling = false;
     },
@@ -636,68 +656,67 @@ export default {
       try {
         await this.deleteContainer(this.$route.params.id);
         this.$q.notify({
-          message: 'Delete Container Success',
-          color: 'secondary'
-        })
-        await this.$router.replace({name: 'Home.Containers'})
+          message: "Delete Container Success",
+          color: "secondary",
+        });
+        await this.$router.replace({ name: "Home.Containers" });
       } catch (e) {
         this.$q.notify({
           message: e.response.data.message,
-          color: 'negative'
-        })
-        console.log(e)
+          color: "negative",
+        });
+        console.log(e);
       }
     },
     resetValidation() {
-      this.globalErrors = []
+      this.globalErrors = [];
       this.validators = {
         containerNameErr: false,
         assignedProjectIdsErr: false,
         formHasError: false,
-        errCount: 0
-      }
+        errCount: 0,
+      };
     },
     validateInput() {
-      this.resetValidation()
-      console.log("ref container name is ")
-      console.log(this.$refs.containerName)
+      this.resetValidation();
+      console.log("ref container name is ");
+      console.log(this.$refs.containerName);
       this.$refs.containerName.validate();
-      this.validators.containerNameErr = this.$refs.containerName.hasError
+      this.validators.containerNameErr = this.$refs.containerName.hasError;
 
       if (this.validators.containerNameErr) {
         this.validators.formHasError = true;
         this.validators.errCount++;
-        this.globalErrors.push(this.$refs.containerName.innerErrorMessage)
+        this.globalErrors.push(this.$refs.containerName.innerErrorMessage);
       }
 
       if (this.container.project_ids.length === 0) {
-        this.validators.assignedProjectIdsErr = true
+        this.validators.assignedProjectIdsErr = true;
         this.validators.formHasError = true;
         this.validators.errCount++;
-        this.globalErrors.push("Please assign at least 1 created projects")
+        this.globalErrors.push("Please assign at least 1 created projects");
       }
 
       if (this.container.routers.length === 0) {
-        this.validators.routerErr = true
+        this.validators.routerErr = true;
         this.validators.formHasError = true;
         this.validators.errCount++;
-        this.globalErrors.push("Please assign at least 1 router for assigned project")
+        this.globalErrors.push(
+          "Please assign at least 1 router for assigned project"
+        );
       }
-
     },
     async onSaveClicked() {
-      this.validateInput()
+      this.validateInput();
       if (!this.validators.formHasError) {
-        if (this.$route.name === 'Containers.Detail') {
-          await this.onUpdateContainer()
-
+        if (this.$route.name === "Containers.Detail") {
+          await this.onUpdateContainer();
         } else {
-          await this.onStoreContainer()
+          await this.onStoreContainer();
         }
       } else {
         this.alertDialog = true;
       }
-
     },
     async onStoreContainer() {
       try {
@@ -705,21 +724,23 @@ export default {
           name: this.container.name,
           description: this.container.description,
           project_ids: this.container.project_ids,
-          routers: this.container.routers
-
+          routers: this.container.routers,
         });
-        const {id} = response.data
+        const { id } = response.data;
         this.$q.notify({
-          message: 'StoreContainer Success',
-          color: 'secondary'
-        })
-        await this.$router.replace({name: 'Containers.Detail', params: {id}})
+          message: "StoreContainer Success",
+          color: "secondary",
+        });
+        await this.$router.replace({
+          name: "Containers.Detail",
+          params: { id },
+        });
       } catch (e) {
         this.$q.notify({
           message: e.response.data.message,
-          color: 'negative'
-        })
-        console.log(e)
+          color: "negative",
+        });
+        console.log(e);
       }
     },
     async onUpdateContainer() {
@@ -729,18 +750,18 @@ export default {
           name: this.container.name,
           description: this.container.description,
           project_ids: this.container.project_ids,
-          routers: this.container.routers
+          routers: this.container.routers,
         });
         this.$q.notify({
-          message: 'Update Container Success',
-          color: 'secondary'
-        })
+          message: "Update Container Success",
+          color: "secondary",
+        });
       } catch (e) {
         this.$q.notify({
           message: e.response.data.message,
-          color: 'negative'
-        })
-        console.log(e)
+          color: "negative",
+        });
+        console.log(e);
       }
     },
     addRoute() {
@@ -748,44 +769,43 @@ export default {
         path: this.dataInputRoute.path,
         method: this.dataInputRoute.method,
         type: this.dataInputRoute.type,
-        project_id: this.dataInputRoute.project_id
-      })
+        project_id: this.dataInputRoute.project_id,
+      });
       this.routerDialog = false;
-      this.clearDataInputRoute()
-
+      this.clearDataInputRoute();
     },
     editRoute() {
-      console.log("data input route is ")
-      console.log(this.dataInputRoute)
-      let temp = [...this.container.routers]
-      console.log("temp is")
-      console.log(temp)
+      console.log("data input route is ");
+      console.log(this.dataInputRoute);
+      let temp = [...this.container.routers];
+      console.log("temp is");
+      console.log(temp);
       temp[this.dataInputRoute.index] = {
         id: this.dataInputRoute.id,
         path: this.dataInputRoute.path,
         method: this.dataInputRoute.method,
         type: this.dataInputRoute.type,
-        project_id: this.dataInputRoute.project_id
-      }
+        project_id: this.dataInputRoute.project_id,
+      };
       this.container.routers = temp;
       this.routerDialog = false;
-      this.clearDataInputRoute()
+      this.clearDataInputRoute();
     },
     clearDataInputRoute() {
       this.dataInputRoute = {
-        requestMethod: '',
-        projectId: '',
-        type: '',
-        path: '',
-      }
+        requestMethod: "",
+        projectId: "",
+        type: "",
+        path: "",
+      };
     },
     openAddRouteDialog() {
-      this.clearDataInputRoute()
-      this.formModeRoute = 'add'
+      this.clearDataInputRoute();
+      this.formModeRoute = "add";
       this.routerDialog = true;
     },
     openEditRouteDialog(route, index) {
-      this.formModeRoute = 'edit';
+      this.formModeRoute = "edit";
       this.dataInputRoute = {
         index,
         id: route.id,
@@ -793,33 +813,35 @@ export default {
         project_id: route.project_id,
         type: route.type,
         path: route.path,
-      }
+      };
       this.routerDialog = true;
     },
     removeRouter(index) {
-      this.container.routers.splice(index, 1)
+      this.container.routers.splice(index, 1);
     },
     removeAssignedProject(projectId) {
-      this.container.project_ids = this.container.project_ids.filter(e => e !== projectId)
+      this.container.project_ids = this.container.project_ids.filter(
+        (e) => e !== projectId
+      );
     },
     addProject(project) {
       if (this.container.project_ids.includes(project.id)) {
         /* show alert */
-        this.alert = true
+        this.alert = true;
       } else {
-        this.container.project_ids.push(project.id)
+        this.container.project_ids.push(project.id);
       }
     },
     async loadContainerById(id) {
       try {
-        let response = await this.getSpecificContainer(id)
-        this.fillContainerData(response.data)
+        let response = await this.getSpecificContainer(id);
+        this.fillContainerData(response.data);
       } catch (err) {
         this.$q.notify({
           message: err.response.data.message,
-          color: 'negative'
-        })
-        console.log(err)
+          color: "negative",
+        });
+        console.log(err);
       }
     },
     async fetchProjects() {
@@ -827,16 +849,15 @@ export default {
         let response = await this.actionFetchProjects();
         this.projects = response.data;
         this.projects.forEach((row, index) => {
-          row.index = index
-        })
+          row.index = index;
+        });
       } catch (err) {
         this.$q.notify({
           message: err.response.data.message,
-          color: 'negative'
-        })
-        console.log(err)
+          color: "negative",
+        });
+        console.log(err);
       }
-
     },
     fillContainerData(data) {
       this.container = {
@@ -847,16 +868,16 @@ export default {
         project_ids: data.project_ids,
         routers: data.routers,
         running: data.running,
-      }
-    }
+      };
+    },
   },
   async mounted() {
-    if (this.$route.name === 'Containers.Detail') {
-      await this.loadContainerById(this.$route.params.id)
+    if (this.$route.name === "Containers.Detail") {
+      await this.loadContainerById(this.$route.params.id);
     }
     await this.fetchProjects();
-  }
-}
+  },
+};
 </script>
 
 <style scoped lang="scss">

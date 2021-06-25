@@ -1,26 +1,24 @@
 <template>
   <div id="app">
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
 <script>
-
 export default {
-  name: 'LayoutDefault',
+  name: "LayoutDefault",
 
-  components: {
+  components: {},
+
+  data() {
+    return {};
   },
-
-  data () {
-    return {
-    }
-  }
-}
+};
 </script>
 
 <style>
-html, body {
+html,
+body {
   height: 100%;
 }
 #app {

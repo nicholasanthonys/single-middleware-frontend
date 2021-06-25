@@ -1,27 +1,23 @@
 <template>
   <div>
     <v-jsoneditor
-        :value="value"
-        :plus="false"
-        style="height:300px"
-        @error="onError"
-        :options="options"
-        @input="updateValue"
-
+      :value="value"
+      :plus="false"
+      style="height: 300px"
+      @error="onError"
+      :options="options"
+      @input="updateValue"
     />
-    <br/>
+    <br />
     <p class="text-h5">Raw JSON Representation</p>
-    <pre>{{ JSON.stringify(value, null, '\t') }}</pre>
+    <pre>{{ JSON.stringify(value, null, "\t") }}</pre>
   </div>
 </template>
 
 <script>
-
 export default {
-  props :[
-    'value'
-  ],
-  data(){
+  props: ["value"],
+  data() {
     return {
       options: {
         mode: null,
@@ -31,21 +27,18 @@ export default {
         // },
         theme: "ace/theme/tomorrow_night_bright",
       },
-    }
+    };
   },
-  methods : {
-    updateValue(val){
-     this.$emit('input',val)
+  methods: {
+    updateValue(val) {
+      this.$emit("input", val);
     },
     onError(err) {
-      console.log("error with editor")
+      console.log("error with editor");
       console.log(err);
-
     },
-  }
-}
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

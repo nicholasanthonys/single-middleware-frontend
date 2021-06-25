@@ -1,79 +1,96 @@
 <template>
   <div class="full-height">
     <form class="full-height" @submit.prevent="onSaveClicked">
-      <div class="column " style="height: 100%">
+      <div class="column" style="height: 100%">
         <div class="col">
           <q-splitter
-              v-if="!isLoading"
-              v-model="splitterModel"
-              class="full-height"
+            v-if="!isLoading"
+            v-model="splitterModel"
+            class="full-height"
           >
             <template v-slot:before>
-              <q-tabs
-                  v-model="tab"
-                  vertical
-                  class="text-teal"
-              >
-                <q-tab name="general" icon="description" label="General"/>
-                <q-tab name="request" icon="list" label="Request"
-                       :alert="validators.destinationURLErr ||
-                       validators.requestEditorErr? 'red': false"/>
-                <q-tab name="response" icon="list" label="Response"
-                       :alert="validators.statusCodeErr || validators.responseEditorErr?
-                       'red': false"/>
+              <q-tabs v-model="tab" vertical class="text-teal">
+                <q-tab name="general" icon="description" label="General" />
+                <q-tab
+                  name="request"
+                  icon="list"
+                  label="Request"
+                  :alert="
+                    validators.destinationURLErr || validators.requestEditorErr
+                      ? 'red'
+                      : false
+                  "
+                />
+                <q-tab
+                  name="response"
+                  icon="list"
+                  label="Response"
+                  :alert="
+                    validators.statusCodeErr || validators.responseEditorErr
+                      ? 'red'
+                      : false
+                  "
+                />
               </q-tabs>
             </template>
 
             <template v-slot:after>
               <q-tab-panels
-                  v-model="tab"
-                  animated
-                  swipeable
-                  vertical
-                  transition-prev="jump-up"
-                  transition-next="jump-up"
-                  keep-alive
-                  ref="tabs"
+                v-model="tab"
+                animated
+                swipeable
+                vertical
+                transition-prev="jump-up"
+                transition-next="jump-up"
+                keep-alive
+                ref="tabs"
               >
-
                 <q-tab-panel name="general">
                   <div class="text-h4 q-mb-md">General</div>
-                  <q-input v-model="id" filled hint="Config Id" label="Id"
-                           v-if="mode === 'edit' "/>
+                  <q-input
+                    v-model="id"
+                    filled
+                    hint="Config Id"
+                    label="Id"
+                    v-if="mode === 'edit'"
+                  />
 
-                  <q-input v-model="description" type="textarea" filled
-                           hint="Config Description" label="Description"/>
+                  <q-input
+                    v-model="description"
+                    type="textarea"
+                    filled
+                    hint="Config Description"
+                    label="Description"
+                  />
                 </q-tab-panel>
                 <q-tab-panel name="request">
                   <div class="text-h4 q-mb-md">Request</div>
                   <EditorRequestResponseConfig
-                      ref="editorRequest"
-                      config-type="request"
-                      :have-log="true"
-                      :prop-enable-loop="true"
-                      :enable-c-logics="$route.name === 'Configures.Detail'"
-                      :configure-id="$route.params.id"
-                      :project-id="$route.params.projectId"
-                      v-model="request"
-                      @on-validate-result="validateRequest"
+                    ref="editorRequest"
+                    config-type="request"
+                    :have-log="true"
+                    :prop-enable-loop="true"
+                    :enable-c-logics="$route.name === 'Configures.Detail'"
+                    :configure-id="$route.params.id"
+                    :project-id="$route.params.projectId"
+                    v-model="request"
+                    @on-validate-result="validateRequest"
                   />
                 </q-tab-panel>
 
                 <q-tab-panel name="response">
                   <div class="text-h4 q-mb-md">Response</div>
                   <EditorRequestResponseConfig
-                      ref="editorResponse"
-                      config-type="response"
-                      :prop-enable-loop="false"
-                      :have-log="true"
-                      v-model="response"
-                      @on-validate-result="validateResponse"
+                    ref="editorResponse"
+                    config-type="response"
+                    :prop-enable-loop="false"
+                    :have-log="true"
+                    v-model="response"
+                    @on-validate-result="validateResponse"
                   />
                 </q-tab-panel>
-
               </q-tab-panels>
             </template>
-
           </q-splitter>
         </div>
         <div class="col-1">
@@ -81,28 +98,32 @@
             <div class="col-1 text-center">
               <q-btn type="submit">Save</q-btn>
             </div>
-            <div class="col-1" v-if="$route.name === 'Configures.Detail' ">
+            <div class="col-1" v-if="$route.name === 'Configures.Detail'">
               <q-btn @click="confirmDelete = true">Delete</q-btn>
             </div>
           </div>
-
         </div>
       </div>
     </form>
 
-
     <q-dialog v-model="confirmDelete" persistent>
       <q-card>
         <q-card-section class="row items-center">
-          <q-avatar icon="delete" color="primary" text-color="white"/>
-          <span
-              class="q-ml-sm">Are you sure want to delete this configure ? </span>
+          <q-avatar icon="delete" color="primary" text-color="white" />
+          <span class="q-ml-sm"
+            >Are you sure want to delete this configure ?
+          </span>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="primary" v-close-popup/>
-          <q-btn flat label="Delete" color="primary" v-close-popup
-                 @click="onDeleteClicked"/>
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn
+            flat
+            label="Delete"
+            color="primary"
+            v-close-popup
+            @click="onDeleteClicked"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -115,54 +136,52 @@
 
         <q-card-section class="q-pt-none">
           <ul>
-            <li v-for="(error,index) in globalErrors" :key="index">
+            <li v-for="(error, index) in globalErrors" :key="index">
               {{ error }}
             </li>
           </ul>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="OK" color="primary" v-close-popup/>
+          <q-btn flat label="OK" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
-
 </template>
 
 <script>
-import EditorRequestResponseConfig
-  from "../../components/common/EditorRequestResponseConfig";
-import {mapActions} from "vuex";
-import {isObjectEmpty } from "../../util/syntaxchecker";
+import EditorRequestResponseConfig from "../../components/common/EditorRequestResponseConfig";
+import { mapActions } from "vuex";
+import { isObjectEmpty } from "../../util/syntaxchecker";
 import {
-  INVALID_REQUEST_EDITOR_SYNTAX, INVALID_RESPONSE_EDITOR_SYNTAX,
+  INVALID_REQUEST_EDITOR_SYNTAX,
+  INVALID_RESPONSE_EDITOR_SYNTAX,
 } from "../../models/const";
 
 export default {
   props: {
-    mode: String
+    mode: String,
   },
   components: {
-    EditorRequestResponseConfig
+    EditorRequestResponseConfig,
   },
   data() {
-
     return {
       confirmDelete: false,
       isLoading: false,
 
-      tab: 'general',
+      tab: "general",
       splitterModel: 10,
 
-      id: '',
-      description: '',
+      id: "",
+      description: "",
 
       request: {
-        loop: '',
-        destinationUrl: '',
-        destinationPath: '',
-        requestMethod: 'POST',
+        loop: "",
+        destinationUrl: "",
+        destinationPath: "",
+        requestMethod: "POST",
 
         codeAddHeader: {},
         codeAddBody: {},
@@ -193,7 +212,6 @@ export default {
         codeModifyBody: {},
         codeDeleteHeader: [],
         codeDeleteBody: [],
-
       },
       validators: {
         destinationURLErr: false,
@@ -202,61 +220,61 @@ export default {
         responseEditorErr: false,
         statusCodeErr: false,
         formHasError: false,
-        errCount: 0
+        errCount: 0,
       },
-      resultValidation : {
-       request : {},
-       response : {},
+      resultValidation: {
+        request: {},
+        response: {},
       },
       tabNames: ["general", "request", "response"],
       globalErrors: [],
       alertDialog: false,
-
-    }
+    };
   },
   methods: {
     ...mapActions({
-      fetchSpecificConfigure: 'configures/fetchSpecificConfigure',
-      storeConfigure: 'configures/storeConfigure',
-      updateConfigure: 'configures/updateConfigure',
-      deleteConfigure: 'configures/deleteConfigure'
+      fetchSpecificConfigure: "configures/fetchSpecificConfigure",
+      storeConfigure: "configures/storeConfigure",
+      updateConfigure: "configures/updateConfigure",
+      deleteConfigure: "configures/deleteConfigure",
     }),
-    validateRequest(val){
+    validateRequest(val) {
       // validate request
-      this.resultValidation.request = val
+      this.resultValidation.request = val;
       if (!isObjectEmpty(this.resultValidation.request)) {
-        this.validators.requestEditorErr= true;
-        this.validators.errCount++
+        this.validators.requestEditorErr = true;
+        this.validators.errCount++;
         this.validators.formHasError = true;
-        this.globalErrors.push(INVALID_REQUEST_EDITOR_SYNTAX)
+        this.globalErrors.push(INVALID_REQUEST_EDITOR_SYNTAX);
       }
     },
-    validateResponse(val){
-      this.resultValidation.response=  val
+    validateResponse(val) {
+      this.resultValidation.response = val;
       if (!isObjectEmpty(this.resultValidation.response)) {
-        this.validators.responseEditorErr= true;
-        this.validators.errCount++
+        this.validators.responseEditorErr = true;
+        this.validators.errCount++;
         this.validators.formHasError = true;
-        this.globalErrors.push(INVALID_RESPONSE_EDITOR_SYNTAX)
+        this.globalErrors.push(INVALID_RESPONSE_EDITOR_SYNTAX);
       }
     },
     visitTabs() {
       let traversal = this.tabNames.reduce((promiseChain, item) => {
-        return promiseChain.then(() => new Promise(resolve => {
-              console.log("done with", item)
-              resolve()
-              this.$refs.tabs.goTo(item)
+        return promiseChain.then(
+          () =>
+            new Promise((resolve) => {
+              console.log("done with", item);
+              resolve();
+              this.$refs.tabs.goTo(item);
             })
-        )
-      }, Promise.resolve())
-
+        );
+      }, Promise.resolve());
 
       traversal.then(() => {
-        this.$refs.tabs.goTo('general')
-      })
+        this.$refs.tabs.goTo("general");
+      });
     },
     resetValidator() {
-      this.globalErrors = []
+      this.globalErrors = [];
       this.validators = {
         destinationURLErr: false,
         requestMethodErr: false,
@@ -264,115 +282,127 @@ export default {
         responseEditorErr: false,
         statusCodeErr: false,
         formHasError: false,
-        errCount: 0
-      }
+        errCount: 0,
+      };
     },
     validateInput() {
-      this.resetValidator()
+      this.resetValidator();
 
       this.$refs.editorRequest.$refs.destinationURL.validate();
-      this.validators.destinationURLErr = this.$refs.editorRequest.$refs.destinationURL.hasError
+      this.validators.destinationURLErr =
+        this.$refs.editorRequest.$refs.destinationURL.hasError;
 
       this.$refs.editorRequest.$refs.requestMethod.validate();
-      this.validators.requestMethodErr = this.$refs.editorRequest.$refs.requestMethod.hasError
-
+      this.validators.requestMethodErr =
+        this.$refs.editorRequest.$refs.requestMethod.hasError;
 
       this.$refs.editorResponse.$refs.statusCode.validate();
-      this.validators.statusCodeErr = this.$refs.editorResponse.$refs.statusCode.hasError
+      this.validators.statusCodeErr =
+        this.$refs.editorResponse.$refs.statusCode.hasError;
 
       if (this.validators.destinationURLErr) {
         this.validators.errCount++;
-        this.globalErrors.push(this.$refs.editorRequest.$refs.destinationURL.innerErrorMessage)
+        this.globalErrors.push(
+          this.$refs.editorRequest.$refs.destinationURL.innerErrorMessage
+        );
       }
 
       if (this.validators.requestMethodErr) {
         this.validators.errCount++;
-        this.globalErrors.push(this.$refs.editorRequest.$refs.requestMethod.innerErrorMessage)
+        this.globalErrors.push(
+          this.$refs.editorRequest.$refs.requestMethod.innerErrorMessage
+        );
       }
 
       if (this.validators.statusCodeErr) {
-        this.validators.errCount++
-        this.globalErrors.push(this.$refs.editorResponse.$refs.statusCode.innerErrorMessage)
+        this.validators.errCount++;
+        this.globalErrors.push(
+          this.$refs.editorResponse.$refs.statusCode.innerErrorMessage
+        );
       }
       if (this.validators.errCount > 0) {
-        this.validators.formHasError = true
+        this.validators.formHasError = true;
         this.alertDialog = true;
       }
-
     },
     async onSaveClicked() {
-      this.validateInput()
+      this.validateInput();
       if (!this.validators.formHasError) {
-        if (this.$route.name === 'Configures.Detail') {
-          console.log("on save clicked triggered")
-          await this.onUpdateConfig()
+        if (this.$route.name === "Configures.Detail") {
+          console.log("on save clicked triggered");
+          await this.onUpdateConfig();
         } else {
-          await this.onStoreConfig()
+          await this.onStoreConfig();
         }
       }
-
     },
     async onDeleteClicked() {
       try {
         let params = {
           project_id: this.$route.params.projectId,
-          configure_id: this.$route.params.id
-        }
-        await this.deleteConfigure(params)
+          configure_id: this.$route.params.id,
+        };
+        await this.deleteConfigure(params);
         this.$q.notify({
-          message: 'Delete Success.',
-          color: 'secondary'
-        })
+          message: "Delete Success.",
+          color: "secondary",
+        });
         await this.$router.replace({
-          name: 'Projects.Detail',
-          params: {id: this.$route.params.projectId}
-        })
-
+          name: "Projects.Detail",
+          params: { id: this.$route.params.projectId },
+        });
       } catch (err) {
-        console.log(err)
+        console.log(err);
         this.$q.notify({
-          message: err.response.data.message ? err.response.data.message : 'Somethings Wrong',
-          color: 'negative'
-        })
+          message: err.response.data.message
+            ? err.response.data.message
+            : "Somethings Wrong",
+          color: "negative",
+        });
       }
     },
     async onUpdateConfig() {
       try {
         let data = this.constructData();
-        await this.updateConfigure(data)
+        await this.updateConfigure(data);
         this.$q.notify({
-          message: 'Update Success.',
-          color: 'secondary'
-        })
+          message: "Update Success.",
+          color: "secondary",
+        });
       } catch (err) {
-        console.log(err)
+        console.log(err);
         this.$q.notify({
-          message: err.response.data.message ? err.response.data.message : 'Somethings Wrong',
-          color: 'negative'
-        })
+          message: err.response.data.message
+            ? err.response.data.message
+            : "Somethings Wrong",
+          color: "negative",
+        });
       }
     },
     async onStoreConfig() {
       try {
         let data = this.constructData();
-        let response = await this.storeConfigure(data)
-        const {id} = response.data
+        let response = await this.storeConfigure(data);
+        const { id } = response.data;
         this.$q.notify({
-          message: 'Add Configure Success.',
-          color: 'secondary'
-        })
+          message: "Add Configure Success.",
+          color: "secondary",
+        });
         await this.$router.replace({
-          name: "Configures.Detail", params: {
+          name: "Configures.Detail",
+          params: {
             projectId: this.$route.params.projectId,
-            id
-          }
-        })
+            id,
+          },
+        });
       } catch (err) {
-        console.log(err)
+        console.log(err);
         this.$q.notify({
-          message: err.response.data.message ? err.response.data.message : 'Somethings Wrong',
-          color: 'negative'
-        })
+          message: err.response.data.message
+            ? err.response.data.message
+            : "Somethings Wrong",
+          color: "negative",
+        });
       }
     },
     constructData() {
@@ -387,8 +417,12 @@ export default {
             destination_path: this.request.destinationPath,
             method: this.request.requestMethod,
             transform: this.request.transform,
-            log_before_modify: this.request.logBeforeModify ? this.request.logBeforeModify : {},
-            log_after_modify: this.request.logAfterModify ? this.request.logAfterModify : {},
+            log_before_modify: this.request.logBeforeModify
+              ? this.request.logBeforeModify
+              : {},
+            log_after_modify: this.request.logAfterModify
+              ? this.request.logAfterModify
+              : {},
             adds: {
               header: this.request.codeAddHeader,
               body: this.request.codeAddBody,
@@ -403,13 +437,17 @@ export default {
               header: this.request.codeDeleteHeader,
               body: this.request.codeDeleteBody,
               query: this.request.codeDeleteQuery,
-            }
+            },
           },
           response: {
             status_code: this.response.statusCode,
             transform: this.response.transform,
-            log_before_modify: this.response.logBeforeModify ? this.response.logBeforeModify : {},
-            log_after_modify: this.response.logAfterModify ? this.response.logAfterModify : {},
+            log_before_modify: this.response.logBeforeModify
+              ? this.response.logBeforeModify
+              : {},
+            log_after_modify: this.response.logAfterModify
+              ? this.response.logAfterModify
+              : {},
             adds: {
               header: this.response.codeAddHeader,
               body: this.response.codeAddBody,
@@ -421,37 +459,36 @@ export default {
             deletes: {
               header: this.response.codeDeleteHeader,
               body: this.response.codeDeleteBody,
-            }
-          }
-
-
-        }
-      }
+            },
+          },
+        },
+      };
     },
     async loadConfigure(projectId, configureId) {
-      this.isLoading = true
+      this.isLoading = true;
       const param = {
-        configure_id: configureId, project_id: projectId
-      }
+        configure_id: configureId,
+        project_id: projectId,
+      };
       try {
-        let response = await this.fetchSpecificConfigure(param)
-        this.fillData(response.data)
+        let response = await this.fetchSpecificConfigure(param);
+        this.fillData(response.data);
       } catch (err) {
-        console.log(err)
+        console.log(err);
         this.$q.notify({
-          message: err.response.data.message ? err.response.data.message : 'Somethings Wrong',
-          color: 'negative'
-        })
-
+          message: err.response.data.message
+            ? err.response.data.message
+            : "Somethings Wrong",
+          color: "negative",
+        });
       }
-      this.isLoading = false
+      this.isLoading = false;
     },
     fillData(data) {
-      const {description, request, response} = data
-      this.description = description
-      this.request = this.fillRequest(request)
-      this.response = this.fillResponse(response)
-
+      const { description, request, response } = data;
+      this.description = description;
+      this.request = this.fillRequest(request);
+      this.response = this.fillResponse(response);
     },
     fillRequest(request) {
       const {
@@ -465,8 +502,8 @@ export default {
         deletes,
         log_before_modify,
         log_after_modify,
-        c_logics
-      } = request
+        c_logics,
+      } = request;
       return {
         loop,
         destinationUrl: destination_url,
@@ -487,9 +524,8 @@ export default {
         codeDeleteBody: deletes.body ? deletes.body : [],
         codeDeleteQuery: deletes.query ? deletes.query : [],
 
-        cLogics: c_logics ? c_logics : []
-
-      }
+        cLogics: c_logics ? c_logics : [],
+      };
     },
 
     fillResponse(response) {
@@ -500,8 +536,8 @@ export default {
         log_before_modify,
         log_after_modify,
         status_code,
-        transform
-      } = response
+        transform,
+      } = response;
 
       return {
         statusCode: status_code,
@@ -514,19 +550,20 @@ export default {
         codeModifyBody: modifies.body ? modifies.body : {},
         codeDeleteHeader: deletes.header ? deletes.header : [],
         codeDeleteBody: deletes.body ? deletes.body : [],
-      }
+      };
     },
   },
   async mounted() {
-    if (this.$route.name === 'Configures.Detail') {
-      await this.loadConfigure(this.$route.params.projectId, this.$route.params.id)
+    if (this.$route.name === "Configures.Detail") {
+      await this.loadConfigure(
+        this.$route.params.projectId,
+        this.$route.params.id
+      );
     }
 
-    await this.visitTabs()
-  }
-}
+    await this.visitTabs();
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
