@@ -5,7 +5,7 @@ export function validateConfigReferenceSyntax(str) {
       return false;
     }
 
-    let references = ["$body", "$header", "$query", "$path"];
+    let references = ["$body", "$header", "$query", "$path", "$status_code"];
     if (splittedString[1] === "$request" || splittedString[1] === "$response") {
       for (let i = 0; i < references.length; i++) {
         if (splittedString[2].includes(references[i])) {
