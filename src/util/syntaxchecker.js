@@ -20,9 +20,6 @@ export function validateConfigReferenceSyntax(str) {
 }
 
 export function traverseObj(val, listKey = [], resultObj = {}) {
-  console.log("val traverseObj is ");
-  console.log(val);
-
   if (typeof val == "object") {
     if (Array.isArray(val)) {
       for (let i = 0; i < val.length; i++) {
