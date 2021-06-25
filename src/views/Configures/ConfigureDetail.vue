@@ -183,7 +183,7 @@ export default {
         cLogics: [],
       },
       response: {
-        statusCode: '',
+        statusCode: 0,
         transform: "ToJson",
         logBeforeModify: {},
         logAfterModify: {},

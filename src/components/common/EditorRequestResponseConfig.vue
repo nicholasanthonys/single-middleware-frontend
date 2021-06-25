@@ -43,19 +43,52 @@
 
             <div class="column">
               <div class="col-1" v-if="configType ==='response' ">
-                <q-input
+                data status code is {{data.statusCode}}
+                <q-select
                     ref="statusCode"
-                    v-model="data.statusCode"
-                    type="number"
-                    label="Status Code"
-                    hint="Response Status Code"
                     filled
+                    v-model="data.statusCode"
+                    :options="statusOptions"
+                    label="Status Code"
+                    color="teal"
                     style="max-width: 200px"
+                    options-selected-class="text-deep-orange"
+                    map-options
                     :rules="[ val => val != null && val >= 0 ||
                     `Please fill response status code`]"
-                    @input="emitValue"
 
-                />
+                >
+                  <template v-slot:option="scope">
+                    <q-expansion-item
+                        expand-separator
+                        group="somegroup"
+                        :default-opened="hasChild(scope)"
+                        header-class="text-weight-bold"
+                        :label="scope.opt.label"
+
+                    >
+                      <template >
+                        <div v-for="child in scope.opt.children"
+                             :key="child.value">
+                          <q-item
+                              :key="child.label"
+                              clickable
+                              v-ripple
+                              v-close-popup
+                              @click="clickItemStatusCode(child.value)"
+                              :class="{ 'bg-light-blue-1': data.statusCode===
+                            child.value}"
+                          >
+                            <q-item-section>
+                              <q-item-label v-html="child.label" class="q-ml-md" ></q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </div>
+
+                      </template>
+                    </q-expansion-item>
+                  </template>
+                </q-select>
                 <br/>
               </div>
 
@@ -269,6 +302,7 @@ import CLogicItemDetail
   from "../../views/SerialParallelConfig/CLogicItemDetail";
 import {mapActions} from "vuex";
 import {isObjectEmpty, traverseObj} from "../../util/syntaxchecker";
+import {statusCodeOptions} from "../../util/statuscode";
 
 export default {
   name: "EditorRequestResponseConfig",
@@ -291,6 +325,7 @@ export default {
 
   data() {
     return {
+      statusOptions : statusCodeOptions,
       resultValidationObj: {},
       error: null,
       splitterModel: 20,
@@ -306,7 +341,7 @@ export default {
         destinationUrl: this.value.destinationUrl,
         destinationPath: this.value.destinationPath,
 
-        statusCode: this.value.statusCode ? this.value.statusCode : 0,
+        statusCode: this.value.statusCode,
         transform: this.value.transform,
         logBeforeModify: this.value.logBeforeModify,
         logAfterModify: this.value.logAfterModify,
@@ -340,6 +375,20 @@ export default {
       updateRequestCLogic: 'configures/updateConfigureCLogicRequest',
       deleteRequestCLogic: 'configures/deleteConfigureCLogicRequest'
     }),
+    getLabel (scope) {
+      console.log(scope)
+      return scope.label
+    },
+    clickItemStatusCode(code){
+     this.data.statusCode= code;
+     this.emitValue()
+    },
+    hasChild (scope) {
+      if(scope.opt.children){
+        return scope.opt.children.some(c => c.value === this.data.statusCode)
+      }
+      return false;
+    },
     determineTreeMenu() {
       if (this.configType === "request") {
         if (this.enableCLogics) {
