@@ -608,6 +608,10 @@ export default {
           color: 'secondary'
         })
       } catch (err) {
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         console.log(err)
       }
       this.isCreatingDockerContainer = false;
@@ -620,6 +624,10 @@ export default {
         })
         this.container.running = response.data.running
       } catch (e) {
+        this.$q.notify({
+          message: e.response.data.message,
+          color: 'negative'
+        })
         console.log(e)
       }
       this.isToggling = false;
@@ -633,6 +641,10 @@ export default {
         })
         await this.$router.replace({name: 'Home.Containers'})
       } catch (e) {
+        this.$q.notify({
+          message: e.response.data.message,
+          color: 'negative'
+        })
         console.log(e)
       }
     },
@@ -703,6 +715,10 @@ export default {
         })
         await this.$router.replace({name: 'Containers.Detail', params: {id}})
       } catch (e) {
+        this.$q.notify({
+          message: e.response.data.message,
+          color: 'negative'
+        })
         console.log(e)
       }
     },
@@ -720,6 +736,10 @@ export default {
           color: 'secondary'
         })
       } catch (e) {
+        this.$q.notify({
+          message: e.response.data.message,
+          color: 'negative'
+        })
         console.log(e)
       }
     },
@@ -795,6 +815,10 @@ export default {
         let response = await this.getSpecificContainer(id)
         this.fillContainerData(response.data)
       } catch (err) {
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         console.log(err)
       }
     },
@@ -806,6 +830,10 @@ export default {
           row.index = index
         })
       } catch (err) {
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         console.log(err)
       }
 

@@ -244,7 +244,8 @@ export default {
 
     },
     onConfirmConfigSerial() {
-      this.dialog = false;
+      this.selectedConfigureSerial=this.serial.configures[this.serial.configures.length -1]
+      //this.dialog = false;
     },
     selectConfigureSerial( index) {
        this.selectedConfigureSerial = this.serial.configures[index]
@@ -258,6 +259,10 @@ export default {
         let response = await this.actionFetchConfigures(projectId)
         this.options = this.constructOptionsConfigId(response.data.configs)
       } catch (e) {
+        this.$q.notify({
+          message: e.response.data.message,
+          color: 'negative'
+        })
         console.log(e)
       }
       this.isLoadConfigures = false;
@@ -267,6 +272,10 @@ export default {
       try {
          await this.fetchSerial(projectId)
       } catch (e) {
+        this.$q.notify({
+          message: e.response.data.message,
+          color: 'negative'
+        })
         console.log(e)
       }
       this.isLoading = true

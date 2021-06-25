@@ -131,6 +131,10 @@ export default {
           row.index = index
         })
       } catch (err) {
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         console.log(err)
       }
 

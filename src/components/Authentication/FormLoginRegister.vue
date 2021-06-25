@@ -29,8 +29,9 @@
           filled
           v-model="password"
           label="Your Password "
-          :rules="[val =>val &&  val.length >= 8||
-          'Password should at least 8 characters' ]"
+          :rules="mode === 'register' ? [val =>val &&  val.length >= 8||
+          'Password should at least 8 characters' ] : [val => val != null ||
+          'Please type your password']"
       />
 
       <q-input

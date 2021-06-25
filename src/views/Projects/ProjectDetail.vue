@@ -361,6 +361,10 @@ export default {
           color: 'secondary'
         })
       } catch (err) {
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         console.log(err)
       }
     },
@@ -370,6 +374,10 @@ export default {
         await this.actionFetchConfigures(projectId);
 
       } catch (err) {
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         console.log(err)
       }
       this.isLoadConfigures = false;
@@ -399,6 +407,10 @@ export default {
         await this.fetchSpecificProject(this.$route.params.id)
         this.fillData(this.selectedProject)
       } catch (err) {
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         console.log(err)
       }
       this.isLoading = false;
@@ -535,6 +547,10 @@ export default {
           params: {id: this.id}
         })
       } catch (err) {
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         console.log(err)
         // inside of a Vue file
 // or with a config object:
@@ -549,6 +565,10 @@ export default {
           color: 'secondary'
         })
       } catch (err) {
+        this.$q.notify({
+          message: err.response.data.message,
+          color: 'negative'
+        })
         console.log(err)
       }
     },

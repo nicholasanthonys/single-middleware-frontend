@@ -265,7 +265,7 @@ export default {
         codeModifyBody: {},
         codeDeleteHeader: [],
         codeDeleteBody: [],
-        statusCode: null,
+        statusCode: 0,
         transform: "ToJson",
         logBeforeModify: {},
         logAfterModify: {},
@@ -441,6 +441,10 @@ export default {
 
             this.$emit('on-confirm-clicked')
           } catch (e) {
+            this.$q.notify({
+              message: e.response.data.message,
+              color: 'negative'
+            })
             console.log(e)
           }
         } else {
@@ -452,6 +456,10 @@ export default {
             })
             this.$emit('on-confirm-clicked')
           } catch (e) {
+            this.$q.notify({
+              message: e.response.data.message,
+              color: 'negative'
+            })
             console.log(e)
           }
         }
@@ -477,6 +485,10 @@ export default {
           this.dialogCLogicDetail = false;
           this.$emit('on-clogic-save', data)
         } catch (err) {
+          this.$q.notify({
+            message: err.response.data.message,
+            color: 'negative'
+          })
           console.log(err)
         }
       }
@@ -493,6 +505,10 @@ export default {
         await this.actionFetchConfigures(projectId)
         this.options = this.constructOptionsConfigId(this.configs)
       } catch (e) {
+        this.$q.notify({
+          message: e.response.data.message,
+          color: 'negative'
+        })
         console.log(e)
       }
       this.isLoadConfigures = false;

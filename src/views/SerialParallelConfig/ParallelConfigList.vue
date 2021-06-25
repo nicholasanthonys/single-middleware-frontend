@@ -41,6 +41,7 @@
 
                   <p v-if=" col.name !== 'action' ">{{ col.value }}</p>
                   <div v-else>
+
                     <q-btn color="primary" icon="edit" label="edit" size="sm"
                            class="q-mr-sm"
 
@@ -230,7 +231,7 @@ export default {
   data() {
     return {
       failureResponse: {
-        statusCode: '',
+        statusCode: 400,
         transform: "ToJson",
         codeAddHeader: {},
         codeAddBody: {},
@@ -405,6 +406,10 @@ export default {
         await this.actionFetchParallel(this.$route.params.id)
         this.fillDataFailureResponse(this.parallel);
       } catch (e) {
+        this.$q.notify({
+          message: e.response.data.message,
+          color: 'negative'
+        })
         console.log(e)
       }
       this.isLoading = false;
@@ -436,6 +441,10 @@ export default {
             color: 'secondary'
           })
         } catch (err) {
+          this.$q.notify({
+            message: err.response.data.message,
+            color: 'negative'
+          })
           console.log(err)
         }
       }
@@ -463,6 +472,10 @@ export default {
 
           this.cLogicDialog = false
         } catch (err) {
+          this.$q.notify({
+            message: err.response.data.message,
+            color: 'negative'
+          })
           console.log(err)
         }
       }
@@ -485,6 +498,10 @@ export default {
               color: 'secondary'
             })
           } catch (err) {
+            this.$q.notify({
+              message: err.response.data.message,
+              color: 'negative'
+            })
             console.log(err)
           }
 
@@ -502,6 +519,10 @@ export default {
               color: 'secondary'
             })
           } catch (err) {
+            this.$q.notify({
+              message: err.response.data.message,
+              color: 'negative'
+            })
             console.log(err)
           }
 
@@ -520,6 +541,7 @@ export default {
     onAddSelectedConfig() {
       this.mode = 'add';
       this.selectedConfigId = null;
+      this.loop = null,
       this.alias = null;
       this.dialogParallelConfig = true
     },
@@ -528,6 +550,7 @@ export default {
       this.selectedConfigId = val.configure_id
       this.alias = val.alias
       this.loop = val.loop
+
 
       this.mode = 'edit'
       this.dialogParallelConfig = true
@@ -539,6 +562,10 @@ export default {
         let response = await this.actionFetchConfigures(projectId)
         this.configureOptions = this.constructOptionsConfigId(response.data.configs)
       } catch (e) {
+        this.$q.notify({
+          message: e.response.data.message,
+          color: 'negative'
+        })
         console.log(e)
       }
       this.isLoadConfigures = false;
