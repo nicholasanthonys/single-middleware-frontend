@@ -1,5 +1,8 @@
 # single-middleware-frontend
 
+## Env Setup
+Create `.env` from  `.env.example` and set your environment variables
+
 ## Project setup
 ```
 yarn install
